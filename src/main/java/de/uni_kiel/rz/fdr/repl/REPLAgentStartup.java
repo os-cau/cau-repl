@@ -43,7 +43,7 @@ public class REPLAgentStartup {
         if (!supportMode) REPL.setWorkDir(new File(workDir));
 
         // initialize sources first
-        boolean scl = System.getProperty("CAU.Groovy.UseSystemClassLoader", "false").equalsIgnoreCase("true");
+        boolean scl = System.getProperty("CAU.Groovy.UseSystemClassLoader", "true").equalsIgnoreCase("true");
         boolean defer = System.getProperty("CAU.Groovy.DeferMetaClasses", "false").equalsIgnoreCase("true");
         boolean reorderSources = !System.getProperty("CAU.Groovy.ReorderSources", "true").equalsIgnoreCase("false");
         if (forceClassLoader != null) {
