@@ -1,7 +1,7 @@
 // (C) Copyright 2023 Ove Sörensen
 // SPDX-License-Identifier: GPL-3.0-only
 
-package de.uni_kiel.rz.fdr.repl.groovy;
+package de.uni_kiel.rz.fdr.repl.mycore;
 
 import groovy.lang.Binding;
 import org.apache.groovy.groovysh.CommandSupport;

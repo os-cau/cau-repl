@@ -70,6 +70,7 @@ public class REPLAgentStartup {
 
         // check our environment
         REPL.discoverEnvironment(classLoader);
+        REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "cau-repl v{}-{}", REPL.VERSION, REPL.HAVE_GPL ? "gpl" : "nogpl"), INTERNAL_LOG_TARGETS);
         boolean replEnabled = System.getProperty("CAU.REPL.Enabled", "true").equalsIgnoreCase("true");
         if (!replEnabled) REPLBreakpoint.MAX_BREAKPOINTS = 0; // disable breakpoints if we can't act on them
 

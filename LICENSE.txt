@@ -1,4 +1,5 @@
-The REPL agent is licensed under the MIT license (with the exception of designated portions, see below):
+The cau-repl is licensed under the MIT license (with the exception of
+designated portions, see below):
 
 Copyright (c) 2023 Ove Sörensen
 Portions Copyright (c) 2015-2022 Denis Bazhenov
@@ -25,10 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 
-Designated portions of the agent are licensed under the Apache 2.0 License:
+Some designated imported portions are licensed under the Apache 2.0 License:
 
 Copyright (c) 2007 Bruce Fancher
 Copyright (c) 2015-2022 Denis Bazhenov
@@ -212,10 +213,13 @@ Copyright (c) 2015-2022 Denis Bazhenov
    END OF TERMS AND CONDITIONS
 
 
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 
-The additional MyCoRe module is licensed under the GPL 3.0 (without the "or any later version" clause):
+The optional MyCoRe module is licensed under the GPL 3.0 (without the "or any
+later version" clause). Refer to the documentation to create a build that also
+contains the GPL code. GPL-enabled builds have "-gpl" in their version, which
+is also logged to the console during startup.
 
 Copyright (c) 2023 Ove Sörensen
 

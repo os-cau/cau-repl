@@ -3,7 +3,7 @@
 // (C) Copyright 2023 Ove Sörensen
 // SPDX-License-Identifier: GPL-3.0-only
 
-:register de.uni_kiel.rz.fdr.repl.groovy.GroovyCmdMCRCli :mcrcli :M
+:register de.uni_kiel.rz.fdr.repl.mycore.GroovyCmdMCRCli :mcrcli :M
 
 import org.mycore.common.MCRSessionMgr
 

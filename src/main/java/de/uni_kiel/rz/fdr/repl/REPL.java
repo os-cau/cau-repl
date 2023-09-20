@@ -22,8 +22,10 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class REPL {
 
+    public static final String VERSION = "0.1.0-SNAPSHOT";
     public static final Session.AttributeKey<String> USER_KEY = new Session.AttributeKey<>();
     public static final String DEFAULT_WORK_SUBDIR = "cau-repl";
+    public static boolean HAVE_GPL = true;
     public static boolean HAVE_MYCORE = false;
     public static boolean HAVE_MYCORE_MODS = false;
 
@@ -177,8 +179,10 @@ public class REPL {
     }
 
     public static void discoverEnvironment(ClassLoader classLoader) {
+        HAVE_GPL = REPL.class.getResource("/de/uni_kiel/rz/fdr/repl/mycore/GroovySourceDirsStartupHandler.class") != null;
         HAVE_MYCORE = classLoader.getResource("/org/mycore/common/MCRException.class") != null;
         HAVE_MYCORE_MODS = classLoader.getResource("/org/mycore/mods/MCRMODSWrapper.class") != null;
+        if (!HAVE_GPL && (HAVE_MYCORE || HAVE_MYCORE_MODS)) throw new RuntimeException("Internal error: could not determine GPL status");
     }
 
 

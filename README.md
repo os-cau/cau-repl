@@ -8,8 +8,9 @@ The cau-repl comes bundled with an additional [MyCoRe](https://mycore.de) module
 
 ## License
 
-The REPL itself is MIT licensed. Designated portions of it were imported from other projects and are Apache 2.0 licensed.
+cau-repl is MIT licensed. Designated portions of it were imported from other projects and are Apache 2.0 licensed.
 
-The additional MyCoRe module is GPL 3.0 licensed.
+The optional MyCoRe support module is GPL 3.0 licensed. It is not included in the build by default. The documentation contains
+instructions on building a version with the GPL-licensed MyCoRe-specific helpers enabled.
 
 See the bundled LICENSE.txt file and the SPDX identifier of each source file for details.

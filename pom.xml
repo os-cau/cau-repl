@@ -11,9 +11,10 @@
   <groupId>de.uni-kiel.rz.fdr.repl</groupId>
   <name>CAU REPL Module</name>
   <artifactId>cau-repl</artifactId>
+  <!-- remember to also adjust java class REPL::VERSION -->
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <url>https://rzgit.rz.uni-kiel.de/fdm/opendata.uni-kiel.de/cau-repl</url>
+  <url>https://github.com/os-cau/cau-repl</url>
   <organization>
     <name>Rechenzentrum Christian-Albrechts-Universität zu Kiel</name>
     <url>https://www.rz.uni-kiel.de</url>
@@ -72,7 +73,22 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <versions.groovy>4.0.15</versions.groovy>
     <versions.mycore>2022.06.2</versions.mycore> <!-- remember to adjust the version in the <version> and <parent> elements above accordingly by hand -->
+    <conditional.jar.exclude>de/uni_kiel/rz/fdr/repl/mycore/</conditional.jar.exclude>
+    <conditional.resources.exclude>**/*-mycore-*</conditional.resources.exclude>
+    <conditional.jarclassifier>fatjar-nogpl</conditional.jarclassifier>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>gpl</id>
+      <activation><activeByDefault>false</activeByDefault></activation>
+      <properties>
+        <conditional.jar.exclude>.*</conditional.jar.exclude>
+        <conditional.resources.exclude>.*</conditional.resources.exclude>
+        <conditional.jarclassifier>fatjar-gpl</conditional.jarclassifier>
+      </properties>
+    </profile>
+  </profiles>
 
   <dependencyManagement>
     <dependencies>
@@ -96,73 +112,87 @@
 
   <dependencies>
     <dependency>
+      <!-- License: GPL-3.0-only, not bundled, optional -->
       <groupId>org.mycore</groupId>
       <artifactId>mycore-base</artifactId>
       <version>${versions.mycore}</version>
     </dependency>
     <dependency>
+      <!-- License: GPL-3.0-only, not bundled, optional -->
       <groupId>org.mycore</groupId>
       <artifactId>mycore-solr</artifactId>
       <version>${versions.mycore}</version>
     </dependency>
     <dependency>
+      <!-- License: GPL-3.0-only, not bundled, optional -->
       <groupId>org.mycore</groupId>
       <artifactId>mycore-mods</artifactId>
       <version>${versions.mycore}</version>
     </dependency>
     <dependency>
+      <!-- License: GPL-3.0-only, not bundled, optional -->
       <groupId>org.mycore</groupId>
       <artifactId>mycore-user2</artifactId>
       <version>${versions.mycore}</version>
     </dependency>
 
     <dependency>
+      <!-- License: EPL-2.0, not bundled, optional -->
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!-- License: EPL-2.0, not bundled, optional -->
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!-- License: EPL-2.0, not bundled, optional -->
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!-- License: EPL-2.0, not bundled, optional -->
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, not bundled, optional -->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy</artifactId>
       <version>${versions.groovy}</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-xml</artifactId>
       <version>${versions.groovy}</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-json</artifactId>
       <version>${versions.groovy}</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-sql</artifactId>
       <version>${versions.groovy}</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-groovysh</artifactId>
       <version>${versions.groovy}</version>
@@ -174,32 +204,38 @@
       </exclusions>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.sshd</groupId>
       <artifactId>sshd-core</artifactId>
       <version>2.10.0</version>
     </dependency>
     <dependency>
+      <!-- License: BSD-2-Clause, bundled -->
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
       <version>2.14.6</version>
     </dependency>
     <dependency>
+      <!-- License: MIT, bundled -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.36</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.ivy</groupId>
       <artifactId>ivy</artifactId>
       <version>2.5.2</version>
     </dependency>
     <dependency>
+      <!-- License: Apache-2.0, bundled -->
       <groupId>io.github.java-diff-utils</groupId>
       <artifactId>java-diff-utils</artifactId>
       <version>4.12</version>
     </dependency>
 
     <dependency>
+      <!-- License: EPL-2.0, not bundled, integration tests only -->
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <!-- configure junit version in the dependencyManagement section above -->
@@ -208,6 +244,17 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes><exclude>${conditional.resources.exclude}</exclude></excludes>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <includes><include>LICENSE.txt</include></includes>
+      </resource>
+    </resources>
+
     <plugins>
 
       <!-- create a jar -->
@@ -215,7 +262,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
+          <excludes>
+            <exclude>${conditional.jar.exclude}</exclude>
+          </excludes>
           <archive>
+            <!-- if you change the configuration, be sure to also adjsut the other executions below ("agent"...) -->
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addExtensions/>
@@ -292,7 +343,7 @@
         </executions>
       </plugin>
 
-      <!-- The shade plugin adds all our custom dependencies to our .jar, so they are available in MyCoRe -->
+      <!-- The shade plugin adds all our custom dependencies to our .jar, so they are available without separate installation -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -303,6 +354,8 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>${conditional.jarclassifier}</shadedClassifierName>
               <!--minimizeJar>true</minimizeJar-->
               <artifactSet>
                 <includes>
