@@ -1,7 +1,7 @@
 # cau-repl
 
-Extend Java programs with Groovy at runtime: add an interactive SSH-based REPL to any JVM and tweak it with your own custom Groovy
-classes.
+Extend Java programs with Groovy at runtime. Add an interactive SSH-based REPL to any JVM and tweak it with your own custom Groovy
+classes: no sourcecode required!
 
 The cau-repl comes bundled with an additional [MyCoRe](https://mycore.de) module for easy integration with your document repository.
 
@@ -15,8 +15,38 @@ issues if you run it on Windows (it might run fine on the WSL, though). Pull req
 
 Testing of the MyCoRe plugin was until now conducted only in a Tomcat environment.
 
+## 2. Features
 
-## 2. Requirements
+**Without access to an application's sourcecode** and without making any changes to it, cau-repl enables you to:
+
+- Connect to any Java application via SSH and run Groovy commands in its JVM. You can use all the application's classes
+interactively.
+- Load any Maven artifact into the REPL at runtime and use it just in your session
+- Start long-running batch jobs from the SSH console that persist after you disconnect, monitor their status and easily
+retry failed steps. Job inputs can be processed in parallel, with automatic tuning to determine the number of workers
+that maximize throughput.
+- Extend any Java program with your own Groovy classes, e.g. for dependency injection.
+- Automatically run your own Groovy code each time the application is started.
+- Patch classes of any Java program replacing their methods with your own Groovy code, even if the methods are private.
+All changes are applied ad-hoc each time the application starts without altering its installation.
+- Use interactive breakpoints that transfer control to the SSH console under certain circumstances.
+- (experimental) change the code of methods at runtime, even if those methods are called from Java code.
+
+cau-repl can be built as a MyCoRe plugin that enables better integration:
+
+- Simple installation: just put one `.jar` in your `lib/` directory and enable the REPL in your `.properties`
+- Extend your repository with your own EventHandlers, CronJobs, etc. - no need to create a plugin, set up a full
+development environment or recompile it with every new version: just drop a single `.groovy` file in the right directory and the class will be available in MyCoRe.
+- Numerous helper functions that make interacting with your repository from the REPL easy:
+    - SOLR searches
+    - Retrieving documents and their XML via XPath
+    - Displaying, changing (by XSLT or manually), saving XML
+    - Generating diffs between updated XML and the original before saving
+    - Easy MyCoRe session management: run any command as any user, with automatic transactions    
+- The REPL's Job system is integrated with MyCoRe's, so jobs started from the REPL can also be managed via the webinterface.
+- MyCoRe's own CLI commands are also available and can be used from the REPL.
+
+## 3. Requirements
 
 - Java 17 (newer versions may or may not work)
 - Maven
@@ -24,7 +54,7 @@ Testing of the MyCoRe plugin was until now conducted only in a Tomcat environmen
 - MyCoRe 2022.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)
 
 
-## 3. License
+## 4. License
 
 cau-repl is MIT licensed. Designated portions of it were imported from other projects and are Apache 2.0 licensed.
 
@@ -34,9 +64,9 @@ instructions on building a version with the GPL-licensed MyCoRe-specific helpers
 See the bundled LICENSE.txt file and the SPDX identifier of each source file for details.
 
 
-## 4. Quickstart
+## 5. Quickstart
 
-### 4.1. For use in MyCoRe, built with GPL code
+### 5.1. For use in MyCoRe, built with GPL code
     mvn -P gpl clean package
     cp target/cau-repl-X.Y.Z-fatjar-gpl.jar /path/to/mycore/lib
     echo "CAU.REPL.Enabled=true" >> /path/to/mycore/mycore.properties
@@ -62,7 +92,7 @@ Numerous helper functions are avaliable. Go retrieve a document and inspect it:
     Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT" label="fdr_mods_00000299">
     ...
 
-### 4.2. For universal use, built without GPL code
+### 5.2. For universal use, built without GPL code
     mvn clean package
     java -javaagent:target/cau-repl-X.Y.Z-fatjar-nogpl.jar -jar /path/to/your/application.jar
     # a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
@@ -83,3 +113,6 @@ Now import a class of your target and start interacting
     groovy:000> SomeClass.someStaticMethod()
     groovy:000> x = new SomeClass()
     ...
+
+Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
+target. Consult the documentation for details.
