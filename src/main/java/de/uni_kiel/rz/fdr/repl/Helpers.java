@@ -4,6 +4,7 @@
 package de.uni_kiel.rz.fdr.repl;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -114,7 +115,28 @@ public class Helpers {
     }
 
     public static long epochMicros() {
-            Instant i = Instant.now();
-            return TimeUnit.SECONDS.toMicros(i.getEpochSecond()) + TimeUnit.NANOSECONDS.toMicros(i.getNano());
+        Instant i = Instant.now();
+        return TimeUnit.SECONDS.toMicros(i.getEpochSecond()) + TimeUnit.NANOSECONDS.toMicros(i.getNano());
+    }
+
+    public static String shellCommand(String command) throws IOException {
+        boolean windows = System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("windows");
+        ProcessBuilder builder = new ProcessBuilder();
+        if (windows) builder.command("cmd.exe", "/c", command);
+        else builder.command("/bin/sh", "-c", command);
+        Process proc = builder.start();
+        try {
+            String stdout = new String(proc.getInputStream().readAllBytes());
+            int status = proc.waitFor();
+            if (status != 0) throw new RuntimeException("Command " + command + " returned exit status " + status);
+            return stdout;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            proc.destroyForcibly();
+            proc.getInputStream().close();
+            proc.getErrorStream().close();
+            proc.getOutputStream().close();
+        }
     }
 }

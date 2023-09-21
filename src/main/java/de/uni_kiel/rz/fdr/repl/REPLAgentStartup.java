@@ -68,51 +68,72 @@ public class REPLAgentStartup {
             throw new RuntimeException(e);
         }
 
-        // check our environment
-        REPL.discoverEnvironment(classLoader);
-        REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "cau-repl v{}-{}", REPL.VERSION, REPL.HAVE_GPL ? "gpl" : "nogpl"), INTERNAL_LOG_TARGETS);
-        boolean replEnabled = System.getProperty("CAU.REPL.Enabled", "true").equalsIgnoreCase("true");
-        if (!replEnabled) REPLBreakpoint.MAX_BREAKPOINTS = 0; // disable breakpoints if we can't act on them
-
-        // run autoexec command
-        String autoexec = System.getProperty("CAU.JavaAgent.AutoExec");
-        if (autoexec != null) {
-            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Running AutoExec Command:", autoexec), INTERNAL_LOG_TARGETS);
-            Eval.me(autoexec);
-        }
-
-        // bail if the repl was not configured
-        if (supportMode || !replEnabled) return;
-
-        // now initialize the REPL
-        String maxbp = System.getProperty("CAU.REPL.MaxBreakpoints");
-        if (maxbp != null) REPLBreakpoint.MAX_BREAKPOINTS = Integer.parseInt(maxbp);
-        String addr = System.getProperty("CAU.REPL.SSH.ListenAddr");
-        s = System.getProperty("CAU.REPL.SSH.ListenPort");
-        Integer port = (s == null) ? null : Integer.valueOf(s);
-        s = System.getProperty("CAU.REPL.SSH.Timeout");
-        Integer timeout = (s == null) ? null : Integer.valueOf(s);
-        String pass = System.getProperty("CAU.REPL.SSH.Password");
-        if (pass == null) {
-            pass = randomPassword(new SecureRandom().nextInt(30, 35));
-            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Session Password auto-generated: {}", pass),
-                    Set.of(REPLLog.LOG_TARGETS.STDERR));
-        }
-        REPL repl = new REPL(addr, port, timeout, new File(workDir), classLoader);
-        repl.setAuthenticator(new REPLPasswordAuthenticator(pass));
-
-        String editor = System.getProperty("CAU.REPL.Editor");
-        if (editor == null) editor = "vim";
-        repl.addStartupCommand(":set editor '" + editor +"'");
-        String editorssh = System.getProperty("CAU.REPL.EditorSSH");
-        if (editorssh == null) editorssh = "vim --not-a-term -c \"set mouse=\" -c \"set ttymouse=\" -c \"set filetype=groovy\"";
-        repl.addStartupCommand(":set editorssh '" + editorssh +"'");
-
-        REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: listening on {}:{}", repl.getListenAddr(), repl.getPort()), INTERNAL_LOG_TARGETS);
         try {
-            repl.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            // check our environment
+            REPL.discoverEnvironment(classLoader);
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "cau-repl v{}-{}", REPL.VERSION, REPL.HAVE_GPL ? "gpl" : "nogpl"), INTERNAL_LOG_TARGETS);
+            boolean replEnabled = System.getProperty("CAU.REPL.Enabled", "true").equalsIgnoreCase("true");
+            if (!replEnabled) REPLBreakpoint.MAX_BREAKPOINTS = 0; // disable breakpoints if we can't act on them
+
+            // run autoexec command
+            String autoexec = System.getProperty("CAU.JavaAgent.AutoExec");
+            if (autoexec != null) {
+                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Running AutoExec Command:", autoexec), INTERNAL_LOG_TARGETS);
+                Eval.me(autoexec);
+            }
+
+            // bail if the repl was not configured
+            if (supportMode || !replEnabled) return;
+
+            // now initialize the REPL
+            String maxbp = System.getProperty("CAU.REPL.MaxBreakpoints");
+            if (maxbp != null) REPLBreakpoint.MAX_BREAKPOINTS = Integer.parseInt(maxbp);
+            String addr = System.getProperty("CAU.REPL.SSH.ListenAddr");
+            s = System.getProperty("CAU.REPL.SSH.ListenPort");
+            Integer port = (s == null) ? null : Integer.valueOf(s);
+            s = System.getProperty("CAU.REPL.SSH.Timeout");
+            Integer timeout = (s == null) ? null : Integer.valueOf(s);
+            // password
+            String pass = System.getProperty("CAU.REPL.SSH.Password");
+            if (pass != null && pass.isBlank()) pass = null;
+            String passCmd = System.getProperty("CAU.REPL.SSH.PasswordCommand");
+            if (passCmd != null && passCmd.isBlank()) passCmd = null;
+            if (pass != null && passCmd != null)
+                throw new RuntimeException("You can't set CAU.REPL.SSH.Password and CAU.REPL.SSH.PasswordCommand at the same time.");
+            if (passCmd != null) {
+                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Fetching password from {}", passCmd), INTERNAL_LOG_TARGETS);
+                String output = Helpers.shellCommand(passCmd);
+                if (output.split(System.lineSeparator()).length == 0) throw new RuntimeException("Password command returned no data");
+                if (output.split(System.lineSeparator()).length != 1)
+                    throw new RuntimeException("Password command returned more than one line");
+                pass = output.split(System.lineSeparator())[0];
+                if (pass.isBlank()) throw new RuntimeException("Password command returned empty password");
+            } else if (pass == null) {
+                pass = randomPassword(new SecureRandom().nextInt(30, 35));
+                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Session Password auto-generated: {}", pass),
+                        Set.of(REPLLog.LOG_TARGETS.STDERR));
+            }
+            REPL repl = new REPL(addr, port, timeout, new File(workDir), classLoader);
+            repl.setAuthenticator(new REPLPasswordAuthenticator(pass));
+            // editor
+            String editor = System.getProperty("CAU.REPL.Editor");
+            if (editor == null) editor = "vim";
+            repl.addStartupCommand(":set editor '" + editor + "'");
+            String editorssh = System.getProperty("CAU.REPL.EditorSSH");
+            if (editorssh == null)
+                editorssh = "vim --not-a-term -c \"set mouse=\" -c \"set ttymouse=\" -c \"set filetype=groovy\"";
+            repl.addStartupCommand(":set editorssh '" + editorssh + "'");
+
+            // start the REPL
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: listening on {}:{}", repl.getListenAddr(), repl.getPort()), INTERNAL_LOG_TARGETS);
+            try {
+                repl.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Startup failure: {}", e.getMessage(), e), INTERNAL_LOG_TARGETS);
+            throw e;
         }
     }
 
