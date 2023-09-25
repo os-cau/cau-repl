@@ -266,7 +266,7 @@
             <exclude>${conditional.jar.exclude}</exclude>
           </excludes>
           <archive>
-            <!-- if you change the configuration, be sure to also adjsut the other executions below ("agent"...) -->
+            <!-- if you change the configuration, be sure to also adjust the other executions below ("agent"...) -->
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addExtensions/>
@@ -290,7 +290,7 @@
             <goals><goal>jar</goal></goals>
             <phase>package</phase>
             <configuration>
-              <classifier>agent</classifier>
+              <classifier>agent-${project.version}</classifier>
               <finalName>${project.artifactId}</finalName>
               <includes>
                 <include>de/uni_kiel/rz/fdr/repl/REPLAgent.class</include>
@@ -484,9 +484,8 @@
           <!-- abort after first error -->
           <skipAfterFailureCount>1</skipAfterFailureCount>
           <argLine>
-            -javaagent:${project.build.directory}/${project.artifactId}-${project.version}.jar
+            -javaagent:${project.build.directory}/${project.artifactId}-${project.version}-${conditional.jarclassifier}.jar
             --add-opens 'java.base/java.lang=ALL-UNNAMED'
-            -DCAU.Groovy.UseSystemClassLoader=true
             -DCAU.REPL.Log.Trace=true
             -DCAU.REPL.Enabled=false
             -DCAU.REPL.Log.Internal=file
