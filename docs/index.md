@@ -20,15 +20,15 @@ Testing of the MyCoRe plugin was until now conducted only in a Tomcat environmen
 **Without access to an application's sourcecode** and without making any changes to it, cau-repl enables you to:
 
 - Connect to any Java application via SSH and run Groovy commands in its JVM. You can use all the application's classes
-interactively.
+  interactively.
 - Load any Maven artifact into the REPL at runtime and use it just in your session
 - Start long-running batch jobs from the SSH console that persist after you disconnect, monitor their status and easily
-retry failed steps. Job inputs can be processed in parallel, with automatic tuning to determine the number of workers
-that maximize throughput.
+  retry failed steps. Job inputs can be processed in parallel, with automatic tuning to determine the number of workers
+  that maximize throughput.
 - Extend any Java program with your own Groovy classes, e.g. for dependency injection.
 - Automatically run your own Groovy code each time the application is started.
 - Patch classes of any Java program replacing their methods with your own Groovy code, even if the methods are private.
-All changes are applied ad-hoc each time the application starts without altering its installation.
+  All changes are applied ad-hoc each time the application starts without altering its installation.
 - Use interactive breakpoints that transfer control to the SSH console under certain circumstances.
 - (experimental) change the code of methods at runtime, even if those methods are called from Java code.
 
@@ -36,13 +36,13 @@ cau-repl can be built as a MyCoRe plugin that enables better integration:
 
 - Simple installation: just put one `.jar` in your `lib/` directory and enable the REPL in your `.properties`
 - Extend your repository with your own EventHandlers, CronJobs, etc. - no need to create a plugin, set up a full
-development environment or (re-)compile anything: just drop a single `.groovy` file in the right directory and the class will be available in MyCoRe.
+  development environment or (re-)compile anything: just drop a single `.groovy` file in the right directory and the class will be available in MyCoRe.
 - Numerous helper functions that make interacting with your repository from the REPL easy:
     - SOLR searches
     - Retrieving documents and their XML via XPath
     - Displaying, changing (by XSLT or manually), saving XML
     - Generating diffs between updated XML and the original before saving
-    - Easy MyCoRe session management: run any command as any user, with automatic transactions    
+    - Easy MyCoRe session management: run any command as any user, with automatic transactions
 - The REPL's Job system is integrated with MyCoRe's, so jobs started from the REPL can also be managed via the webinterface.
 - MyCoRe's own CLI commands are also available and can be used from the REPL.
 
@@ -60,7 +60,7 @@ cau-repl is MIT licensed. Designated portions of it were imported from other pro
 
 The optional MyCoRe support module is GPL 3.0 licensed. It is not included in the build by default. The documentation contains
 instructions on building a version with the MyCoRe-specific helpers enabled (the `-gpl` build). You can use this build under the terms of
-the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GPL 3.0 license. 
+the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GPL 3.0 license.
 
 See the bundled LICENSE.txt file and the SPDX identifier of each source file for details.
 
@@ -120,7 +120,3 @@ Numerous helper functions are avaliable. Go retrieve a document and inspect it:
     <mycoreobject xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchema
     Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT" label="fdr_mods_00000299">
     ...
-
-## Documentation
-
-There is [extensive documentation TODO URL](https://127.0.0.1) available covering all of cau-repls features. 

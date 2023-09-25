@@ -1,8 +1,9 @@
-target
+target/
 dependency-reduced-pom.xml
 pom.xml.versionsBackup
-.idea
-.cache
-.m2
+.idea/
+.cache/
+.m2/
 *.iml
-tools
+tools/
+site/
