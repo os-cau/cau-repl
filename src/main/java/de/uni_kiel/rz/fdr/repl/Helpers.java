@@ -5,6 +5,7 @@ package de.uni_kiel.rz.fdr.repl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarFile;
 
 import static de.uni_kiel.rz.fdr.repl.groovy.GroovyDynamizeTransformer2.*;
 import static de.uni_kiel.rz.fdr.repl.groovy.GroovyPatchesTransformer.PATCHEESTUB_PREFIX;
@@ -26,37 +28,39 @@ import static de.uni_kiel.rz.fdr.repl.groovy.GroovyPatchesTransformer.PATCHEE_SU
 
 public class Helpers {
         public static Object darkInvocation(Object target, String methodName, Class<?>[] signature, Object[] arguments) throws InvocationTargetException, IllegalAccessException {
-            // requires --add-opens 'java.base/java.lang=ALL-UNNAMED'
-            Class<?> klass = target.getClass();
-            Method meth = null;
-            while (klass != null && meth == null) {
-                try {
-                    meth = klass.getDeclaredMethod(methodName, signature);
-                } catch (NoSuchMethodException ignore) {
+            // requires --add-opens 'java.base/java.lang=ALL-UNNAMED'. maybe the agent's Instrumentation.redefineModule() can be used instead of this parameter?
+            try {
+                Class<?> klass = target.getClass();
+                Method meth = null;
+                while (klass != null && meth == null) {
+                    try {
+                        meth = klass.getDeclaredMethod(methodName, signature);
+                    } catch (NoSuchMethodException ignore) {
+                    }
+                    klass = klass.getSuperclass();
                 }
-                klass = klass.getSuperclass();
-            }
 
-            if (meth == null) throw new RuntimeException("Could not find method " + methodName + " in class");
-            meth.setAccessible(true);
-            return meth.invoke(target, arguments);
+                if (meth == null) throw new RuntimeException("Could not find method " + methodName + " in class");
+                meth.setAccessible(true);
+                return meth.invoke(target, arguments);
+            } catch (InaccessibleObjectException e) {
+                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Could not access object of class {}: please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters.", target.getClass()), REPLLog.INTERNAL_LOG_TARGETS);
+                throw new RuntimeException("Could not access object of class " + target.getClass() + ": please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters.", e);
+            }
         }
 
-        @SuppressWarnings("unused")
-        public static boolean forbiddenExtendClassPathF(ClassLoader classLoader, List<File> files) {
-            List<URL> urls = new ArrayList<>();
-            for (File f : files) {
-                try {
-                    urls.add(f.toURI().toURL());
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
+        // keep this protected -> uses the agent's Instrumentation
+        protected static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) {
+            if ((classLoader == null || classLoader == ClassLoader.getSystemClassLoader()) && REPLAgent.inst != null) {
+                for (URL u : urls) {
+                    try {
+                        REPLAgent.inst.appendToSystemClassLoaderSearch(new JarFile(u.getPath()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            return forbiddenExtendClassPath(classLoader, urls);
-        }
-
-        public static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) {
-            if (classLoader instanceof URLClassLoader ucl) {
+                return true;
+            } else if (classLoader instanceof URLClassLoader ucl) {
                 for (URL u : urls) {
                     try {
                         darkInvocation(ucl, "addURL", new Class<?>[]{URL.class}, new Object[]{u});

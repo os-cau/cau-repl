@@ -276,6 +276,7 @@ public class GroovySourceDirectory {
 
     @SuppressWarnings("UnusedReturnValue")
     protected static Class<?> defineClass(ClassLoader cl, String name, byte[] bytecode) throws InvocationTargetException, IllegalAccessException {
+        // maybe try to use the agent's Instrumentation.redefineClasses for this?
         Class<?> loadedClass;
         if (TRACE || TRACE_COMPILE) REPLLog.trace("Define Class: {}", name);
 
@@ -283,7 +284,7 @@ public class GroovySourceDirectory {
             // it's easier for groovy classloaders
             loadedClass = gcl.defineClass(name, bytecode);
         } else {
-            // try to inject it into an unsuspecting normal classloader using dark powers: requires --add-opens 'java.base/java.lang=ALL-UNNAMED'
+            // try to inject it into an unsuspecting normal classloader using dark powers: requires --add-opens 'java.base/java.lang=ALL-UNNAMED'. maybe the agent's Instrumentation.redefineModule() can be used instead of this parameter?
             loadedClass = (Class<?>) darkInvocation(cl, "defineClass", new Class<?>[]{String.class, byte[].class, int.class, int.class}, new Object[]{name, bytecode, 0, bytecode.length});
         }
 

@@ -4,6 +4,7 @@
 package de.uni_kiel.rz.fdr.repl;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
@@ -16,18 +17,21 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.jar.JarFile;
 
 /*
     IMPORTANT: This class should not use any other classes that the REPL will need later on. This is the only way
-    to ensure, that those classes will be loaded into the proper classloader later.
+    to ensure that those classes will be loaded into the proper classloader later.
     So don't use any Groovy or de.uni_kiel classes here.
  */
 
 public class REPLAgent {
+    protected static Instrumentation inst = null;
 
     // static initialization
     public static void premain(String agentArgs, Instrumentation inst) {
         System.err.println("REPL: REPLAgent was loaded");
+        REPLAgent.inst = inst;
         String t = System.getProperty("CAU.JavaAgent.Triggers");
         if (t != null) {
             // delayed start
@@ -36,11 +40,11 @@ public class REPLAgent {
             // immediate start
             try {
                 String cp = System.getProperty("CAU.JavaAgent.ClassPath");
-                if (cp != null && !Helpers.forbiddenExtendClassPath(REPLAgent.class.getClassLoader(), Helpers.deglobClassPath(cp))) {
-                    System.err.println("REPL: Could not extend classpath");
+                if (cp != null && !REPLAgentTransformer.forbiddenExtendClassPath(REPLAgent.class.getClassLoader(), REPLAgentTransformer.deglobClassPath(cp))) {
+                    System.err.println("REPL: ERROR: could not extend classpath");
                 }
                 Class<?> klass = Class.forName("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
-                Helpers.darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{null});
+                REPLAgentTransformer.darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{null});
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("REPL: Could not locate class de.uni_kiel.rz.fdr.repl.REPLAgentStartup. Please make sure that cau-repl-*.jar is in your classpath");
             } catch (Exception e) {
@@ -66,7 +70,7 @@ public class REPLAgent {
 
 
         @Override
-        public byte[] transform(Module module, ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+        public byte[] transform(Module module, ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
             if (!triggered) {
                 for (String trig : triggers) {
                     if (!className.startsWith(trig)) continue;
@@ -74,10 +78,11 @@ public class REPLAgent {
 
                     triggered = true;
                     System.err.println("REPL: Agent Triggered on " + className);
+                    if (loader == null) loader = REPLAgent.class.getClassLoader();
                     try {
                         String cp = System.getProperty("CAU.JavaAgent.ClassPath");
                         if (cp != null && !forbiddenExtendClassPath(loader, deglobClassPath(cp))) {
-                            System.err.println("REPL: Could not extend ClassPath");
+                            System.err.println("REPL: ERROR: Could not extend class path");
                         }
                         Class<?> klass = loader.loadClass("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
                         darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{loader});
@@ -87,13 +92,14 @@ public class REPLAgent {
                         System.exit(8888);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        System.err.println("REPL: Error during agent Startup");
+                        System.err.println("REPL: Error during agent startup");
                         System.exit(9999);
                     }
+                    System.err.println("REPL: Agent startup finished");
                     break;
                 }
             }
-            return classfileBuffer;
+            return null;
         }
 
         @Override
@@ -102,13 +108,13 @@ public class REPLAgent {
         }
 
         /*
-            The following static methods are copies of Helpers.*. We duplicate them here to avoid instantiating
+            The following static methods are variants of Helpers.*. We duplicate them here to avoid instantiating
             Helpers.class in the wrong classloader.
          */
 
         @SuppressWarnings("UnusedReturnValue")
-        public static Object darkInvocation(Object target, String methodName, Class<?>[] signature, Object[] arguments) throws InvocationTargetException, IllegalAccessException {
-            // requires --add-opens 'java.base/java.lang=ALL-UNNAMED'
+        protected static Object darkInvocation(Object target, String methodName, Class<?>[] signature, Object[] arguments) throws InvocationTargetException, IllegalAccessException {
+            // requires --add-opens 'java.base/java.lang=ALL-UNNAMED'. maybe the agent's Instrumentation.redefineModule() can be used instead of this parameter?
             Class<?> klass = target.getClass();
             Method meth = null;
             while (klass != null && meth == null) {
@@ -124,20 +130,18 @@ public class REPLAgent {
             return meth.invoke(target, arguments);
         }
 
-        private static boolean forbiddenExtendClassPathF(ClassLoader classLoader, List<File> files) {
-            List<URL> urls = new ArrayList<>();
-            for (File f : files) {
-                try {
-                    urls.add(f.toURI().toURL());
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
+        // keep this protected -> uses the agent's Instrumentation
+        protected static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) {
+            if ((classLoader == null || classLoader == ClassLoader.getSystemClassLoader()) && REPLAgent.inst != null) {
+                for (URL u : urls) {
+                    try {
+                        REPLAgent.inst.appendToSystemClassLoaderSearch(new JarFile(u.getPath()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            return forbiddenExtendClassPath(classLoader, urls);
-        }
-
-        private static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) {
-            if (classLoader instanceof URLClassLoader ucl) {
+                return true;
+            } else if (classLoader instanceof URLClassLoader ucl) {
                 for (URL u : urls) {
                     try {
                         darkInvocation(ucl, "addURL", new Class<?>[]{URL.class}, new Object[]{u});
@@ -151,7 +155,7 @@ public class REPLAgent {
             }
         }
 
-        private static List<URL> deglobClassPath(String classPath) {
+        protected static List<URL> deglobClassPath(String classPath) {
             List<URL> urls = new ArrayList<>();
             for (String s : classPath.split(":")) {
                 try {
