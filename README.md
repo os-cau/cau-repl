@@ -42,7 +42,7 @@ development environment or (re-)compile anything: just drop a single `.groovy` f
     - Retrieving documents and their XML via XPath
     - Displaying, changing (by XSLT or manually), saving XML
     - Generating diffs between updated XML and the original before saving
-    - Easy MyCoRe session management: run any command as any user, with automatic transactions    
+    - Easy MyCoRe session management: run any command as any user, with automatic transactions
 - The REPL's Job system is integrated with MyCoRe's, so jobs started from the REPL can also be managed via the webinterface.
 - MyCoRe's own CLI commands are also available and can be used from the REPL.
 
@@ -60,7 +60,7 @@ cau-repl is MIT licensed. Designated portions of it were imported from other pro
 
 The optional MyCoRe support module is GPL 3.0 licensed. It is not included in the build by default. The documentation contains
 instructions on building a version with the MyCoRe-specific helpers enabled (the `-gpl` build). You can use this build under the terms of
-the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GPL 3.0 license. 
+the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GPL 3.0 license.
 
 See the bundled LICENSE.txt file and the SPDX identifier of each source file for details.
 
@@ -76,6 +76,9 @@ applications. Choose the quickstart instructions that apply to your use-case.
     # a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
     # you may now login with any username and the password that was just printed
     ssh "ssh://localhost:8512"
+
+By default, cau-repl will store its state in the `cau-repl` directory, which it will create in the current working
+directory.
 
 #### Things to try
 
@@ -104,6 +107,9 @@ target. Consult the documentation for details.
     # you may now login with the MyCoRe administrator password
     ssh "ssh://administrator@localhost:8512"
 
+By default, cau-repl will store its state in the `cau-repl` subdirectory, which it will create in your MyCoRe
+installation's root.
+
 #### Things to try
 
 Your commands run directly in MyCoRe's JVM. Try pinging a Solr core:
@@ -116,11 +122,11 @@ Numerous helper functions are avaliable. Go retrieve a document and inspect it:
     groovy:000> doc = mcrxml("mods", filter=".[//mods:title='SOMETITLEHERE']")[0]
     ===> [Document:  No DOCTYPE declaration, Root is [Element: <mycoreobject/>]]
     groovy:000> doc()
-    ===> 
+    ===>
     <mycoreobject xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchema
     Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT" label="fdr_mods_00000299">
     ...
 
 ## Documentation
 
-There is [extensive documentation TODO URL](https://127.0.0.1) available covering all of cau-repls features. 
+There is [complete documentation TODO URL](https://127.0.0.1) available covering all of cau-repl's features.

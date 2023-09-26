@@ -1,1 +1,47 @@
 # Configuration
+
+If you use the cau-repl Java agent, you can configure it via Java system properties. Set them e.g. from the command
+line, as in `java -DCAU.REPL.Enabled=true`, or by Java's `@` parameter syntax to read them from a file.
+Users of the MyCoRe plugin should use their `mycore.properties` file and only resort to system properties to configure the agent in support mode if they
+enabled the early-loading mechanism.
+
+## System Properties for the Universal Java Agent
+
+ | Property                        | Default                         | Description |
+ |---------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+ | CAU.Groovy.ClassPath            | *&lt;Java System Classpath&gt;* | The classpath to use when compiling your `.groocy` sources.|
+ | CAU.Groovy.DeferMetaClasses     | `false`                         | Only needed in special cases. Do not add Groovy MetaClasses to compiled `.groovy` files from the agent. This has the effect of leaving your classes uninitialized so you can manually initialize them in a specific order later on. You can use the `GroovySourceDirectory.addDynamizedMetaClass()` to add the MetaClasses later on and force class initialization. If you set this to `true` and do not invoke this method for your classes, some features of cau-repl (e.g. `@Dynamize`) will be broken.|
+ | CAU.Groovy.ReorderSources       | `true`                          | Set to `false` to disable the logic that determines the proper compilation order for your `.groovy` sources. Disabling this setting will break compilation unless your classes are trivial, so you should only disable it for debugging.|
+ | CAU.Groovy.SourceDirs           |                                 | A comma-separated list of directories. All `.groovy` files in all subdirectories will be compiled into the JVM on startup.|
+ | CAU.Groovy.UseSystemClassLoader | `true`                          | Set this to `false` to use a private classloader for the REPL. The classes you define will then only be visible in the REPL.|
+ | CAU.JavaAgent.AutoExec          |                                 | A Groovy command that will be executed on startup directly after your sources have been compiled and before starting the REPL.|
+ | CAU.JavaAgent.ClassPath         |                                 | JARs that the agent will add to the system classpath, e.g. to specify the location of the cau-repl fat jar if it is off-path.|
+ | CAU.JavaAgent.SupportMode       |                                 | Set this to `true` when you use the agent in conjunction with the plugin|
+ | CAU.JavaAgent.Triggers          |                                 | Loads the REPL in the same classloader as this package or class (e.g. `org/example/`).|
+ | CAU.REPL.EditorSSH              | `/usr/bin/vim --not-a-term`     | The editor to use for interactive file editing within the SSH environment. **Must be able to run without a TTY.**|
+ | CAU.REPL.Enabled                | `true`                          | If set, the REPL will listen for SSH connections.|
+ | CAU.REPL.Log.Internal           |                                 | If set to `file`, redirects cau-repl's internal log messages from STDERR (or Log4J if installed) to the `repl.log` file in its work dir.| 
+ | CAU.REPL.Log.Trace              | `false`                         | Enable very fine grained logging of the REPL's internals. Only use this for debugging.|
+ | CAU.REPL.MaxBreakpoints         | `20`                            | Maximum number of breakpoints that can remain uncontinued at a given time. Further triggered breakpoints will be dropped.|
+ | CAU.REPL.SSH.ListenAddr         | `127.0.0.1`                     | The address that the REPL should listen on for SSH connections.|
+ | CAU.REPL.SSH.ListenPort         | `8512`                          | The port that the REPL should listen on for SSH connections.|
+ | CAU.REPL.SSH.Password           |                                 | The password that grants access to the REPL via SSH. Pass this from a file via Java's `@` parameter syntax. Otherwise, it will be visible in the process list for all local users. Even then, your application might dump the value of all properties into a debug log, so you should generally use the CAU.REPL.SSH.PasswordCommand property instead.| 
+ | CAU.REPL.SSH.PasswordCommand    |                                 | A command that returns the password to be used for the REPL's SSH on STDOUT. Mutually exclusive with CAU.REPL.SSH.Password.|
+ | CAU.REPL.SSH.Timeout            | `43200` (12h)                   | Disconnect SSH connections after they have been idle for this many seconds.|
+ | CAU.REPL.WorkDir                | `./cau-repl`                    | The directory in which the REPL will store its state.|
+
+## MyCoRe Plugin Properties
+
+| Property                                                                           | Default | Description                                                                                                                                                                                                                              |
+|------------------------------------------------------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CAU.REPL.Groovy.ReorderSources                                                     | `true`  | Set to `false` to disable the logic that determines the proper compilation order for your `.groovy` sources. Disabling this setting will break compilation unless your classes are trivial, so you should only disable it for debugging. |
+| CAU.Groovy.SourceDirs.0,<br/>CAU.Groovy.SourceDirs.1,<br/>...                      |         | Root directories for your Groovy sources. All `.groovy` files in all their subdirectories will be compiled into the JVM on startup.                                                                                                      |
+| CAU.REPL.Groovy.Startup.Scripts.0<br/>CAU.REPL.Groovy.Startup.Scripts.1,<br/>...   | | Each Groovy script file you list here will be executed in the REPL whenever you connect to it as if you had typed it there.                                                                                                              |
+| CAU.REPL.Groovy.Startup.Commands.0<br/>CAU.REPL.Groovy.Startup.Commands.1,<br/>... | | Each Groovy command you list here will be executed in the REPL whenever you connect to it as if you had typed it there.                                                                                                                  |
+| CAU.REPL.EditorSSH                                                                 | `/usr/bin/vim --not-a-term` | The editor to use for interactive file editing within the SSH environment. **Must be able to run without a TTY.**                                                                                                                        |
+| CAU.REPL.Enabled                                                                   | `false` | If set, the REPL will listen for SSH connections.                                                                                                                                                                                        |
+| CAU.REPL.Log.Trace                                                                 | `false` | Enable very fine grained logging of the REPL's internals. Only use this for debugging.                                                                                                                                                   |
+| CAU.REPL.MaxBreakpoints                                                            | `20` | Maximum number of breakpoints that can remain uncontinued at a given time. Further triggered breakpoints will be dropped.                                                                                                                |
+| CAU.REPL.SSH.ListenAddr                                                            | `127.0.0.1` | The address that the REPL should listen on for SSH connections.                                                                                                                                                                          |
+| CAU.REPL.SSH.ListenPort                                                            | `8512` | The port that the REPL should listen on for SSH connections.                                                                                                                                                                             |
+| CAU.REPL.SSH.TimeoutSeconds                                                        | `43200` (12h) | Disconnect SSH connections after they have been idle for this many seconds.                                                                                                                                                              |

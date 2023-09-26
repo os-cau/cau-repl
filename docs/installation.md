@@ -20,7 +20,7 @@ This will produce the following two JARs:
 - `target/cau-repl-X.Y.Z-fatjar-nogpl.jar` can be used as a standalone Java agent and contains all of cau-repls dependencies
 - `target/cau-repl-agent-X.Y.Z.jar` is an optional lightweight loader-only agent that can be used to load the full `fatjar`
   into a specific classloader. Use this if your application places its classes in a non-default classloader (e.g.
-  webapplications in a servlet container). See the [Loading](#loading-cau-repl) section for details. 
+  webapplications in a servlet container). See the [Classloader Selection](#classloader-selection) section for details. 
 
 ### Loading the Agent
 
@@ -37,6 +37,9 @@ logfile**, e.g. Systemd's journal. Any local user who can read this password can
 with the permissions of your application. To secure your installation permanently, see the [Configuration](configuration.md) section for ways to set your own
 static password without producing log output. The confiration section also describes various parameters that you can
 use to customize ports, directories, etc.
+
+By default, cau-repl will store its state in the `cau-repl` directory, which it will create in the current working
+directory.
 
 If you do not see your application's classes in the REPL, you need to load cau-repl into a specific classloader.
 
@@ -89,6 +92,9 @@ Then (re-) start your servlet container. The REPL will listen for SSH connection
 login with the username `administrator` and the corresponding MyCoRe password of the account. See the
 [Configuration](configuration.md) section for more settings that you can customize from your `.properties`.
 
+By default, cau-repl will store its state in the `cau-repl` subdirectory, which it will create in your MyCoRe
+installation's root.
+
 ### Loading the Plugin Earlier with the Agent
 
 When you patch libraries or define classes, load order is important. The MyCoRe plugin generally tries to load your
@@ -104,6 +110,7 @@ cp path/to/cau-repl-agent-X.Y.Z.jar /path/to/mycore/lib
 Then add it to your servlet container's java arguments. E.g. for Tomcat, you would add something like this to your
 `bin/setenv.sh` file:
 ```bash
+# adjust paths as needed
 export JAVA_OPTS="$JAVA_OPTS -javaagent:/path/to/mycore/lib/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.ClassPath=/path/to/mycore/lib/* -DCAU.JavaAgent.SupportMode=true -DCAU.JavaAgent.Triggers=org/mycore/ -DCAU.Groovy.ClassPath=$CATALINA_HOME/lib/*:$CATALINA_HOME/webapps/ROOT/WEB-INF/lib/* -DCAU.Groovy.SourceDirs=/path/to/your/groovy-sources"
 ```
 From now on, your Groovy sources in the `/path/to/your/groovy-sources` directory will be compiled before other MyCoRe
