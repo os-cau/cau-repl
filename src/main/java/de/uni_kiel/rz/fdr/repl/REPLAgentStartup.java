@@ -95,6 +95,8 @@ public class REPLAgentStartup {
             Integer timeout = (s == null) ? null : Integer.valueOf(s);
             // password
             String pass = System.getProperty("CAU.REPL.SSH.Password");
+            // clear the property so the plaintext does not leak into debug dumps, logs, etc.
+            System.clearProperty("CAU.REPL.SSH.Password");
             if (pass != null && pass.isBlank()) pass = null;
             String passCmd = System.getProperty("CAU.REPL.SSH.PasswordCommand");
             if (passCmd != null && passCmd.isBlank()) passCmd = null;
