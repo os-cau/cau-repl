@@ -35,6 +35,7 @@ public class REPLLog {
 
     @SuppressWarnings("FieldCanBeLocal")
     private static Class<?> L4J_LOGMANAGER_CLASS = null;
+    private static Class<?> L4J_SIMPLEMESSAGE_CLASS = null;
     private static Object L4J_LOGGER = null;
     private static Method L4J_DEBUG = null;
     private static Method L4J_INFO = null;
@@ -98,15 +99,16 @@ public class REPLLog {
         boolean l4jSuccess = false;
         if ((targets.contains(LOG_TARGETS.LOG4J) || targets.contains(LOG_TARGETS.STDERR_OR_LOG4J)) && L4J_LOGGER != null) {
             try {
+                Object l4jmsg = L4J_SIMPLEMESSAGE_CLASS.getDeclaredConstructor(String.class).newInstance(entry.getMessage());
                 switch (entry.getLevel()) {
-                    case TRACE, DEBUG -> L4J_DEBUG.invoke(L4J_LOGGER, entry.getMessage());
-                    case INFO -> L4J_INFO.invoke(L4J_LOGGER, entry.getMessage());
-                    case WARN -> L4J_WARN.invoke(L4J_LOGGER, entry.getMessage());
-                    case ERROR -> L4J_ERROR.invoke(L4J_LOGGER, entry.getMessage());
+                    case TRACE, DEBUG -> L4J_DEBUG.invoke(L4J_LOGGER, l4jmsg);
+                    case INFO -> L4J_INFO.invoke(L4J_LOGGER, l4jmsg);
+                    case WARN -> L4J_WARN.invoke(L4J_LOGGER, l4jmsg);
+                    case ERROR -> L4J_ERROR.invoke(L4J_LOGGER, l4jmsg);
                     default -> throw new RuntimeException("Unknown log level");
                 }
                 l4jSuccess = true;
-            } catch (IllegalAccessException | InvocationTargetException ignore) {}
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException ignore) {}
         }
 
         // PrintStreams are thread-safe...
@@ -195,11 +197,12 @@ public class REPLLog {
         try {
             if (L4J_LOGGER != null) return;
             L4J_LOGMANAGER_CLASS = Class.forName("org.apache.logging.log4j.LogManager");
+            L4J_SIMPLEMESSAGE_CLASS = Class.forName("org.apache.logging.log4j.message.SimpleMessage");
             L4J_LOGGER = L4J_LOGMANAGER_CLASS.getMethod("getLogger", Class.class).invoke(null, REPLLog.class);
-            L4J_DEBUG = L4J_LOGGER.getClass().getMethod("debug", String.class);
-            L4J_INFO = L4J_LOGGER.getClass().getMethod("info", String.class);
-            L4J_WARN = L4J_LOGGER.getClass().getMethod("warn", String.class);
-            L4J_ERROR = L4J_LOGGER.getClass().getMethod("error", String.class);
+            L4J_DEBUG = L4J_LOGGER.getClass().getMethod("debug", Class.forName("org.apache.logging.log4j.message.Message"));
+            L4J_INFO = L4J_LOGGER.getClass().getMethod("info", Class.forName("org.apache.logging.log4j.message.Message"));
+            L4J_WARN = L4J_LOGGER.getClass().getMethod("warn", Class.forName("org.apache.logging.log4j.message.Message"));
+            L4J_ERROR = L4J_LOGGER.getClass().getMethod("error", Class.forName("org.apache.logging.log4j.message.Message"));
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             L4J_LOGGER = null;
         }
