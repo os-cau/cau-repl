@@ -6,6 +6,9 @@ nav:
   - About: index.md
   - Installation: installation.md
   - Configuration: configuration.md
+  - Using the REPL: repl.md
+extra_css:
+  - custom.css
 remote_branch: gh-pages
 remote_name: github
 theme:

@@ -8,7 +8,7 @@ The cau-repl comes bundled with an additional [MyCoRe](https://mycore.de) module
 
 ## Disclaimer
 
-**This project is in a very early stage: expect bugs.**
+> **This project is in a very early stage: expect bugs.**
 
 As of today, testing was exclusively on Linux. While the code is intended to be OS agnostic, there will certainly be
 issues if you run it on Windows (it might run fine on the WSL, though). Pull requests for compatibility are welcome!
