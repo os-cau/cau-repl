@@ -546,24 +546,29 @@ public class REPLJob implements Serializable {
                     }
                     final int paramPtr = queuedInput;
                     final Serializable param = inputs != null ? inputs[paramPtr] : null;
+                    try {
+                        completionService.submit(() -> {
+                            long epochFrom = Helpers.epochMicros();
+                            try {
+                                Serializable result;
+                                try {
+                                    result = function.apply(param, this);
+                                } catch (Exception ex) {
+                                    long epochTo = Helpers.epochMicros();
+                                    return new InputResult(key, paramPtr, epochFrom, epochTo, null, ex);
+                                }
+                                return new InputResult(key, paramPtr, epochFrom, Helpers.epochMicros(), result, null);
+                            } catch (Exception ex) {
+                                log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "Job {}: internal error while gathering result: {}", key, ex), INTERNAL_LOG_TARGETS);
+                                return new InputResult(key, paramPtr, epochFrom, Helpers.epochMicros(), null, new RuntimeException("internal error while gathering result", ex));
+                            }
+                        });
+                    } catch (RejectedExecutionException ex) {
+                        if (TRACE || TRACE_JOBS) trace("executor rejected #{} (shuting down?)", paramPtr);
+                        break;
+                    }
                     if (TRACE || TRACE_JOBS) trace("submitted #{}", paramPtr);
                     batchSubmitted++;
-                    completionService.submit(() -> {
-                        long epochFrom = Helpers.epochMicros();
-                        try {
-                            Serializable result;
-                            try {
-                                result = function.apply(param, this);
-                            } catch (Exception ex) {
-                                long epochTo = Helpers.epochMicros();
-                                return new InputResult(key, paramPtr, epochFrom, epochTo, null, ex);
-                            }
-                            return new InputResult(key, paramPtr, epochFrom, Helpers.epochMicros(), result, null);
-                        } catch (Exception ex) {
-                            log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "Job {}: internal error while gathering result: {}", key, ex), INTERNAL_LOG_TARGETS);
-                            return new InputResult(key, paramPtr, epochFrom, Helpers.epochMicros(), null, new RuntimeException("internal error while gathering result", ex));
-                        }
-                    });
                     synchronized (this) {
                         queuedInput++;
                         queueLength = queue.size();
