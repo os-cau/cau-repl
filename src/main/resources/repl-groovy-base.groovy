@@ -114,6 +114,8 @@ static def job(Map args=[:], Closure<Serializable> closure) {
     java.util.concurrent.ThreadFactory threadfactory = args.containsKey("threadfactory") ? args["threadfactory"] : null as java.util.concurrent.ThreadFactory
     java.util.function.Consumer<REPLJob.JobEvent> internalcallback = args.containsKey("internalcallback") ? args["internalcallback"] : null as java.util.function.Consumer<REPLJob.JobEvent>
 
+    if (resume && inputs) throw new RuntimeException("job parameters 'inputs' and 'resume' are mutually exclusive")
+
     REPLJob job
     if (resume == null) job = REPLJob.repljob(closure, inputs, concurrency, name, becomedelegate)
     else job = REPLJob.resume(resume, closure, retrysuccess, retryerror, becomedelegate)
