@@ -26,11 +26,16 @@ import java.util.jar.JarFile;
  */
 
 public class REPLAgent {
+    private static final boolean KEEP_INSTRUMENTATION = false;
+
     protected static Instrumentation inst = null;
 
     // static initialization
     public static void premain(String agentArgs, Instrumentation inst) {
         System.err.println("REPL: REPLAgent was loaded");
+        // keeping this around is useful to extend the classpath, etc. but has security implications.
+        // by default (see KEEP_INSTRUMENTATION), we will clear this after the initial extension of the classpath (before
+        // foreign code is run)
         REPLAgent.inst = inst;
         String t = System.getProperty("CAU.JavaAgent.Triggers");
         if (t != null) {
@@ -43,12 +48,15 @@ public class REPLAgent {
                 if (cp != null && !REPLAgentTransformer.forbiddenExtendClassPath(REPLAgent.class.getClassLoader(), REPLAgentTransformer.deglobClassPath(cp))) {
                     System.err.println("REPL: ERROR: could not extend classpath");
                 }
+                if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
                 Class<?> klass = Class.forName("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
                 REPLAgentTransformer.darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{null});
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("REPL: Could not locate class de.uni_kiel.rz.fdr.repl.REPLAgentStartup. Please make sure that cau-repl-*.jar is in your classpath");
             } catch (Exception e) {
                 throw new RuntimeException("REPL: Could not initiate Agent Startup", e);
+            } finally {
+                if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
             }
         }
     }
@@ -84,6 +92,7 @@ public class REPLAgent {
                         if (cp != null && !forbiddenExtendClassPath(loader, deglobClassPath(cp))) {
                             System.err.println("REPL: ERROR: Could not extend class path");
                         }
+                        if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
                         Class<?> klass = loader.loadClass("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
                         darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{loader});
                     } catch (ClassNotFoundException e) {
@@ -94,6 +103,8 @@ public class REPLAgent {
                         e.printStackTrace();
                         System.err.println("REPL: Error during agent startup");
                         System.exit(9999);
+                    } finally {
+                        if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
                     }
                     System.err.println("REPL: Agent startup finished");
                     break;
