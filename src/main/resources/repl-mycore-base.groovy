@@ -158,8 +158,8 @@ org.mycore.datamodel.metadata.MCRObjectDerivate.metaClass.call << { -> return de
 
 
 def mcrcompile(Map params=[:], path) {
-    if (!params["classLoader"]) params["classLoader"] = de.uni_kiel.rz.fdr.repl.mycore.GroovySourceDirsStartupHandler.classLoader
-    if (!params["classPath"]) params["classPath"] = de.uni_kiel.rz.fdr.repl.mycore.GroovySourceDirsStartupHandler.classPath
+    if (!params["classloader"]) params["classloader"] = de.uni_kiel.rz.fdr.repl.mycore.GroovySourceDirsStartupHandler.classLoader
+    if (!params["classpath"]) params["classpath"] = de.uni_kiel.rz.fdr.repl.mycore.GroovySourceDirsStartupHandler.classPath
     return compile(params, path)
 }
 

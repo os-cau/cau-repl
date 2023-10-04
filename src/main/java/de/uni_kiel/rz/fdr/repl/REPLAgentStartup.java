@@ -47,6 +47,7 @@ public class REPLAgentStartup {
         boolean defer = System.getProperty("CAU.Groovy.DeferMetaClasses", "false").equalsIgnoreCase("true");
         boolean reorderSources = !System.getProperty("CAU.Groovy.ReorderSources", "true").equalsIgnoreCase("false");
         if (forceClassLoader != null) {
+            if (!scl) throw new RuntimeException("You must leave CAU.Groovy.UseSystemClassLoader enabled if you target a specific classloader.");
             classLoader = forceClassLoader;
         } else if (supportMode || scl) {
             // or {REPLAgent.class/this.getClass()}.getClassLoader(), or ClassLoader.getPlatformClassLoader(), or Thread.currentThread().getContextClassLoader()

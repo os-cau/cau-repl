@@ -44,8 +44,8 @@ public class Helpers {
                 meth.setAccessible(true);
                 return meth.invoke(target, arguments);
             } catch (InaccessibleObjectException e) {
-                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Could not access object of class {}: please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters.", target.getClass()), REPLLog.INTERNAL_LOG_TARGETS);
-                throw new RuntimeException("Could not access object of class " + target.getClass() + ": please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters.", e);
+                REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Could not access object of class {}: please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters or unset CAU.Groovy.UseSystemClassLoader to use a private classloader.", target.getClass()), REPLLog.INTERNAL_LOG_TARGETS);
+                throw new RuntimeException("Could not access object of class " + target.getClass() + ": please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters or unset CAU.Groovy.UseSystemClassLoader to use a private classloader.", e);
             }
         }
 

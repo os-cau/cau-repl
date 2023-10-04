@@ -23,8 +23,8 @@ def static _CAUREPL_isRo(x) {
 }
 
 def compile(Map params=[:], path) {
-    def classLoader = params["classLoader"] ?: de.uni_kiel.rz.fdr.repl.REPLAgentStartup.classLoader
-    def classPath = params["classPath"] ?: de.uni_kiel.rz.fdr.repl.REPLAgentStartup.classPath
+    def classLoader = params["classloader"] ?: de.uni_kiel.rz.fdr.repl.REPLAgentStartup.classLoader
+    def classPath = params["classpath"] ?: de.uni_kiel.rz.fdr.repl.REPLAgentStartup.classPath
     path = path instanceof String ? java.nio.file.Path.of(path) : path
     path = path instanceof File ? path.toPath() : path
     return new de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory(path, classLoader, classPath)

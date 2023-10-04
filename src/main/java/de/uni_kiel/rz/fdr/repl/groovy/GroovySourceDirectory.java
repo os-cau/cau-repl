@@ -232,7 +232,7 @@ public class GroovySourceDirectory {
                     if (idx != null) REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, "REPL: Intermediate classes between dynamized classes {} and {} are not dynamized: {}", loadedClass.getName(), topDynamized.getName(), String.join(", ", intermediate.subList(0, idx))), INTERNAL_LOG_TARGETS);
                 }
             } catch (InaccessibleObjectException e) {
-                throw new RuntimeException("To load your own Groovy classes into the system ClassLoader, please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your JVM parameters.", e);
+                throw new RuntimeException("To load your own Groovy classes into the system ClassLoader please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your JVM parameters or unset CAU.Groovy.UseSystemClassLoader to use a private classloader instead.", e);
             } catch (InvocationTargetException e) {
                 throw new RuntimeException("Can't load your Groovy class '" + gc.getKey() + "'. If it already exists in the JVM, you may need to use the REPL agent to load your Groovy sources before the conflicting version gets loaded.", e);
             } catch (ExceptionInInitializerError e) {
