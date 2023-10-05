@@ -93,7 +93,9 @@ Now import a class of your target and start interacting
     ...
 
 Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
-target. Consult the documentation for details.
+target.<br/>
+Want to define your own classes? Then you might have to configure cau-repl's ClassLoader use as well.<br/>
+Consult the [installation manual](TODO) for details.
 
 ### For use in MyCoRe, built with GPL code
     mvn -P gpl clean package

@@ -24,13 +24,26 @@ This will produce the following two JARs:
 
 ### Loading the Agent
 
-To load cau-repl as a Java agent, you need to pass an additional parameter to your Java command:
+To simply get access to the SSH REPL, load cau-repl as a Java agent. You need to pass a special parameter to your
+Java command:
 ```bash
 java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar ...
-# If you plan to load new classes into the target's classloader, you also need to disable the acess protection
-# provided by Java's module system. Use the following parameters in this case:
-# java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar `--add-opens 'java.base/java.lang=ALL-UNNAMED'` ...
 ```
+This also allows you to compile your own classes and use them in the REPL.
+
+If you would like to extend your own classes' availability to the entire application (and not just the REPL), they need
+to be loaded into the system-default classloader. Then you should configure cau-repl like this: 
+```bash
+java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar -DCAU.Groovy.UseSystemClassLoader=true ...
+```
+
+If you use the system-default classloader and loading your classes fails with an exception, you might also need to
+disable the access protection provided by Java's module system (potentially impacting your target's security if it
+depends on it). Whether this step is necessary, depends on your target application:
+```bash
+java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar --add-opens 'java.base/java.lang=ALL-UNNAMED' -DCAU.Groovy.UseSystemClassLoader=true ...
+```
+
 The REPL will listen for SSH connections on port 8512 on the local interface. You can use any user name to login. A
 per-session password will be printed to STDERR on startup. **Be careful to make sure that it does not end up in a public
 logfile**, e.g. Systemd's journal. Any local user who can read this password can connect to the REPL and execute code
@@ -55,8 +68,9 @@ java -javagent:/path/to/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.Triggers=org/ex
 # use the classloader that loads the class org.example.SomeClass
 java -javagent:/path/to/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.Triggers=org/example/SomeClass
 ```
-As before, make sure to also add the `--add-opens 'java.base/java.lang=ALL-UNNAMED'` parameter if you plan on changing
-or adding classes in your target.
+As before, you might also have to set the `--add-opens 'java.base/java.lang=ALL-UNNAMED'` parameter if you plan on
+changing or adding classes in your target. Note that this will have security implications for your target application if it
+depends on the separation provided by Java's module system.
 
 _Please note_: it is currently not possible to patch the class that the agent triggers
 on (by the time it is seen, it is to late to block it). So make sure to select a trigger that triggers in the correct
