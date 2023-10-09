@@ -50,8 +50,8 @@ public class GroovyCmdBreakpoint extends CommandSupport {
                 if (list.size() != 2) fail("the max command needs exactly 1 argument");
                 REPLBreakpoint.MAX_BREAKPOINTS = Integer.parseInt(list.get(1));
             }
-            case "disable" -> { for (String s : list.subList(1, list.size())) REPLBreakpoint.disable(s); }
-            case "enable" -> { for (String s : list.subList(1, list.size())) REPLBreakpoint.enable(s); }
+            case "disable" -> REPLBreakpoint.disable(String.join(" ", list.subList(1, list.size())));
+            case "enable" -> REPLBreakpoint.enable(String.join(" ", list.subList(1, list.size())));
             case "eval" -> {
                 if (list.size() < 2) fail("the eval commands needs at least a breakpoint number");
                 if (list.size() == 2) {

@@ -84,6 +84,7 @@ public class REPLBreakpoint {
 
     @SuppressWarnings("unused")
     public static void disable(String filter) {
+        if (filter == null || filter.isEmpty()) return;
         Pattern p = Pattern.compile(filter);
 
         w.lock();
@@ -96,6 +97,7 @@ public class REPLBreakpoint {
 
     @SuppressWarnings("unused")
     public static void enable(String filter) {
+        if (filter == null || filter.isEmpty()) return;
         w.lock();
         try {
             disabledPatterns.remove(filter);
