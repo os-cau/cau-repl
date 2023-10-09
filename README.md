@@ -70,7 +70,7 @@ See the bundled LICENSE.txt file and the SPDX identifier of each source file for
 cau-repl can be built in two flavors: as a MyCoRe plugin, or as a generic Java agent from all kinds of java
 applications. Choose the quickstart instructions that apply to your use-case.
 
-### For universal use, built without GPL code
+### For generic use, built without MyCoRe GPL code
     mvn clean package
     java -javaagent:target/cau-repl-X.Y.Z-fatjar-nogpl.jar -jar /path/to/your/application.jar
     # a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
@@ -79,6 +79,9 @@ applications. Choose the quickstart instructions that apply to your use-case.
 
 By default, cau-repl will store its state in the `cau-repl` directory, which it will create in the current working
 directory.
+
+*If you don't have a Java target application available and just want to see the REPL in action, you can also start the
+agent directly without a target:* `java -jar target/cau-repl-X.Y.Z-fatjar-nogpl.jar`
 
 #### Things to try
 

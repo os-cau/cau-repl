@@ -72,7 +72,7 @@ As before, you might also have to set the `--add-opens 'java.base/java.lang=ALL-
 changing or adding classes in your target. Note that this will have security implications for your target application if it
 depends on the separation provided by Java's module system.
 
-_Please note_: it is currently not possible to patch the class that the agent triggers
+_Remark_: it is currently not possible to patch the class that the agent triggers
 on (by the time it is seen, it is to late to block it). So make sure to select a trigger that triggers in the correct
 classloader, but before the first class you would like to patch.
 
