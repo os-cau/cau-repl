@@ -361,7 +361,6 @@ def mcrjob(Map params=[:], Closure closure) {
         }
         params.put("internalcallback", params["internalcallback"] ? params["internalcallback"].andThen(ic) : ic)
         params.put("threadfactory", new java.util.concurrent.ThreadFactory() {
-            //private static org.mycore.common.MCRSession session = null
             @Override
             public Thread newThread(Runnable r) {
                 return java.util.concurrent.Executors.defaultThreadFactory().newThread(() -> {
@@ -376,50 +375,28 @@ def mcrjob(Map params=[:], Closure closure) {
     return job(params, closure)
 }
 
+def mcrids(Map params=[:], Object... selector) {
+    def documents = params.containsKey("with_documents") ? params["with_documents"] as boolean : true
+    def derivates = params.containsKey("with_derivates") ? params["with_derivates"] as boolean : false
+    List<MCRObjectID> ids = []
 
-def mcrids(selector=null) {
-    def ids
-    def all = false
-    if (!selector) ids = MCRXMLMetadataManager.instance().listIDs()
-    else if (selector instanceof Collection) {
-        ids = selector
-        all = true
+    if (!selector) selector = MCRXMLMetadataManager.instance().listIDs()
+    else selector = selector.flatten()
+    for (def x : selector) {
+        def isDer = x.toString().contains("_derivate_") || x.toString().endsWith("_derivate") || x.toString().equals("derivate")
+        if (!derivates && isDer) continue
+        if (!documents && !isDer) continue
+        if (MCRObjectID.isValid(x.toString())) ids.add(MCRObjectID.getInstance(x))
+        else if (x.count("_") > 1) throw new RuntimeException("malformed mcr object id: " + x)
+        else if (x.contains("_")) ids.addAll(MCRXMLMetadataManager.instance().listIDsForBase(x))
+        else ids.addAll(MCRXMLMetadataManager.instance().listIDsOfType(x))
     }
-    else if (MCRObjectID.isValid(selector.toString())) {
-        ids = [selector.toString()]
-        all = true
-    }
-    else if (selector.count("_") > 1) throw new RuntimeException("malformed mcr object id: " + selector)
-    else if (selector.contains("_")) ids = MCRXMLMetadataManager.instance().listIDsForBase(selector)
-    else ids = MCRXMLMetadataManager.instance().listIDsOfType(selector)
-    return ids.stream()
-               .filter { all || !it.contains("_derivate_")}
-               .map { MCRObjectID.getInstance(it) }
-               .toList() as List<MCRObjectID>
+    return ids
 }
 
-
-def mcrderids(selector=null) {
-    def ids
-    def all = false
-    if (!selector) ids = MCRXMLMetadataManager.instance().listIDs()
-    else if (selector instanceof Collection) {
-        ids = selector
-        all = true
-    }
-    else if (MCRObjectID.isValid(selector).toString()) {
-        ids = [selector.toString()]
-        all = true
-    }
-    else if (selector.count("_") > 1) throw new RuntimeException("malformed mcr object id: " + selector)
-    else if (selector.contains("_")) ids = MCRXMLMetadataManager.instance().listIDsForBase(selector)
-    else ids = MCRXMLMetadataManager.instance().listIDsOfType(selector)
-    return ids.stream()
-            .filter { all || it.contains("_derivate_")}
-            .map { MCRObjectID.getInstance(it) }
-            .toList() as List<MCRObjectID>
+def mcrderids(Object... selector) {
+    return mcrids(selector, with_documents: false, with_derivates: true)
 }
-
 
 def mcrstream(selector=null, filter=null) {
     def xpath = null
@@ -570,6 +547,7 @@ def mcrcli(Map params=[:], String... commands) {
         def queue = new LinkedList(commands.toList())
         while (queue) {
             def cmdLog = new StringWriter()
+            // TODO detect log messages with ERROR level and report/count them like an exception
             def innerAppender = org.apache.logging.log4j.core.appender.WriterAppender.createAppender(null, null, cmdLog, "CAUREPL-I-" + Thread.currentThread().id, false, true)
             logConf.rootLogger.addAppender(innerAppender, org.apache.logging.log4j.Level.ALL, logFilter)
             def cmd = queue.pop()
