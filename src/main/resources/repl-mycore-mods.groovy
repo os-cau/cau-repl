@@ -18,17 +18,21 @@ MCRMODSWrapper.metaClass.getJdomDocument << { -> return delegate.getMCRObject().
 MCRMODSWrapper.metaClass.createXML << { -> return delegate.getMCRObject().createXML() }
 
 def mcrmods(selector="mods", filter=null) {
-    def x = mcrstream(selector, filter).map {
+    def s = mcrstream(selector, filter instanceof String ? filter : null).map {
         if (!MCRMODSWrapper.isSupported(it)) throw new RuntimeException("mycore object ${it.id} does not seem to be a MODS container")
         return new org.mycore.mods.MCRMODSWrapper(it)
-    }.toList()
+    }
+    if (filter && !(filter instanceof String)) s = s.filter(filter)
+    def x = s.toList()
     if (selector instanceof String && MCRObjectID.isValid(selector)) return x.isEmpty() ? null : x.get(0) as org.mycore.mods.MCRMODSWrapper
     return x as List<org.mycore.mods.MCRMODSWrapper>
 }
 
 def mcrmodsstream(selector="mods", filter=null) {
-    return mcrstream(selector, filter).map {
+    def s = mcrstream(selector, filter instanceof String ? filter : null).map {
         if (!MCRMODSWrapper.isSupported(it)) throw new RuntimeException("mycore object ${it.id} does not seem to be a MODS container")
         return new org.mycore.mods.MCRMODSWrapper(it)
-    } as java.util.stream.Stream<org.mycore.mods.MCRMODSWrapper>
+    }
+    if (filter && !(filter instanceof String)) s = s.filter(filter)
+    return s as java.util.stream.Stream<org.mycore.mods.MCRMODSWrapper>
 }
