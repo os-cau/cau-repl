@@ -406,7 +406,7 @@ def mcrstream(selector=null, filter=null) {
         } catch (IllegalArgumentException ex) {
             throw ex.cause ?: ex
         }
-        filter = { !xpath.evaluate(it).isEmpty() }
+        filter = { !xpath.evaluate(it.createXML()).isEmpty() }
     }
     def stream = mcrids(selector).stream()
             .map {MCRMetadataManager.retrieveMCRObject(it) }
