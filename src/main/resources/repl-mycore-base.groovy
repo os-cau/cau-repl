@@ -388,8 +388,8 @@ def mcrids(Map params=[:], Object... selector) {
         if (!documents && !isDer) continue
         if (MCRObjectID.isValid(x.toString())) ids.add(MCRObjectID.getInstance(x))
         else if (x.count("_") > 1) throw new RuntimeException("malformed mcr object id: " + x)
-        else if (x.contains("_")) ids.addAll(MCRXMLMetadataManager.instance().listIDsForBase(x))
-        else ids.addAll(MCRXMLMetadataManager.instance().listIDsOfType(x))
+        else if (x.contains("_")) ids.addAll(MCRXMLMetadataManager.instance().listIDsForBase(x).collect({MCRObjectID.getInstance(it)}))
+        else ids.addAll(MCRXMLMetadataManager.instance().listIDsOfType(x).collect({MCRObjectID.getInstance(it)}))
     }
     return ids
 }
