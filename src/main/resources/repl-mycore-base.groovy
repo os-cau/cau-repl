@@ -534,47 +534,60 @@ def mcrsolrids(Map params=[:], String query) {
 
 
 def mcrcli(Map params=[:], String... commands) {
-    def logConf = org.apache.logging.log4j.LogManager.getContext(false).getConfiguration() as org.apache.logging.log4j.core.config.AbstractConfiguration
+    def manager = new org.mycore.frontend.cli.MCRCommandManager()  // must be at the beginning to force inititialization of static vars
+    def loggers = org.mycore.frontend.cli.MCRCommandManager.getKnownCommands().values().stream()
+            .flatMap {it.stream()}
+            .map {org.apache.logging.log4j.LogManager.getLogger(it.method.declaringClass)}
+            .collect(java.util.stream.Collectors.toSet())
+    [org.mycore.frontend.cli.MCRCommand.class, org.mycore.frontend.cli.MCRCLIExceptionHandler.class,
+     org.mycore.frontend.cli.MCRCommandLineInterface.class, org.mycore.frontend.cli.MCRCommandManager.class,
+     org.mycore.frontend.cli.MCRCommandUtils.class, org.mycore.frontend.cli.MCRExternalProcess.class].each{
+        loggers.add(org.apache.logging.log4j.LogManager.getLogger(it))
+    }
     def logFilter = org.apache.logging.log4j.core.filter.RegexFilter.createFilter("^No match for syntax: .*", [] as String[], false, org.apache.logging.log4j.core.Filter.Result.DENY, org.apache.logging.log4j.core.Filter.Result.ACCEPT)
-    def outerAppender = org.apache.logging.log4j.core.appender.OutputStreamAppender.createAppender(null, null, _cauOut, "CAUREPL-O-" + Thread.currentThread().id, false, true)
-    logConf.rootLogger.addAppender(outerAppender, org.apache.logging.log4j.Level.ALL, logFilter)
+    def outerAppender = org.apache.logging.log4j.core.appender.OutputStreamAppender.createAppender(null, logFilter, _cauOut, "CAUREPL-O-" + Thread.currentThread().id, false, true)
+    for (def l : loggers) l.addAppender(outerAppender)
+    def innerAppender = new de.uni_kiel.rz.fdr.repl.mycore.Log4jListAppender("CAUREPL-I-" + Thread.currentThread().id, logFilter)
+    for (def l : loggers) l.addAppender(innerAppender)
     def session = params["session"] ?: mcrsession()
+    def watchLog = params.containsKey("errors_from_log") ? params["errors_from_log"] as boolean : true
     def errors = 0
     def result = []
     session.put("cauCLIResult", result)
     try {
-        def manager = new org.mycore.frontend.cli.MCRCommandManager()
         def queue = new LinkedList(commands.toList())
         while (queue) {
-            def cmdLog = new StringWriter()
-            // TODO detect log messages with ERROR level and report/count them like an exception
-            def innerAppender = org.apache.logging.log4j.core.appender.WriterAppender.createAppender(null, null, cmdLog, "CAUREPL-I-" + Thread.currentThread().id, false, true)
-            logConf.rootLogger.addAppender(innerAppender, org.apache.logging.log4j.Level.ALL, logFilter)
             def cmd = queue.pop()
             def ts = java.time.Instant.now()
+            if (cmd.trim().startsWith("#")) continue
             try {
                 def newCmds
                 debug("Executing MyCoRe CLI Command: {}", cmd)
                 mcrdo({
                     newCmds = manager.invokeCommand(org.mycore.frontend.cli.MCRCommandLineInterface.expandCommand(cmd))
                 }, transaction: true, session: session, quiet: true)
-                if (newCmds == null || !(cmdLog.toString() =~ /^Syntax matched \(executed\): /)) throw new RuntimeException("Command not understood: " + cmd)
+                if (watchLog) {
+                    def newErr = innerAppender.getError()
+                    if (newErr) throw new RuntimeException(newErr.message.formattedMessage.trim())
+                }
+                if (newCmds == null || !(innerAppender.events.find{it.message.formattedMessage =~ /^Syntax matched \(executed\): /})) throw new RuntimeException("Command not understood: " + cmd)
                 else queue.addAll(0, newCmds)
-                result.add([cmd: cmd, log: cmdLog.toString(), error: null, timestamp: ts])
+                result.add([cmd: cmd, log: innerAppender.resetEvents(), error: null, timestamp: ts])
             } catch (Exception e) {
                 errors++
-                result.add([cmd: cmd, log: cmdLog.toString(), error: e, timestamp: ts])
+                result.add([cmd: cmd, log: innerAppender.resetEvents(), error: e, timestamp: ts])
                 error("ERROR: Command '{}' failed", cmd, e)
                 if (!org.mycore.frontend.cli.MCRCommandLineInterface.SKIP_FAILED_COMMAND) throw e
-            } finally {
-                logConf.removeAppender(innerAppender.name)
             }
         }
     } finally {
         if (errors) error("CLI finished with {} errors", errors)
         else info("CLI finished successfully: {} commands", result.size())
-        println("Hint: retrieve detailed results from the \"cauCLIResult\" session variable, e.g.: mcrsession().get(\"cauCLIResult\")")
-        logConf.removeAppender(outerAppender.name)
+        println("===> Hint: retrieve detailed results from the \"cauCLIResult\" session variable, e.g.: mcrsession().get(\"cauCLIResult\")")
+        for (def l : loggers) {
+            l.removeAppender(outerAppender)
+            l.removeAppender(innerAppender)
+        }
     }
     return !errors
 }
