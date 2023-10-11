@@ -401,7 +401,11 @@ def mcrderids(Object... selector) {
 def mcrstream(selector=null, filter=null) {
     def xpath = null
     if (filter instanceof String) {
-        xpath = XPathFactory.instance().compile(filter, org.jdom2.filter.Filters.fpassthrough(), null, MCRConstants.getStandardNamespaces())
+        try {
+            xpath = XPathFactory.instance().compile(filter, org.jdom2.filter.Filters.fpassthrough(), null, MCRConstants.getStandardNamespaces())
+        } catch (IllegalArgumentException ex) {
+            throw ex.cause ?: ex
+        }
         filter = { !xpath.evaluate(it).isEmpty() }
     }
     def stream = mcrids(selector).stream()
