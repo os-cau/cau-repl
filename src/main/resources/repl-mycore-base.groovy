@@ -419,7 +419,7 @@ def mcrderstream(selector="derivate", filter=null) {
     def xpath = null
     if (filter instanceof String) {
         xpath = XPathFactory.instance().compile(filter, org.jdom2.filter.Filters.fpassthrough(), null, MCRConstants.getStandardNamespaces())
-        filter = { !xpath.evaluate(it).isEmpty() }
+        filter = { !xpath.evaluate(it.createXML()).isEmpty() }
     }
     def stream = mcrderids(selector).stream()
             .map { MCRMetadataManager.retrieveMCRDerivate(it) }
