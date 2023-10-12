@@ -112,6 +112,25 @@ Attribute.metaClass.call << { ->
     return delegate.value
 }
 
+Text.metaClass.call << { ->
+    // text() -> value
+    return delegate.value
+}
+
+Text.metaClass.leftShift << { Object x ->
+    // foo << x -> set contents
+    if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
+    delegate.setText(x.toString())
+    return delegate
+}
+
+Text.metaClass.plus << { Object x ->
+    // foo + x -> append contents
+    if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
+    delegate.append(x.toString())
+    return delegate
+}
+
 org.mycore.datamodel.metadata.MCRBase.metaClass.reload << { ->
     def x = mcrxml(delegate.id.toString())
     if (!x) throw new RuntimeException("reload failed")
