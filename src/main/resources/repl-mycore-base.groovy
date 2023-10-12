@@ -4,10 +4,9 @@
 // (C) Copyright 2023 Ove Sörensen
 // SPDX-License-Identifier: GPL-3.0-only
 
+
 import org.mycore.common.MCRConstants
 import org.mycore.common.MCRTransactionHelper
-import org.mycore.common.config.MCRConfiguration2
-import org.mycore.common.xml.MCRURIResolver
 import org.mycore.user2.MCRUserManager
 import org.mycore.datamodel.metadata.MCRMetadataManager
 import org.mycore.datamodel.common.MCRXMLMetadataManager
@@ -597,8 +596,9 @@ def mcrcli(Map params=[:], String... commands) {
 }
 
 
-def mcrxslt(Map params=[:], source, String... stylesheets) {
+def mcrxslt(Map params=[:], source, String... stylesheet) {
     params = new HashMap(params)
+    def xsltParams = params.containsKey("params") ? params["params"] as Map<String, String> : new HashMap<String, String>()
     if (!params.keySet().intersect(["session", "sessionid", "user", "userid", "join"]) && MCRSessionMgr.hasCurrentSession()) params["join"] = true
     def content
     if (source instanceof org.mycore.datamodel.metadata.MCRBase) content = source.createXML()
@@ -614,8 +614,12 @@ def mcrxslt(Map params=[:], source, String... stylesheets) {
     else content = source
 
     def xml = new org.mycore.common.content.MCRJDOMContent(content)
-    if (!stylesheets) return xml
-    def transformer = org.mycore.common.content.transformer.MCRXSLTransformer.getInstance(stylesheets)
-    return mcrdo(params, { transformer.transform(xml) })
+    if (!stylesheet) return xml
+    def transformer = org.mycore.common.content.transformer.MCRXSLTransformer.getInstance(stylesheet)
+    return mcrdo(params, {
+        def pc = new org.mycore.common.xsl.MCRParameterCollector()
+        pc.setParameters(xsltParams)
+        return transformer.transform(xml, pc).asXML()
+    })
 }
 
