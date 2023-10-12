@@ -1,5 +1,5 @@
 // (C) Copyright 2023 Ove Sörensen
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: MIT
 
 package de.uni_kiel.rz.fdr.repl.mycore;
 
@@ -8,6 +8,8 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.message.SimpleMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +23,12 @@ public class Log4jListAppender extends AbstractAppender {
     }
 
     @Override
-    public void append(org.apache.logging.log4j.core.LogEvent event) { events.add(event); }
+    public void append(LogEvent event) {
+        // we always convert messages to a SimpleMessage to get rid of any large objects associated with them, saving memory
+        Log4jLogEvent.Builder builder = new Log4jLogEvent.Builder(event);
+        builder.setMessage(new SimpleMessage(event.getMessage().getFormattedMessage()));
+        events.add(builder.build());
+    }
 
     // not thread-safe
     public List<LogEvent> resetEvents() {
