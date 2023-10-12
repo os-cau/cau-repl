@@ -19,6 +19,7 @@ import org.jdom2.xpath.XPathFactory
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jdom2.Attribute
+import org.jdom2.Text
 import org.jdom2.output.XMLOutputter
 
 
@@ -47,6 +48,7 @@ Document.metaClass.leftShift << { Object x ->
     // doc << x -> set root element
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
     delegate.rootElement = x
+    return delegate
 }
 
 Document.metaClass.reload << { ->
@@ -87,24 +89,27 @@ Element.metaClass.call << { ->
 Element.metaClass.leftShift << { Object x ->
     // foo << x -> set contents
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    if (x instanceof org.jdom2.Content || x instanceof Collection) delegate.setContent(x)
-    else if (x instanceof Attribute) delegate.setAttribute(x)
+    if (x instanceof org.jdom2.Content || x instanceof Collection) delegate.setContent(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
+    else if (x instanceof Attribute) delegate.setAttribute(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
     else if (x instanceof String) delegate.setText(x)
     else throw new RuntimeException("don't know how to handle class " + x.getClass())
+    return delegate
 }
 
 Element.metaClass.plus << { Object x ->
     // foo + x -> append contents
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    if (x instanceof org.jdom2.Content || x instanceof Collection || x instanceof String) delegate.addContent(x)
-    else if (x instanceof Attribute) delegate.setAttribute(x)
+    if (x instanceof org.jdom2.Content || x instanceof Collection || x instanceof String) delegate.addContent(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
+    else if (x instanceof Attribute) delegate.setAttribute(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
     else throw new RuntimeException("don't know how to handle class " + x.getClass())
+    return delegate
 }
 
 Attribute.metaClass.leftShift << { Object x ->
     // attr << x -> set attribute value
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    delegate.setValue(x.toString())
+    delegate.setValue(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x).toString())
+    return delegate
 }
 
 Attribute.metaClass.call << { ->
