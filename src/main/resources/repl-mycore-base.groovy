@@ -637,8 +637,8 @@ def mcrxslt(Map params=[:], source, String... stylesheet) {
     else if (source instanceof String) content = org.mycore.common.xml.MCRXMLParserFactory.nonValidatingParser.parseXML(new org.mycore.common.content.MCRStringContent(source))
     else content = source
 
+    if (!stylesheet) return content
     def xml = new org.mycore.common.content.MCRJDOMContent(content)
-    if (!stylesheet) return xml
     def transformer = org.mycore.common.content.transformer.MCRXSLTransformer.getInstance(stylesheet)
     return mcrdo(params, {
         def pc = new org.mycore.common.xsl.MCRParameterCollector()
