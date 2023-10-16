@@ -550,7 +550,7 @@ def mcrsolrstream(Map params=[:], String query) {
     if (params.containsKey("start")) throw new RuntimeException("'start' parameter is not supported")
     if (params.containsKey("rows")) throw new RuntimeException("'rows' parameter is not supported")
     def client = params["client"] ?: MCRSolrClientFactory.mainSolrClient
-    def parallel = params.containsKey("parallel") ? params["parallel"] as boolean : true
+    def parallel = params["parallel"] as boolean
     def chunksize = params["chunksize"] ?: 1000
     def sp = new org.apache.solr.common.params.ModifiableSolrParams()
     sp.set("q", query)
