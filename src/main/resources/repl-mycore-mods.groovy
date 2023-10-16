@@ -14,7 +14,7 @@ MCRMODSWrapper.metaClass.leftShift << { Object x -> return delegate.MODS.leftShi
 MCRMODSWrapper.metaClass.plus << { Object x -> return delegate.MODS.plus(x) }
 MCRMODSWrapper.metaClass.reload << { Object x -> return delegate.getMCRObject().reload() }
 MCRMODSWrapper.metaClass.getId << { -> return delegate.getMCRObject().getId() }
-MCRMODSWrapper.metaClass.getJdomDocument << { -> return delegate.getMCRObject().jdomDocument }
+MCRMODSWrapper.metaClass.getJDomDocument << { -> return delegate.getMCRObject().jdomDocument }
 MCRMODSWrapper.metaClass.createXML << { -> return delegate.getMCRObject().createXML() }
 
 def mcrmods(selector="mods", filter=null) {

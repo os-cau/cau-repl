@@ -47,7 +47,14 @@ Document.metaClass.call << { ->
 Document.metaClass.leftShift << { Object x ->
     // doc << x -> set root element
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    delegate.rootElement = x
+    de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.setStringOrElement(delegate, x, false)
+    return delegate
+}
+
+Document.metaClass.plus << { Object x ->
+    // doc + x -> add root element
+    if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
+    de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.addStringOrElement(delegate, x, false)
     return delegate
 }
 
@@ -89,9 +96,8 @@ Element.metaClass.call << { ->
 Element.metaClass.leftShift << { Object x ->
     // foo << x -> set contents
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    if (x instanceof org.jdom2.Content || x instanceof Collection) delegate.setContent(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
+    if (x instanceof org.jdom2.Content || x instanceof String || x instanceof Collection) de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.setStringOrElement(delegate, x, true)
     else if (x instanceof Attribute) delegate.setAttribute(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
-    else if (x instanceof String) delegate.setText(x)
     else throw new RuntimeException("don't know how to handle class " + x.getClass())
     return delegate
 }
@@ -99,7 +105,7 @@ Element.metaClass.leftShift << { Object x ->
 Element.metaClass.plus << { Object x ->
     // foo + x -> append contents
     if (_CAUREPL_isRo(delegate)) throw new RuntimeException("this is a read-only-view. use mcrxml() or mcrderxml() for write access.")
-    if (x instanceof org.jdom2.Content || x instanceof Collection || x instanceof String) delegate.addContent(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
+    if (x instanceof org.jdom2.Content || x instanceof String || x instanceof Collection) de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.addStringOrElement(delegate, x, true)
     else if (x instanceof Attribute) delegate.setAttribute(de.uni_kiel.rz.fdr.repl.mycore.XMLHelpers.inheritNamespace(delegate, x))
     else throw new RuntimeException("don't know how to handle class " + x.getClass())
     return delegate
