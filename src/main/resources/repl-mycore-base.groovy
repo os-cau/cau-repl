@@ -510,19 +510,16 @@ def mcrder(selector=null, filter=null) {
 
 def mcrdiff(old=null, updated) {
     if (!old) old = mcrxml(updated.id)
-    def xmlOut = new XMLOutputter()
+    def xmlOut = new XMLOutputter(org.jdom2.output.Format.getPrettyFormat())
     if (!(old instanceof Document)) old = old.createXML()
     old = xmlOut.outputString(old).split("\\n").toList()
     if (!(updated instanceof Document)) updated = updated.createXML()
     updated = xmlOut.outputString(updated).split("\\n").toList()
     def patch = com.github.difflib.DiffUtils.diff(old, updated)
+    def udiff = com.github.difflib.UnifiedDiffUtils.generateUnifiedDiff("old", "updated", old, patch, 1)
     def result = new StringBuilder()
-    for (def d : patch.deltas) {
-        result.append("==========  @" + d.source.position + " / @" + d.target.position + "\n")
-        if (d.source?.lines) for (def s : d.source.lines) result.append("-- " + s.replaceAll("\\r+\$", "\\\n"))
-        if (d.target?.lines) for (def s : d.target.lines) result.append("++ " + s.replaceAll("\\r+\$", "\\\n"))
-    }
-    return result.isEmpty() ? null : result.toString()
+    udiff.each{result.append(it); result.append("\n")}
+    return result.isEmpty() ? null : "\n" + result.toString()
 }
 
 def mcrsolr(Map params=[:], String query) {
