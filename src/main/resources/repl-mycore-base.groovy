@@ -296,19 +296,18 @@ static def mcrinvalidate(def... ids) {
 }
 
 
-def mcrsave(Map params=[:], Object objects) {
-    if (params.keySet().intersect(["session", "sessionid", "user", "userid", "jointransaction"]).size() > 1) throw new RuntimeException("supply at most one parameter of: session, sessionid, user, userid, jointransaction")
-    def jointransaction = params["jointransaction"] as boolean
-    def update = params.containsKey("update") ? params["update"] : true as boolean
-    def reload = params.containsKey("reload") ? params["update"] : true as boolean
+def mcrsave(Map params=[:], def... object) {
+    def jointransaction = params.containsKey("jointransaction") ? params["jointransaction"] as boolean : true
+    def update = params.containsKey("update") ? params["update"] as boolean : true
+    def reload = params.containsKey("reload") ? params["update"] as boolean : true
     def outerta = MCRTransactionHelper.isTransactionActive()
-    if (jointransaction && !outerta) throw new RuntimeException("there is no outer transaction to join")
-    def session = outerta ? null : mcrsession(params)
+    if (!jointransaction && outerta) throw new RuntimeException("there is an outer transaction and you set jointransaction=false")
+    def session = MCRSessionMgr.hasCurrentSession() ? null : mcrsession(params)
     if (session) MCRSessionMgr.setCurrentSession(session)
     try {
-        if (session) MCRTransactionHelper.beginTransaction()
-        if (!(objects instanceof Collection)) objects = [objects]
-        for (def o : objects) {
+        if (!outerta) MCRTransactionHelper.beginTransaction()
+        object = object.flatten()
+        for (def o : object) {
             if (o instanceof MCRObject) update ? MCRMetadataManager.update(o) : MCRMetadataManager.create(o)  // making sure to reinit the object from the xml in the update case
             else if (o instanceof MCRDerivate) update ? MCRMetadataManager.update(o) : MCRMetadataManager.create(o)  // making sure to reinit the object from the xml in the update case
             else if (o instanceof Document && o["/mycoreobject"]) update ? MCRMetadataManager.update(new MCRObject(o)) : MCRMetadataManager.create(new MCRObject(o))
@@ -319,8 +318,7 @@ def mcrsave(Map params=[:], Object objects) {
             mcrinvalidate(o.id)
             if (reload) o.reload()
         }
-        if (session && MCRTransactionHelper.isTransactionActive()) MCRTransactionHelper.commitTransaction()
-        return true
+        if (!outerta) MCRTransactionHelper.commitTransaction()
     } finally {
         if (session) {
             if (MCRTransactionHelper.isTransactionActive()) {
