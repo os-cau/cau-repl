@@ -285,13 +285,13 @@ def mcrdo(Map params=[:], Closure closure) {
 }
 
 
-static def mcrinvalidate(def... ids) {
-    for (def id : ids) {
+static def mcrinvalidate(def... id) {
+    for (def x : id.flatten()) {
         // don't reference MCRMODSWrapper by class -> not every MyCoRe installation might have it
-        if (id instanceof org.mycore.datamodel.metadata.MCRBase || id.class.name.equals("org.mycore.mods.MCRMODSWrapper")) id = id.id
-        if (id instanceof String) id = MCRObjectID.getInstance(id)
-        org.mycore.datamodel.common.MCRCreatorCache.invalidate(id)
-        org.mycore.access.MCRAccessCacheHelper.clearAllPermissionCaches(id.toString())
+        if (x instanceof org.mycore.datamodel.metadata.MCRBase || x instanceof Document || x.class.name.equals("org.mycore.mods.MCRMODSWrapper")) x = x.id
+        if (x instanceof String) x = MCRObjectID.getInstance(x)
+        org.mycore.datamodel.common.MCRCreatorCache.invalidate(x)
+        org.mycore.access.MCRAccessCacheHelper.clearAllPermissionCaches(x.toString())
     }
 }
 
