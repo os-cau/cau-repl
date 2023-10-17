@@ -171,10 +171,17 @@ public class REPL {
                 // set a default value
                 REPL.workDir[0] = new File(DEFAULT_WORK_SUBDIR).getAbsoluteFile();
             }
-            if (!REPL.workDir[0].isDirectory() && !REPL.workDir[0].mkdirs()) throw new RuntimeException("Failed to create work directory '" + REPL.workDir[0].getAbsolutePath() + "'");
+            boolean newDir = false;
+            if (!REPL.workDir[0].isDirectory()) {
+                if (!REPL.workDir[0].mkdirs()) throw new RuntimeException("Failed to create work directory '" + REPL.workDir[0].getAbsolutePath() + "'");
+                newDir = true;
+            }
             // also point groovy subsystems to our workdir
             System.setProperty("groovy.root", new File(REPL.workDir[0], ".groovy").getAbsolutePath());
             REPLLog.rollOver();
+            // now that the log is rolled over, we can use it
+            if (newDir) REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, "REPL: Created a new work directory at {}", REPL.workDir[0].getAbsolutePath()), REPLLog.INTERNAL_LOG_TARGETS);
+            else REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.DEBUG, "REPL: Found existing work directory at {}", REPL.workDir[0].getAbsolutePath()), REPLLog.INTERNAL_LOG_TARGETS);
         }
     }
 
