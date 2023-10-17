@@ -138,7 +138,7 @@ SSH session. Jobs can be associated with a list of inputs to be processed. If yo
 cau-repl can automatically parallelize your jobs. This also makes it possible to re-run just the inputs that failed later
 on, even after restarting the target application.
 
-**Create a new job**
+<a name="job"></a>**Create a new job**
 > **Function**
 >
 >`job(closure)`
@@ -148,7 +148,7 @@ on, even after restarting the target application.
 > directory. This makes it possible for you to resume aborted or failed executions as well as inspect the job's results
 > even after restarting the target application. Jobs instances that throw an exception will be considered failed.
 > Instances that do not throw an exception will be considered successful.<br/>
-> MyCoRe users should use the [mcrjob()](TODO) function instead,
+> MyCoRe users should use the [mcrjob()](mycore.md#mcrjob) function instead,
 > which is additionally integrated with MyCoRe's job system.
 >
 > **Positional Parameters**
@@ -170,19 +170,19 @@ on, even after restarting the target application.
 > 
 > **Optional Named Parameters**
 > 
-> `boolean autostart = true` - Controls whether your job should immediately be started or placed in the master job list
+> `Boolean autostart = true` - Controls whether your job should immediately be started or placed in the master job list
 > in a paused state.
 > 
-> `Integer autotune = null` *experimental* - If set, enables automatic parallelization for the processing of your input items.
+> `Integer autotune` *experimental* - If set, enables automatic parallelization for the processing of your input items.
 > cau-repl will measure the throughput of work items and optimize the degree of parallelism on-the-fly. This works best
 > when your work items are homogenous and individual processing time is small. The number you specify here is the
 > maximum degree of parallelism you will allow. *Note:* to use a fixed number of parallel worker threads, just specify
 > the `concurrency` parameter (see below) and don't set `autotune`.
 > 
-> `boolean background = true` - Controls whether this call should return immediately, or only after the job has finished
+> `Boolean background = true` - Controls whether this call should return immediately, or only after the job has finished
 > running. You might want to disable background processing when you also enable progress messages.
 > 
-> `boolean becomedelegate = true` - Controls whether cau-repl will set the newly created `ReplJob` as your closure's
+> `Boolean becomedelegate = true` - Controls whether cau-repl will set the newly created `ReplJob` as your closure's
 > delegate before executing it. This makes the instance methods of your `ReplJob` (especially the versions of the
 > logging methods `info()`, etc. that also log to your job's private log) readily available for your closure. 
 > More information is available in
@@ -192,11 +192,11 @@ on, even after restarting the target application.
 > level of a job while it is running. If you also pass the `autotune` parameter,
 > the value of `concurrency` will be used as the initial concurrency level to start the tuning-process from.
 > 
-> `boolean errorpause = false` - If set, the job will be paused on the first error (i.e. when your closure throws an
+> `Boolean errorpause = false` - If set, the job will be paused on the first error (i.e. when your closure throws an
 > exception). If there are other parallel workers, the work items they are currently processing will not be aborted and
 > your job will be fully paused after they too have finished their current work items.
 > 
-> `List<Serializable> inputs = null` - The work items that will be sequentially - in the order you specified them -
+> `Collection<Serializable> inputs` - The work items that will be sequentially - in the order you specified them -
 > passed as the first parameter to subsequent executions of your closure. The entire list will be kept in memory, so
 > only use small objects here. To process larger objects, pass their ids or addresses instead and fetch them yourself
 > from your closure. If you omit this parameter, your closure will simply be called once without input arguments.
@@ -204,20 +204,20 @@ on, even after restarting the target application.
 > `String name = <job's key>` - Set a descriptive name for your job to make identifying it easier. If omitted, your job's
 > auto-generated key will also be used as its name.
 > 
-> `boolean progress = false` - Log job progress to the REPL periodically. Best combined with `background = false`.
+> `Boolean progress = false` - Log job progress to the REPL periodically. Best combined with `background = false`.
 > 
-> `String resume = null` - Pass the `key` of a finished ReplJob here to resume it. When you resume a job, your
+> `String resume` - Pass the `key` of a finished ReplJob here to resume it. When you resume a job, your
 > new job's state will be initialized from the persistent state file of the old job in the REPL's work directory.
 > This includes inputs, results as well as its internal log.
 > By default, only inputs that were not successfully processed (i.e. inputs that have failed, never started or started and
 > did not finish at all) will be processed when you start the new job. Do not pass the `inputs` parameter when you
 > resume - input values will automatically be read from the old job's state file.
 >
-> `boolean retryerror = true` - When resuming a job, disable to not retry inputs that threw an exception.
+> `Boolean retryerror = true` - When resuming a job, disable to not retry inputs that threw an exception.
 > 
-> `boolean retrysuccess = false` - When resudimg a job, enable to also retry inputs that were successful.
+> `Boolean retrysuccess = false` - When resudimg a job, enable to also retry inputs that were successful.
 > 
-> `ThreadFactory threadfactory = null` - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
+> `ThreadFactory threadfactory` - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
 > system default is used.
 > 
 > **Returns** the [ReplJob](TODO) that was created.
@@ -409,13 +409,13 @@ groovy:000> Primes.primeFactors(34592523)
 The REPL will normally compile your Groovy sources when the target application starts. If you want to compile code
 dynamically at runtime, there is a support function available for you.
 
-**Compile Groovy sources**
+<a name="compile"></a>**Compile Groovy sources**
 > **Function**
 > 
 > `compile(path)`
 > 
 > Compile the Groovy sources at the specified path and load them into a suitable classloader. MyCoRe user should use the
-> [mcrcompile()]() function instead, which will use default parameter values suitable for MyCoRe.
+> [mcrcompile()](mycore.md#mcrcompile) function instead, which will use default parameter values suitable for MyCoRe.
 >
 > **Positional Parameters**
 >
