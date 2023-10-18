@@ -490,6 +490,7 @@
             -DCAU.REPL.Enabled=false
             -DCAU.REPL.Log.Internal=file
             -DCAU.REPL.WorkDir=${project.build.testOutputDirectory}/../cau-repl
+            -DCAU.Groovy.UseSystemClassLoader=true
             -DCAU.Groovy.SourceDirs=${project.build.testSourceDirectory}/../resources/groovyIT
           </argLine>
         </configuration>
