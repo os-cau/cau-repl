@@ -48,7 +48,7 @@ cau-repl can be built as a MyCoRe plugin that enables better integration:
 
 ## Requirements
 
-- Java 17 (newer versions may or may not work)
+- Java 17 or 21 (other versions > 17 may or may not work)
 - Maven
 - vim or any other console text editor that can run without a tty (optional: only if you want to edit files within the SSH session)
 - MyCoRe 2022.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)
