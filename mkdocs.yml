@@ -8,6 +8,7 @@ nav:
   - Configuration: configuration.md
   - Using the REPL: repl.md
   - MyCoRe Integration: mycore.md
+  - Extending your Target: extending.md
 extra_css:
   - custom.css
 remote_branch: gh-pages

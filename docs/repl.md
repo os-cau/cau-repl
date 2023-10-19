@@ -449,7 +449,7 @@ groovy:000> x = new Dummy()
 ------------------------------
 ## Managing Breakpoints
 You can add breakpoints to your Groovy code. When triggered, they pause its execution and transfer control to the REPL.
-See the [Programming](TODO) section to start using this feature. Once you have augmented your code with breakpoints, you
+See the [Extending](extending.md#adding-interactive-breakpoints) section to start using this feature. Once you have augmented your code with breakpoints, you
 can manage them in the REPL:
 
 **List currently triggered breakpoints and disabled patterns**

@@ -3,3 +3,13 @@ blockquote {
   background: #f4fbff;
   padding-left: 0.5em;
 }
+
+blockquote > blockquote{
+  border-left: 2px solid #eea700;
+  background: #fff2e0;
+  padding-left: 0.5em;
+}
+
+div.wy-nav-content {
+  max-width: 1000px;
+}

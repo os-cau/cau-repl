@@ -428,7 +428,8 @@ groovy:000> x["//mods:mods"]()
 </mods:mods>
 
 // XSLT-transforming a document, overriding some parameters
-groovy:000> mcrxslt("foo_mods_00000001", "xsl/mods2oai_dc.xsl", params:[WebApplicationBaseURL: "https://example.org/", ServletsBaseURL: "https://example.org/"])
+groovy:000> mcrxslt("foo_mods_00000001", "xsl/mods2oai_dc.xsl", params:[WebApplicationBaseURL: "https://example.org/",
+ServletsBaseURL: "https://example.org/"])
 ===> [Document:  No DOCTYPE declaration, Root is [Element: <record [Namespace: http://www.openarchives.org/OAI/2.0/]/>]]
 groovy:000> _()
 ===> 
@@ -850,11 +851,11 @@ is only one CLI session active globally, so do not execute multiple commands in 
 > `:mcrcli [command]`<br/>
 > `:M [command]`
 >
-> This is the shell command version of the [mcrcli()](TODO) function. It provides identical functionality, and is more
+> This is the shell command version of the [mcrcli()](#mcrcli) function. It provides identical functionality, and is more
 > convenient to work with since it does not require you to quote your command.<br/>
 > *Please Note:* for technical reasons, repeated whitespace characters in your command string will be merged into a
 > single space - even within quotes (which will be considered part of your command). If this is a problem, you should
-> use the [mcrcli()](TODO) function instead.
+> use the [mcrcli()](#mcrcli) function instead.
 >
 > **Returns** `true` if there were no errors, `false` if there were errors. Further details are available in the
 > `cauCLIResult` MyCoRe session variable (access it e.g. by `mcrsession().get("cauCLIResult")`).<br/>

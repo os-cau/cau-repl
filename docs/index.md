@@ -27,10 +27,10 @@ Testing of the MyCoRe plugin was until now conducted only in a Tomcat environmen
   that maximize throughput.
 - Extend any Java program with your own Groovy classes, e.g. for dependency injection.
 - Automatically run your own Groovy code each time the application is started.
-- Patch classes of any Java program replacing their methods with your own Groovy code, even if the methods are private.
+- (experimental) Patch classes of any Java program replacing their methods with your own Groovy code, even if the methods are private.
   All changes are applied ad-hoc each time the application starts without altering its installation.
 - Use interactive breakpoints that transfer control to the SSH console under certain circumstances.
-- (experimental) change the code of methods at runtime, even if those methods are called from Java code.
+- (very experimental) change the code of methods at runtime, even if those methods are called from Java code.
 
 cau-repl can be built as a MyCoRe plugin that enables better integration:
 
@@ -98,7 +98,7 @@ Now import a class of your target and start interacting
 Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
 target.<br/>
 Want to define your own classes? Then you might have to configure cau-repl's ClassLoader use as well.<br/>
-Consult the [installation manual](TODO) for details.
+Consult the [installation manual](installation.md) for details.
 
 ### For use in MyCoRe, built with GPL code
     mvn -P gpl clean package
