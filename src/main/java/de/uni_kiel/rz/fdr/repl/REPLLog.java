@@ -29,8 +29,8 @@ public class REPLLog {
 
     public enum LOG_TARGETS { STDERR, STDOUT, LOG4J, STDERR_OR_LOG4J, REPL_ALL_SHELLS, REPL_FILE }
     public static final Set<LOG_TARGETS> DEFAULT_LOG_TARGETS = Set.of(LOG_TARGETS.STDERR_OR_LOG4J, LOG_TARGETS.REPL_FILE);
-    public static final Set<LOG_TARGETS> INTERNAL_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("file") ? Set.of(LOG_TARGETS.REPL_FILE) : Set.of(LOG_TARGETS.STDERR_OR_LOG4J);
-    public static final Set<LOG_TARGETS> TRACE_LOG_TARGETS = Set.of(LOG_TARGETS.REPL_FILE);
+    public static final Set<LOG_TARGETS> INTERNAL_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("file") ? Set.of(LOG_TARGETS.REPL_FILE) : (System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("stderr") ? Set.of(LOG_TARGETS.STDERR) : Set.of(LOG_TARGETS.STDERR_OR_LOG4J));
+    public static final Set<LOG_TARGETS> TRACE_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("stderr") ? Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_FILE) : Set.of(LOG_TARGETS.REPL_FILE);
     public static final Set<LOG_TARGETS> EPHEMERAL_LOG_TARGETS = Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_ALL_SHELLS);
 
     @SuppressWarnings("FieldCanBeLocal")
