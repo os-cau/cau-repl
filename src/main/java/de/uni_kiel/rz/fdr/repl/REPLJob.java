@@ -134,6 +134,7 @@ public class REPLJob implements Serializable {
         for (File f : Objects.requireNonNull(REPL.getWorkDir().listFiles(File::isFile))) {
              Matcher m = pattern.matcher(f.getName());
              if (!m.matches()) continue;
+             if (jobs.containsKey(m.group(1))) continue;
              result.add(m.group(1));
         }
         result.sort(Comparator.naturalOrder());
