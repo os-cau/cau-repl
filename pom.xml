@@ -11,7 +11,7 @@
   <groupId>de.uni-kiel.rz.fdr.repl</groupId>
   <name>CAU REPL Module</name>
   <artifactId>cau-repl</artifactId>
-  <!-- remember to also adjust java class REPL::VERSION -->
+  <!-- remember to also adjust java class REPL::VERSION, as well as copyright years in mkdocs.yml -->
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/os-cau/cau-repl</url>
@@ -205,7 +205,7 @@
       <!-- License: Apache-2.0, bundled -->
       <groupId>org.apache.sshd</groupId>
       <artifactId>sshd-core</artifactId>
-      <version>2.10.0</version>
+      <version>2.11.0</version>
     </dependency>
     <dependency>
       <!-- License: BSD-2-Clause, bundled -->
@@ -500,6 +500,20 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <outputDirectory>${project.basedir}/docs/apidocs</outputDirectory>
+          <reportOutputDirectory>${project.basedir}/docs/apidocs</reportOutputDirectory>
+          <show>public</show>
+          <author>false</author>
+          <nohelp>true</nohelp>
+          <bottom>Copyright &#169; 2023&#x2013;{currentYear} Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</bottom>
+        </configuration>
       </plugin>
 
     </plugins>

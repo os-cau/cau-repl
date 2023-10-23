@@ -22,6 +22,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class REPL {
 
+    // remember to also adjust the version in pom.xml
     public static final String VERSION = "0.1.0-SNAPSHOT";
     public static final Session.AttributeKey<String> USER_KEY = new Session.AttributeKey<>();
     public static final String DEFAULT_WORK_SUBDIR = "cau-repl";
