@@ -28,6 +28,11 @@ public class GroovyCmdBreakpoint extends CommandSupport {
     }
 
     @Override
+    public String getUsage() {
+        return "[] | [key [feedback]] | disable [pattern] | enable [pattern] | eval [key] [code] | eval [key] | max [limit]";
+    }
+
+    @Override
     public Object execute(List<String> list) {
         if (list.isEmpty()) {
             // list command

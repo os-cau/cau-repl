@@ -26,6 +26,11 @@ public class GroovyCmdMCRCli extends CommandSupport {
     }
 
     @Override
+    public String getUsage() {
+        return "[command]";
+    }
+
+    @Override
     public Object execute(List<String> list) {
         Binding binding;
         IO.Verbosity verb = shell.getIo().getVerbosity();

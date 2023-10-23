@@ -36,6 +36,11 @@ public class GroovyCmdGrabREPL extends CommandSupport {
     }
 
     @Override
+    public String getUsage() {
+        return "[group[:module[:version|*[:classifier]]]][@ext]";
+    }
+
+    @Override
     public Object execute(List<String> list) {
         try {
             for (String dep : list) {

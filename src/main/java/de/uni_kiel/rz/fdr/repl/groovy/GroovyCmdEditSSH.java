@@ -47,6 +47,11 @@ public class GroovyCmdEditSSH extends CommandSupport {
     }
 
     @Override
+    public String getUsage() {
+        return "[] | [filename]";
+    }
+
+    @Override
     public Object execute(List<String> list) {
         return doExecute(list, true);
     }

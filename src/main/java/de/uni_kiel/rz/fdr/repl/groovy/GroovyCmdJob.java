@@ -39,6 +39,10 @@ public class GroovyCmdJob extends CommandSupport {
         return "Lists or manages jobs";
     }
 
+    @Override
+    public String getUsage() {
+        return "[] | [index] | [key] | pause [key] | unpause [key] | cancel [key] | cancelforce[key] | archive [key] | archived | prune";
+    }
 
     private static String jobToList(REPLJob j) {
         String s = "[" + speedDialInverse.get(j.getKey()) + "] " + j.getKey() + " - " + j.getName() + " - ";

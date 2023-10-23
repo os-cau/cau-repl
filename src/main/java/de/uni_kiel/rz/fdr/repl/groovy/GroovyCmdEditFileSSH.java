@@ -25,6 +25,11 @@ public class GroovyCmdEditFileSSH extends CommandSupport {
     }
 
     @Override
+    public String getUsage() {
+        return "[] | [filename]";
+    }
+
+    @Override
     public Object execute(List<String> list) {
         if (list.size() != 1) fail("the :editfilessh command requires exactly 1 parameter");
 
