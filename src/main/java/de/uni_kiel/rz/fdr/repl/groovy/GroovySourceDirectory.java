@@ -37,7 +37,7 @@ public class GroovySourceDirectory {
 
     private final Path root;
     private List<File> sources;
-    private ArrayList<Class<?>> classes = new ArrayList<>();
+    private final ArrayList<Class<?>> classes = new ArrayList<>();
     private final ClassLoader classLoader;
     private final String patcheeClassPath;
     private final boolean deferredMetaClasses;
@@ -153,11 +153,10 @@ public class GroovySourceDirectory {
             if (!KEEP_TEMPFILES) tmpdir.deleteOnExit();
             cc.setTargetDirectory(tmpdir);
 
-            ArrayList<Class<?>> compiledClasses = new ArrayList<>();
             for (List<URI> batch : compilationBatches) {
                 if (TRACE || TRACE_COMPILE) REPLLog.trace("Compiling {}", batch.stream().map(URI::toString).collect(Collectors.joining(", ")));
                 CompilationUnit cu = new CompilationUnit(cc);
-                cu.setClassNodeResolver(new CompilationOutputFirstClassNodeResolver(classLoader, compiledClasses.stream().map(Class::getName).toList()));
+                cu.setClassNodeResolver(new CompilationOutputFirstClassNodeResolver(classLoader, classes.stream().map(Class::getName).toList()));
                 cu.setClassLoader(new GroovyClassLoader(classLoader));
                 for (URI u : batch) cu.addSource(u.toURL());
                 // collect all compiled classes, including generated inner classes (closures etc.)
@@ -180,13 +179,16 @@ public class GroovySourceDirectory {
                     newClasses.put(l, bytecode.get(l));
                 }
 
-                compiledClasses.addAll(loadClassBatch(newClasses));
+                // load the compiled classes, making sure to do it one class at a time. this ensures that,
+                // in the case of a compilation error, the subset of classes that were actually loaded are in the list.
+                for (Map.Entry<String, byte[]> toLoad : newClasses.entrySet()) {
+                    classes.addAll(loadClassBatch(Map.of(toLoad.getKey(), toLoad.getValue())));
+                }
             }
 
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Compiled Groovy classes: {}",
-                    compiledClasses.stream().map(Class::getName).collect(Collectors.joining(", "))), INTERNAL_LOG_TARGETS);
+                    classes.stream().map(Class::getName).collect(Collectors.joining(", "))), INTERNAL_LOG_TARGETS);
             this.sources = files;
-            this.classes = compiledClasses;
         } finally {
             if (KEEP_TEMPFILES) {
                 REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Compiled Class Files remain in: {}", tmpdir), INTERNAL_LOG_TARGETS);
@@ -202,7 +204,7 @@ public class GroovySourceDirectory {
         }
     }
 
-    private List<Class<?>> loadClassBatch(LinkedHashMap<String, byte[]> classes) throws IllegalAccessException {
+    private List<Class<?>> loadClassBatch(Map<String, byte[]> classes) throws IllegalAccessException {
         // Instead of injecting the bytecode directly into a classloader, it might also be possible to have groovy generate
         // .class files at runtime and add the directory to the classpath / module path
         ArrayList<Class<?>> result = new ArrayList<>();
