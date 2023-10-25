@@ -88,12 +88,12 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 >
 > **Optional Named Parameters**
 > - `ReplLog.LOG_TARGETS[] targets = REPLLog.DEFAULT_LOG_TARGETS` - The list of targets that will receive this message.
->   See the [REPLLog](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html) documentation for possible values.
+>   See the [REPLLog](apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html) documentation for possible values.
 >   If omitted, the message will be logged to Log4J if it is available or stderr if
 >   not. In addition, it will be written to the REPL's own logfile in its work directory.
 > - `PrintStream[] streams = []` - A list of multiple `PrintStream` that will receive this message. Empty by default.
 > 
-> **Returns** The [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) that was logged
+> **Returns** The [REPLLogEntry](apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) that was logged
 
 **Retrieve the REPL log file**
 > **Function**
@@ -103,7 +103,7 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 > Retrieves the contents of the REPL's internal log file, which is rotated every time
 > the target application starts up.
 > 
-> **Returns** a list of [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) in chronological order.
+> **Returns** a list of [REPLLogEntry](apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) in chronological order.
 
 **Retrieve the Tomcat log**
 > **Function**
@@ -116,7 +116,7 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 > **Returns** an array of `String`, in chronological order.
 
 
-**Related Classes:** [REPLLog](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html), [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) provide additional functionality related to logging.
+**Related Classes:** [REPLLog](apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html), [REPLLogEntry](apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) provide additional functionality related to logging.
 
 **Examples:**
 ```text
@@ -221,7 +221,7 @@ on, even after restarting the target application.
 > `ThreadFactory threadfactory` - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
 > system default is used.
 > 
-> **Returns** the [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
+> **Returns** the [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
 
 **List current jobs**
 > **Shell Command**
@@ -242,7 +242,7 @@ on, even after restarting the target application.
 > Retrieves the ReplJob that has the given `index` number in the `:J` listing, or whose `key` matches the argument.
 > Print its JobProgress to the console and return the job object.
 >
-> **Returns** The [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was requested.
+> **Returns** The [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was requested.
 **Pause or unpause a job**
 > **Shell Command**
 >
@@ -307,7 +307,7 @@ on, even after restarting the target application.
 >
 > **Returns** The list of pruned keys in text format.
 
-**Related Classes:** [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
+**Related Classes:** [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
 control.
 
 **Example: Simple Job**
@@ -432,9 +432,9 @@ dynamically at runtime, there is a support function available for you.
 > `String classpath = <REPL's classpath>` - The class path to use when locating targets of the @Patches annotation.
 > Defaults to the REPL's classpath.
 > 
-> **Returns** the [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
+> **Returns** the [GroovySourceDirectory](apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
 
-**Related Classes:** [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.
+**Related Classes:** [GroovySourceDirectory](apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.
 
 **Examples:**
 ```text
@@ -475,7 +475,7 @@ can manage them in the REPL:
 > will be returned as the result of the `replbreakpoint` function call that triggered this breakpoint.<br/>
 > *Please Note:* for technical reasons, repeated whitespace characters in your feedback string will be merged into a
 > single space - even within quotes (which will be considered part of your feedback). If this is a problem, you should
-> use the [REPLBreakpoint.resume()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#resume(long)) function instead.
+> use the [REPLBreakpoint.resume()](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#resume(long)) function instead.
 >
 > **Returns** nothing.
 
@@ -486,13 +486,13 @@ can manage them in the REPL:
 > `:B disable [pattern]` / `:B enable [pattern]`
 >
 > Use this to disable or re-enable certain breakpoint matching a regular-expression pattern in Java RE syntax. A
-> triggered breakpoint with a [signature](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#getSignature()) that matches one of your disabled patterns will be silently ignored.
+> triggered breakpoint with a [signature](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#getSignature()) that matches one of your disabled patterns will be silently ignored.
 > Your breakpoints' signatures are displayed in the `:B` breakpoint list after the numeric key (e.g.
 > `org.example.Dummy::foo - My Breakpoint`).<br/>
 > *Please Note:* for technical reasons, repeated whitespace characters in your pattern string will be merged into a
 > single space - even within quotes (which will be considered part of your pattern). If this is a problem, you should
-> use the [REPLBreakpoint.disable()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#disable(java.lang.String)) /
-> [REPLBreakpoint.enable()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#enable(java.lang.String)) functions instead.
+> use the [REPLBreakpoint.disable()](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#disable(java.lang.String)) /
+> [REPLBreakpoint.enable()](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#enable(java.lang.String)) functions instead.
 > 
 > **Returns** nothing.
 
@@ -511,10 +511,10 @@ can manage them in the REPL:
 > 
 > *Please Note:* for technical reasons, repeated whitespace characters in your code string will be merged into a
 > single space - even within quotes (which will be considered part of your code). If this is a problem, you should
-> use the [REPLBreakpoint.eval()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#eval(long,de.uni_kiel.rz.fdr.repl.REPLBreakpoint.Eval)) function instead.
+> use the [REPLBreakpoint.eval()](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#eval(long,de.uni_kiel.rz.fdr.repl.REPLBreakpoint.Eval)) function instead.
 >
 > **Returns** nothing when you submit code to run, or the results of your code wrapped in a
-> [REPLBreakpoint.EvalResult](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.EvalResult.html) when you retrieve the result.
+> [REPLBreakpoint.EvalResult](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.EvalResult.html) when you retrieve the result.
 
 **Set the maximum number of concurrent breakpoints**
 > **Shell Command**
@@ -529,7 +529,7 @@ can manage them in the REPL:
 >
 > **Returns** nothing.
 
-**Related Classes:** [REPLBreakpoint](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
+**Related Classes:** [REPLBreakpoint](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
 
 **Examples:**
 ```text

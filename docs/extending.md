@@ -252,7 +252,7 @@ class Example {
 }
 ```
 
-**Related Classes:** [REPLBreakpoint](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
+**Related Classes:** [REPLBreakpoint](apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
 
 ## Updating methods at runtime
 

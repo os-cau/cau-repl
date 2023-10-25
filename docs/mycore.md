@@ -175,7 +175,7 @@ The same functionality is also mirrored for Derivate instances:
 
 > **File Mixins for org.mycore.datamodel.metadata.MCRDerivate**
 >
-> `derivate.files` invoked on an `MCRDerivate` instance also returns the derivate's files in the same format as [#mcrderfiles](mcrderfiles()). 
+> `derivate.files` invoked on an `MCRDerivate` instance also returns the derivate's files in the same format as [mcrderfiles()](#mcrderfiles). 
 
 
 **Examples:**
@@ -315,7 +315,7 @@ to change the XML directly on the element-level and write your changes back to t
 > **Returns** the transformed XML as a JDOM `Document` object.
 
 **Interacting with XML Objects**
-> **Mixins for org.jdom2.Document**
+> **XML Mixins for org.jdom2.Document**
 > 
 > `doc()` - Returns the full XML of `Document doc` as a `String`.
 > 
@@ -332,7 +332,8 @@ to change the XML directly on the element-level and write your changes back to t
 > 
 > `doc.id` - Returns the ID of the MyCoRe object contained in `Document doc` as a `String`.
 
-> **Mixins for org.jdom2.Element**
+<!-- keep me for spacing -->
+> **XML Mixins for org.jdom2.Element**
 >
 > `element()` - Returns the full XML of `Element element` as a `String`.
 >
@@ -357,7 +358,7 @@ to change the XML directly on the element-level and write your changes back to t
 
 To remove an element, JDOM's builtin method `Element.detach()` may be used.
 
-> **Mixins for org.jdom2.Attribute**
+> **XML Mixins for org.jdom2.Attribute**
 >
 > `attribute()` - Returns the value of `Attribute attribute` as a `String`.
 > 
@@ -365,7 +366,7 @@ To remove an element, JDOM's builtin method `Element.detach()` may be used.
 
 To remove an attribute, JDOM's builtin method `Attribute.detach()` may be used.
 
-> **Mixins for org.jdom2.Text**
+> **XML Mixins for org.jdom2.Text**
 >
 > `text()` - Returns the value of `Text text` as a `String`.
 >
@@ -376,29 +377,26 @@ To remove an attribute, JDOM's builtin method `Attribute.detach()` may be used.
 
 To remove a text block, JDOM's builtin method `Text.detach()` may be used.
 
-> **Mixins for org.mycore.mods.MCRMODSWrapper**
+> **XML Mixins for org.mycore.datamodel.metadata.MCRObject**
 >
-> `mods()` - Returns the XML of the MODS content of `MCRMODSWrapper mods` as a `String`.
+> `MCRObject` also mirrors most of the mixins from `org.jdom2.Document`, except for those that change the XML.
+
+<!-- keep me for spacing -->
+> **XML Mixins for org.mycore.datamodel.metadata.MCRDerivate**
 >
-> `mods[]` - Returns the structure of the root element of the MODS' contents of `MCRMODSWrapper mods` as a `String`.
+> `MCRDerivate` also mirrors most of the mixins from `org.jdom2.Document`, except for those that change the XML.
+
+<!-- keep me for spacing -->
+> **XML Mixins for org.mycore.mods.MCRMODSWrapper**
 >
-> `mods[index]` - Returns the child of the root element of `MCRMODSWrapper mods` at position `int index`.
->
-> `mods[xpath]` - Returns the first match of the XPath query `String xpath` on the MODS' contents of `MCRMODSWrapper mods`.
->
-> `mods[[xpath]]` - Returns all matches of the XPath query `String xpath` on the MODS' contents of `MCRMODSWrapper mods`
-> as a list.
->
-> `mods.reload()` - Reload `MCRMODSWrapper mods` from the repository in-place.
->
-> `mods.id` - Returns the ID of the MyCoRe object contained in `MCRMODSWrapper mods` as a `String`.
-> 
 > `mods.JDomDocument` - Returns the entire `Document` behind the `MCRMODSWrapper mods` (i.e. including the parts outside
 > of the MODS container).
 >
 > `mods.createXML()` - Returns the result of invoking `createXML()` on the wrapped `MCRObject`.
+>
+> `MCRMODSWrapper` also mirrors most of the mixins from `org.jdom2.Document`, except for those that change the XML.
 
-If you'd like to change a MODS' contents, you should use object returned by the `mcrxml()` function instead.
+If you'd like to change a document's XML, you should use object returned by the `mcrxml()` function.
 
 **Examples:**
 ```text
@@ -807,9 +805,9 @@ are additional functions available that enable you to manage sessions yourself.
 > the [mcrsession()](#mcrsession) to tweak job processing and its MyCoRe session environment. If you do not specify any
 > session parameters, your closure will run inside a newly created admin-level session.
 >
-> **Returns** the [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
+> **Returns** the [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
 
-**Related Classes:** [REPLJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
+**Related Classes:** [REPLJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
 control.
 
 **Examples:**
@@ -951,6 +949,6 @@ dynamically at runtime, there is a support function available for you.
 > `String classpath = <MyCoRe's classpath>` - The class path to use when locating targets of the @Patches annotation.
 > Defaults to the MyCoRe's classpath.
 >
-> **Returns** the [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
+> **Returns** the [GroovySourceDirectory](apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
 
-**Related Classes:** [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.
+**Related Classes:** [GroovySourceDirectory](apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.
