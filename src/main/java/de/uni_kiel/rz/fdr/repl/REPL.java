@@ -193,5 +193,13 @@ public class REPL {
         if (!HAVE_GPL && (HAVE_MYCORE || HAVE_MYCORE_MODS)) throw new RuntimeException("Internal error: could not determine GPL status");
     }
 
+    /**
+     * Generates a textual representation of cau-repl's version
+     * @return cau-repl's version string.
+     */
+    public static String getVersionString() {
+        return "cau-repl " + REPL.VERSION + "-" + (HAVE_GPL ? "gpl" : "nogpl");
+    }
+
 
 }

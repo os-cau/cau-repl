@@ -52,7 +52,7 @@ public class GroovySourceDirsStartupHandler implements MCRStartupHandler.AutoExe
         REPLLog.initializeLibs();
         classLoader = servletContext.getClassLoader();
         REPL.discoverEnvironment(classLoader);
-        REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "cau-repl v{}-{}", REPL.VERSION, REPL.HAVE_GPL ? "gpl" : "nogpl"), INTERNAL_LOG_TARGETS);
+        REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, REPL.getVersionString()), INTERNAL_LOG_TARGETS);
         classPath = classPath + ":" + servletContext.getRealPath("/WEB-INF/lib/*");
 
         // use groovy expando metaclasses globally
