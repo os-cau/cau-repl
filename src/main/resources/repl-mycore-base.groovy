@@ -301,7 +301,7 @@ static def mcrinvalidate(def... id) {
 def mcrsave(Map params=[:], def... object) {
     def jointransaction = params.containsKey("jointransaction") ? params["jointransaction"] as boolean : true
     def update = params.containsKey("update") ? params["update"] as boolean : true
-    def reload = params.containsKey("reload") ? params["update"] as boolean : true
+    def reload = params["reload"] as boolean
     def outerta = MCRTransactionHelper.isTransactionActive()
     if (!jointransaction && outerta) throw new RuntimeException("there is an outer transaction and you set jointransaction=false")
     def session = MCRSessionMgr.hasCurrentSession() ? null : mcrsession(params)

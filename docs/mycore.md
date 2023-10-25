@@ -488,11 +488,11 @@ Here are some functions that you can use to update a document's state in the rep
 > `Boolean jointransaction = true` - Controls whether we will join an existing transaction. If set to `false` and
 > `mcrsave()` is called from an ongoing transaction, an exception will be raised.
 > 
-> `Boolean reload = true` - By default, all saved documents will be reloaded from the repository in-place after they
-> were persisted.
+> `Boolean reload = false` - You may optionally trigger an in-place reload for all saved documents from the repository
+> after they were persisted.
 > This is to ensure that your variables reflect the actual state of the document on-disk - including changes added by
-> event-handlers triggered when saving. Set to `false` to not reload the documents (which will probably cause problems
-> if you try to save your not-reloaded variables a second time).
+> event-handlers triggered when saving. The default is to not reload the documents (which is faster, but can cause
+> problems if you try to save your not-reloaded variables a second time).
 > 
 > `Boolean update = true` - Set this to `false` to make sure that all your documents were actually new and not
 > pre-existing. In the case of pre-existing documents, an exception will be raised. By default, the pre-existing
@@ -573,7 +573,7 @@ groovy:000> mcrdiff(x)
          </mods:mods>
 
 // saving the changes
-groovy:000> mcrsave(x)
+groovy:000> mcrsave(x, reload: true)
 ===> null
 // note that the object was auto-reloaded in-place, reflecting all the changes applied during saving
 groovy:000> x["//servdate[@type='modifydate']/text()"]()
@@ -831,7 +831,7 @@ groovy:000> mcrjob({ id, job ->
 groovy:001>   def doc = mcrxml(id)
 groovy:002>   def title = doc["//mods:title"]
 groovy:003>   title << title.text.replaceAll(/(?i)Test/, "Bork Bork Bork")
-groovy:004>   mcrsave(doc, reload: false)
+groovy:004>   mcrsave(doc)
 groovy:005>   return title.text
 groovy:006> }, inputs: ids, transaction: true, progress: true)
 ===> 20231017-125903-180455901 (Job 20231017-125903-180455901)
