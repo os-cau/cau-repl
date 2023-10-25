@@ -11,7 +11,7 @@ import jline.UnixTerminal;
 import org.apache.sshd.server.Environment;
 
 /**
- * Overriding class for reading terminal width from SSH Environment
+ * For internal use only. This class enables jline to read the terminal size from an Apache Mina SSHD Environment
  */
 public class SshTerminal extends UnixTerminal {
 

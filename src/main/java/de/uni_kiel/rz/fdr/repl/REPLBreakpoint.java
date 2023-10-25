@@ -10,11 +10,29 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+/**
+ * This class represents a single triggered Breakpoint instance in your code. It also provides static methods
+ * to manage all current instances of triggered breakpoints.
+ */
 public class REPLBreakpoint {
 
+    /**
+     * More than this many simultaneously triggered breakpoint instances will be dropped.
+     */
     public static int MAX_BREAKPOINTS = 20;
 
+    /**
+     * A request to eval a Groovy statement in the breakpoint's thread.
+     * @param command The Groovy statement to eval
+     * @param parameter An extra object that can be passed to the statement
+     */
     public record Eval(String command, Object parameter){}
+
+    /**
+     * The result of an {@link Eval Eval} request.
+     * @param result Your statement's result
+     * @param exception Any exception that was thrown during eval
+     */
     public record EvalResult(Object result, Throwable exception){}
 
     private static long count = 0;
@@ -25,21 +43,43 @@ public class REPLBreakpoint {
     private static final LinkedHashMap<String, Pattern> disabledPatterns = new LinkedHashMap<>();
     private static boolean overflowWarning = false;
 
+    /**
+     * Pauses the current thread and triggers a breakpoint in the REPL.
+     * @return An optional feedback value passed from the REPL
+     */
     @SuppressWarnings("unused")
     public static Object replbreakpoint() {
         return replbreakpoint(null, null, null);
     }
 
+    /**
+     * Pauses the current thread and triggers a breakpoint in the REPL.
+     * @param name An informative name for this instance
+     * @return An optional feedback value passed from the REPL
+     */
     @SuppressWarnings("unused")
     public static Object replbreakpoint(String name) {
         return replbreakpoint(name, null, null);
     }
 
+    /**
+     * Pauses the current thread and triggers a breakpoint in the REPL.
+     * @param name An informative name for this instance
+     * @param extra Any extra data you would like to make available in the REPL context
+     * @return An optional feedback value passed from the REPL
+     */
     @SuppressWarnings("unused")
     public static Object replbreakpoint(String name, Object extra) {
         return replbreakpoint(name, extra, null);
     }
 
+    /**
+     * Pauses the current thread and triggers a breakpoint in the REPL.
+     * @param name An informative name for this instance
+     * @param extra Any extra data you would like to make available in the REPL context
+     * @param timeoutMillis Auto-continue the breakpoint after this many milliseonds
+     * @return An optional feedback value passed from the REPL
+     */
     @SuppressWarnings("unused")
     public static Object replbreakpoint(String name, Object extra, Long timeoutMillis) {
         REPLBreakpoint bp = new REPLBreakpoint(-1, name, extra, timeoutMillis);
@@ -82,6 +122,10 @@ public class REPLBreakpoint {
         return r;
     }
 
+    /**
+     * Disables all future breakpoint instances matching this pattern.
+     * @param filter The filter pattern in Java regular expression syntax.
+     */
     @SuppressWarnings("unused")
     public static void disable(String filter) {
         if (filter == null || filter.isEmpty()) return;
@@ -95,6 +139,10 @@ public class REPLBreakpoint {
         }
     }
 
+    /**
+     * Re-enables a previously disabled breakpoint pattern.
+     * @param filter The filter pattern in Java regular expression syntax.
+     */
     @SuppressWarnings("unused")
     public static void enable(String filter) {
         if (filter == null || filter.isEmpty()) return;
@@ -106,11 +154,22 @@ public class REPLBreakpoint {
         }
     }
 
+    /**
+     * Resumes a breakpoint instance.
+     * @param key The instance's key
+     * @return Whether the breakpoint was resumed
+     */
     @SuppressWarnings("unused")
     public static boolean resume(long key) {
         return resume(key, null);
     }
 
+    /**
+     * Resumes a breakpoint instance.
+     * @param key The instance's key
+     * @param feedback The feedback value that the associated {@code replbreakpoint()} call will return
+     * @return Whether the breakpoint was resumed
+     */
     @SuppressWarnings("unused")
     public static boolean resume(long key, Object feedback) {
         REPLBreakpoint bp;
@@ -125,6 +184,12 @@ public class REPLBreakpoint {
         return true;
     }
 
+    /**
+     * Queues a Groovy statement for evaluation in the Thread of a triggered breakpoint
+     * @param key The breakpoint instance's key
+     * @param eval The Groovy statement to evaluate
+     * @return Whether the statement was enqueued
+     */
     @SuppressWarnings("unused")
     public static boolean eval(long key, Eval eval) {
         REPLBreakpoint bp;
@@ -139,6 +204,10 @@ public class REPLBreakpoint {
         return true;
     }
 
+    /**
+     * Get all waiting breakpoints.
+     * @return A list of all currently triggered breakpoint instances
+     */
     @SuppressWarnings("unused")
     public static List<REPLBreakpoint> list() {
         r.lock();
@@ -149,6 +218,11 @@ public class REPLBreakpoint {
         }
     }
 
+    /**
+     * Retrieve a single breakpoint instance by key.
+     * @param key The instance's key
+     * @return The breakpoint instance with the given key
+     */
     @SuppressWarnings("unused")
     public static REPLBreakpoint get(long key) {
         r.lock();
@@ -159,6 +233,10 @@ public class REPLBreakpoint {
         }
     }
 
+    /**
+     * Get a list of all currently disabled breakpoint patterns
+     * @return The list of all currently disabled breakpoint patterns
+     */
     @SuppressWarnings("unused")
     public static List<String> getDisabledPatterns() {
         r.lock();
@@ -221,27 +299,46 @@ public class REPLBreakpoint {
         return feedback;
     }
 
+    /**
+     * Resumes this breakpoint.
+     */
     @SuppressWarnings("unused")
     public synchronized void resume() {
         resume(null);
     }
 
+    /**
+     * Resumes this breakpoint, returning a result.
+     * @param feedback The return value of the corresponding {@code replbreakpoint()} call.
+     */
     @SuppressWarnings("unused")
     public synchronized void resume(Object feedback) {
         this.feedback = feedback;
         notify();
     }
 
+    /**
+     * Enqueues a request to evaluate a Groovy statement while the breakpoint is waiting
+     * @param eval The Groovy statement to eval.
+     */
     @SuppressWarnings("unused")
     public synchronized void eval(Eval eval) {
         this.eval = eval;
         notify();
     }
 
+    /**
+     * Get the last eval request's result.
+     * @return The las eval request's result.
+     */
     public EvalResult getEvalResult() {
         return evalResult;
     }
 
+    /**
+     * Get this breakpoint instance's key.
+     * @return This breakpoint instance's key.
+     */
     public long getKey() {
         return key;
     }
@@ -250,33 +347,58 @@ public class REPLBreakpoint {
         this.key = key;
     }
 
+    /**
+     * Gets the last feedback value thaqt was passed from the REPL.
+     * @return The last feedback value thaqt was passed from the REPL.
+     */
     @SuppressWarnings("unused")
     public Object getFeedback() {
         return feedback;
     }
 
+    /**
+     * Get's the context in which this breakpoint was triggered.
+     * @return The context in which this breakpoint was triggered
+     */
     @SuppressWarnings("unused")
     public StackTraceElement getOwner() {
         return owner;
     }
 
+    /**
+     * Gets the name of this breakpoint.
+     * @return The name of this breakpoint
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets any extra data that was passed to the REPL.
+     * @return The extra data that was passed to the REPL.
+     */
     @SuppressWarnings("unused")
     public Object getExtra() {
         return extra;
     }
 
+    /**
+     * Gets this breakpoint's timeout in milliseconds.
+     * @return This breakpoint's timeout in milliseconds.
+     */
     @SuppressWarnings("unused")
     public Long getTimeoutMillis() {
         return timeoutMillis;
     }
 
+    /**
+     * Get this instance's signature, against which the disable-patterns will be matched.
+     * @return This instance's signature
+     */
     public String getSignature() {
         return (owner != null ? owner.getClassName() + "::" + owner.getMethodName() : "[unknown]::[unknown]") + " - " + (name != null ? name : (owner != null ? owner.getLineNumber() : "[unknown]"));
     }
+
     @Override
     public String toString() {
         return String.format("%1$4s", key) + " " + getSignature() + (evalResult != null ? " *" : "");

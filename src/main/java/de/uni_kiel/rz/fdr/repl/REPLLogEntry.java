@@ -12,20 +12,62 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
+/**
+ * Represents a single log message to be used by {@link REPLLog}.
+ */
 @SuppressWarnings("unused")
 public class REPLLogEntry implements Serializable {
 
-    public static String TRACE_PREFIX = "=====";
+    private static String TRACE_PREFIX = "=====";
 
+    /**
+     * The different levels of criticality for a log message.
+     */
     @SuppressWarnings("unused")
-    public enum LOG_LEVEL { TRACE, DEBUG, INFO, WARN, ERROR }
+    public enum LOG_LEVEL {
+        /**
+         * Internal trace messages, not logged by default.
+         */
+        TRACE,
+        /**
+         * Debug level messages.
+         */
+        DEBUG,
+        /**
+         * General information messages.
+         */
+        INFO,
+        /**
+         * Warning messages indicating potential problems.
+         */
+        WARN,
+        /**
+         * Error messages reporting a failure condition.
+         */
+        ERROR
+    }
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
+    /**
+     * Internal use only.
+     */
     private final Instant timestamp;
+    /**
+     * Internal use only.
+     */
     private final LOG_LEVEL level;
+    /**
+     * Internal use only.
+     */
     private final String message;
 
+    /**
+     * Create a new log entry.
+     * @param timestamp The timestamp of the event that triggered this message.
+     * @param level The log level of the message.
+     * @param messages The messages to log. The first argument can use the "{@code {}}" placeholder to format the succeeding arguments.
+     */
     public REPLLogEntry(Instant timestamp, LOG_LEVEL level, Object... messages) {
         this.timestamp = timestamp;
         this.level = level;
@@ -33,6 +75,11 @@ public class REPLLogEntry implements Serializable {
         validate();
     }
 
+    /**
+     * Create a new log entry with the timestamp set to now.
+     * @param level The log level of the message.
+     * @param messages The messages to log. The first argument can use the "{@code {}}" placeholder to format the succeeding arguments.
+     */
     public REPLLogEntry(LOG_LEVEL level, Object... messages) {
         this.timestamp = Instant.now();
         this.level = level;
@@ -40,6 +87,11 @@ public class REPLLogEntry implements Serializable {
         validate();
     }
 
+    /**
+     * Create a new log entry with the timestamp set to now.
+     * @param level The textual representation of the message's log level.
+     * @param messages The messages to log. The first argument can use the "{@code {}}" placeholder to format the succeeding arguments.
+     */
     public REPLLogEntry(String level, Object... messages) {
         this.timestamp = Instant.now();
         this.level = LOG_LEVEL.valueOf(level.toUpperCase(Locale.ROOT));
@@ -47,14 +99,26 @@ public class REPLLogEntry implements Serializable {
         validate();
     }
 
+    /**
+     * Get the message's event timestamp.
+     * @return The message's event timestamp.
+     */
     public Instant getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Get the log level of the message.
+     * @return The message's log level.
+     */
     public LOG_LEVEL getLevel() {
         return level;
     }
 
+    /**
+     * Get the textual representation of the message's payload.
+     * @return The message's payload.
+     */
     public String getMessage() {
         return ((level.equals(LOG_LEVEL.TRACE) && TRACE_PREFIX != null) ? TRACE_PREFIX + " " : "") + message;
     }
@@ -82,7 +146,7 @@ public class REPLLogEntry implements Serializable {
         return "[" + formatter.format(timestamp) + "] " + level + " " + getMessage();
     }
 
-    public String toTSV() {
+    protected String toTSV() {
         return timestamp + "\t" + level + ((level.equals(LOG_LEVEL.TRACE) && TRACE_PREFIX != null) ? " " + TRACE_PREFIX : "") + "\t" + StringEscapeUtils.escapeJavaScript(message) + System.lineSeparator();
     }
 
@@ -92,7 +156,7 @@ public class REPLLogEntry implements Serializable {
         if (message == null) throw new RuntimeException("missing message");
     }
 
-    public static REPLLogEntry fromTSV(String tsv) {
+    protected static REPLLogEntry fromTSV(String tsv) {
         String[] s = tsv.split("\\t");
         if (s.length != 3) throw new RuntimeException("invalid log line");
         return new REPLLogEntry(Instant.parse(s[0]), LOG_LEVEL.valueOf(s[1].toUpperCase(Locale.ROOT).split(" ")[0]), StringEscapeUtils.unescapeJavaScript(s[2]));

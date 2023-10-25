@@ -7,3 +7,4 @@ pom.xml.versionsBackup
 *.iml
 tools/
 site/
+docs/apidocs/

@@ -273,7 +273,7 @@ to change the XML directly on the element-level and write your changes back to t
 >
 > `String stylesheet` *optional, repeatable* - The names of the XSLT stylesheets to be applied. This function will
 > resolve the names with MyCoRe's `MCRXSLTransformer.getInstance()` method, so the same naming conventions used there
-> apply here. If you pass multiple instances of this param  eter, the stylesheets will be applied in the same order.
+> apply here. If you pass multiple instances of this parameter, the stylesheets will be applied in the same order.
 > 
 > **Optional Named Parameters**
 > 
@@ -451,7 +451,7 @@ Here are some functions that you can use to update a document's state in the rep
 > `mcrsave(...object)`
 >
 > Creates or updates documents in the repository. The changes will be performed in a transaction. If the saved documents
-> were present in one of MyCoRe's caches, those antries will automatically be invalidated.
+> were present in one of MyCoRe's caches, those entries will automatically be invalidated.
 >
 > **Positional Parameters**
 >
@@ -462,7 +462,7 @@ Here are some functions that you can use to update a document's state in the rep
 > **Optional Named Parameters**
 >
 > `Boolean jointransaction = true` - Controls whether we will join an existing transaction. If set to `false` and
-> `mcrsave()` is called from an ongoing transaction, ans exception will be raised.
+> `mcrsave()` is called from an ongoing transaction, an exception will be raised.
 > 
 > `Boolean reload = true` - By default, all saved documents will be reloaded from the repository in-place after they
 > were persisted.
@@ -491,7 +491,7 @@ Here are some functions that you can use to update a document's state in the rep
 > **Positional Parameters**
 >
 > `Document | MCRObject | MCRDerivate | MCRMODSWrapper old` *optional* - The old version of the document. If omitted, it
-> will automatically fetched from the repository by the id of the `new` document.
+> will automatically be fetched from the repository by the id of the `new` document.
 >
 > `Document | MCRObject | MCRDerivate | MCRMODSWrapper updated` - The new version of the document.
 >
@@ -512,7 +512,7 @@ Here are some functions that you can use to update a document's state in the rep
 >
 > `Document | MCRObject | MCRDerivate | MCRMODSWrapper | MCRObjectID | String | Collection<> id` *repeatable* - The
 > documents whose state you want to invalidate in the caches. In addition to the usual formats, you can also pass an ID
-> as a String, or a Collection of any of these types.
+> as a String, or a Collection of these types.
 >
 > **Returns** nothing.
 
@@ -666,7 +666,7 @@ groovy:000> x["//servdate[@type='modifydate']/text()"]()
 > 
 > Because `SolrDocument` implements Java's `Map` interface, you get access to all of
 > [Groovy's convenience methods for Maps](https://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html). Especially
-> noteworthy are the follwing:
+> noteworthy are the following:
 >
 > `solrdoc.field` - Returns the value of the literal expression `field` contained in the Solr result `SolrDocument solrdoc`. Does not support field names
 > containing special characters.
@@ -753,7 +753,7 @@ are additional functions available that enable you to manage sessions yourself.
 > `mcrjob(closure)`
 >
 > This is a MyCoRe-enhanced version of [the REPL's universal job() function](repl.md#job). The major additional features
-> that it provides are session- and transaction-management as well as integration with MyCoRe's preocessing
+> that it provides are session- and transaction-management as well as integration with MyCoRe's processing
 > infrastructure. You can view the progress of an `mcrjob()` in MyCoRe's web interface.
 >
 > **Positional Parameters**
@@ -772,7 +772,7 @@ are additional functions available that enable you to manage sessions yourself.
 > `mcrjob()`, or lose session and transaction handling features.
 >
 > `Boolean transaction = false` - Execute the job inside a MyCoRe transaction. It will be auto-committed if less than
-> `transactionerrors` errors occured, or rolled back otherwise.
+> `transactionerrors` errors happened, or rolled back otherwise.
 > 
 > `Integer transactionerrors = 1` - If you set `transaction`, and the number of failed inputs reaches this limit, the
 > entire job will be cancelled and the transaction rolled back. By default, this will happen on the first error.
@@ -781,9 +781,9 @@ are additional functions available that enable you to manage sessions yourself.
 > the [mcrsession()](#mcrsession) to tweak job processing and its MyCoRe session environment. If you do not specify any
 > session parameters, your closure will run inside a newly created admin-level session.
 >
-> **Returns** the [ReplJob](TODO) that was created.
+> **Returns** the [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
 
-**Related Classes:** [REPLJob](TODO), [REPLJobCallbackAutoTune](TODO) provide additional functionality related to job
+**Related Classes:** [REPLJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
 control.
 
 **Examples:**
@@ -837,7 +837,7 @@ is only one CLI session active globally, so do not execute multiple commands in 
 > **Optional Named Parameters**
 >
 > `Boolean errors_from_log = true` - If enabled, log messages with the level `ERROR` or above will be treated as a
-> failed CLI command. Many MyCoRe CLI commands do not throw exceptions when an error occurs, so this is neccessary to
+> failed CLI command. Many MyCoRe CLI commands do not throw exceptions when an error occurs, so this is necessary to
 > detect failure conditions.
 > 
 > `MCRSession mcrsession = <the REPL's default admin session>` - You can optionally specify a MyCoRe session that your
@@ -925,6 +925,6 @@ dynamically at runtime, there is a support function available for you.
 > `String classpath = <MyCoRe's classpath>` - The class path to use when locating targets of the @Patches annotation.
 > Defaults to the MyCoRe's classpath.
 >
-> **Returns** the [GroovySourceDirectory](TODO) with the results of the compilation.
+> **Returns** the [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
 
-**Related Classes:** [GroovySourceDirectory](TODO) provides additional functionality related to compilation.
+**Related Classes:** [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.

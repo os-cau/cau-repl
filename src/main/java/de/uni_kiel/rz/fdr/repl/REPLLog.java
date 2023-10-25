@@ -19,19 +19,74 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * This class provides the means for logging messages to various targets. If Log4J is available in the current VM,
+ * it can also be used. cau-repl uses this class internally for its log messages, and you are encouraged to use it
+ * from your Groovy code as well.
+ */
 public class REPLLog {
 
+    /**
+     * Controls whether very fine-grained internal trace messages from cau-repl are logged. Do not enable in production.
+     */
     public static boolean TRACE = false;
+    /**
+     * Controls whether very fine-grained internal trace messages from cau-repl related to compilation are logged.
+     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting. Do not enable in production.
+     */
     public static boolean TRACE_COMPILE = false;
+    /**
+     * Controls whether very fine-grained internal trace messages from cau-repl related to dynamization are logged.
+     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting. Do not enable in production.
+     */
     public static boolean TRACE_DYNAMIZE = false;
+    /**
+     * Controls whether very fine-grained internal trace messages from cau-repl related to jobs are logged.
+     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting. Do not enable in production.
+     */
     public static boolean TRACE_JOBS = false;
-    public static int KEEP_LOGS = 10;
 
-    public enum LOG_TARGETS { STDERR, STDOUT, LOG4J, STDERR_OR_LOG4J, REPL_ALL_SHELLS, REPL_FILE }
+    /**
+     * The different targets that log messages can be written to.
+     */
+    public enum LOG_TARGETS {
+        /**
+         * The JVM's standard error output.
+         */
+        STDERR,
+        /**
+         * The JVM's standard output.
+         */
+        STDOUT,
+        /**
+         * Log4J, but only if it is available in the current JVM.
+         */
+        LOG4J,
+        /**
+         * Log4J, with a fallback the JVM's standard error output if the former is not available.
+         */
+        STDERR_OR_LOG4J,
+        /**
+         * The SSH consoles of all currently active shells.
+         */
+        REPL_ALL_SHELLS,
+        /**
+         * The repl.log file in cau-repl's work directory.
+         */
+        REPL_FILE
+    }
+
+    /**
+     * The default log targets for your messages: Log4J with a fallback to the standard error output and additionally
+     * cau-repl's own log file.
+     */
     public static final Set<LOG_TARGETS> DEFAULT_LOG_TARGETS = Set.of(LOG_TARGETS.STDERR_OR_LOG4J, LOG_TARGETS.REPL_FILE);
+    /**
+     * The log targets for internal log messages originating from cau-repl itself.
+     */
     public static final Set<LOG_TARGETS> INTERNAL_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("file") ? Set.of(LOG_TARGETS.REPL_FILE) : (System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("stderr") ? Set.of(LOG_TARGETS.STDERR) : Set.of(LOG_TARGETS.STDERR_OR_LOG4J));
-    public static final Set<LOG_TARGETS> TRACE_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("stderr") ? Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_FILE) : Set.of(LOG_TARGETS.REPL_FILE);
-    public static final Set<LOG_TARGETS> EPHEMERAL_LOG_TARGETS = Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_ALL_SHELLS);
+    protected static final Set<LOG_TARGETS> TRACE_LOG_TARGETS = System.getProperty("CAU.REPL.Log.Internal", "").equalsIgnoreCase("stderr") ? Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_FILE) : Set.of(LOG_TARGETS.REPL_FILE);
+    protected static final Set<LOG_TARGETS> EPHEMERAL_LOG_TARGETS = Set.of(LOG_TARGETS.STDERR, LOG_TARGETS.REPL_ALL_SHELLS);
 
     @SuppressWarnings("FieldCanBeLocal")
     private static Class<?> L4J_LOGMANAGER_CLASS = null;
@@ -42,6 +97,7 @@ public class REPLLog {
     private static Method L4J_WARN = null;
     private static Method L4J_ERROR = null;
 
+    private static int KEEP_LOGS = 10;
     private static final String DEFAULT_LOG_PREFIX = "repl";
     private static final String DEFAULT_LOG_SUFFIX = ".log";
 
@@ -51,6 +107,11 @@ public class REPLLog {
         initializeLibs();
     }
 
+    /**
+     * Log a new message with log level {@code TRACE} to the trace log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     @SuppressWarnings("unused")
     public static REPLLogEntry trace(Object... args) {
         REPLLogEntry e = new REPLLogEntry(REPLLogEntry.LOG_LEVEL.TRACE, args);
@@ -58,6 +119,11 @@ public class REPLLog {
         return e;
     }
 
+    /**
+     * Log a new message with log level {@code DEBUG} to the default log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     @SuppressWarnings("unused")
     public static REPLLogEntry debug(Object... args) {
         REPLLogEntry e = new REPLLogEntry(REPLLogEntry.LOG_LEVEL.DEBUG, args);
@@ -65,6 +131,11 @@ public class REPLLog {
         return e;
     }
 
+    /**
+     * Log a new message with log level {@code INFO} to the default log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     @SuppressWarnings("unused")
     public static REPLLogEntry info(Object... args) {
         REPLLogEntry e = new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, args);
@@ -72,6 +143,11 @@ public class REPLLog {
         return e;
     }
 
+    /**
+     * Log a new message with log level {@code WARN} to the default log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     @SuppressWarnings("unused")
     public static REPLLogEntry warn(Object... args) {
         REPLLogEntry e = new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, args);
@@ -79,22 +155,42 @@ public class REPLLog {
         return e;
     }
 
+    /**
+     * Log a new message with log level {@code ERROR} to the default log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     public static REPLLogEntry error(Object... args) {
         REPLLogEntry e = new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, args);
         log(e, DEFAULT_LOG_TARGETS);
         return e;
     }
 
+    /**
+     * Log a new message with log level {@code INFO} to the default log targets.
+     * @param args The log messages. You an use the "{@code {}}" placeholder in the first argument to format the succeeding arguments.
+     * @return The log entry that was sent to the targets.
+     */
     @SuppressWarnings("unused")
     public static REPLLogEntry log(Object... args) {
         return info(args);
     }
 
+    /**
+     * Log a given message to the default log targets.
+     * @param entry The message to log.
+     */
     @SuppressWarnings("unused")
     public static void log(REPLLogEntry entry) {
         log(entry, DEFAULT_LOG_TARGETS);
     }
 
+    /**
+     * Log a given message.
+     * @param entry The message to log.
+     * @param targets The log targets to write to.
+     * @param streams Additional Print Streams to write to.
+     */
     public static void log(REPLLogEntry entry, Set<LOG_TARGETS> targets, PrintStream... streams) {
         boolean l4jSuccess = false;
         if ((targets.contains(LOG_TARGETS.LOG4J) || targets.contains(LOG_TARGETS.STDERR_OR_LOG4J)) && L4J_LOGGER != null) {
@@ -151,6 +247,11 @@ public class REPLLog {
         }
     }
 
+    /**
+     * Gets all log entries from the repl's internal log file (which is rotated when the JVM starts). They will be read
+     * from disk, so this call might be slow if the log file is big.
+     * @return A list of all log entries from the repl's internal log file.
+     */
     public static List<REPLLogEntry> getLog() {
         synchronized (REPLLog.class) {
             try (Stream<String> lines = Files.lines(logFile(null).toPath())) {
@@ -163,7 +264,7 @@ public class REPLLog {
         }
     }
 
-    public static Instant getFirstTimestamp() {
+    protected static Instant getFirstTimestamp() {
         synchronized (REPLLog.class) {
             try (Stream<String> lines = Files.lines(logFile(null).toPath())) {
                 return lines
@@ -177,7 +278,7 @@ public class REPLLog {
         }
     }
 
-    public static void rollOver() throws IOException {
+    protected static void rollOver() throws IOException {
         synchronized (REPLLog.class) {
             Instant timestamp = getFirstTimestamp();
             if (timestamp != null) Files.move(logFile(null).toPath(), logFile(formatter.format(timestamp)).toPath());
@@ -193,6 +294,10 @@ public class REPLLog {
         return new File(REPL.getWorkDir(), DEFAULT_LOG_PREFIX + (tag == null ? "" : ("." + tag)) + DEFAULT_LOG_SUFFIX);
     }
 
+    /**
+     * Try to (re-)initialize optional external libraries. At the moment, this pertains only to Log4J. Invoking this
+     * method will check whether it is installed and make it available as a logging target.
+     */
     public static synchronized void initializeLibs() {
         try {
             if (L4J_LOGGER != null) return;

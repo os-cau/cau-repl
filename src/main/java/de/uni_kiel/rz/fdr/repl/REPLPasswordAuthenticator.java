@@ -10,7 +10,7 @@ import org.apache.sshd.server.session.ServerSession;
 
 import java.security.InvalidParameterException;
 
-public class REPLPasswordAuthenticator implements PasswordAuthenticator {
+class REPLPasswordAuthenticator implements PasswordAuthenticator {
     private final String password;
 
     public REPLPasswordAuthenticator(String password) {

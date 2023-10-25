@@ -9,6 +9,9 @@ import java.util.function.Consumer;
 
 import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
 
+/**
+ * A Callback that you can use for your jobs; it automatically adjusts its concurrency to tune it for maximum throughput.
+ */
 @SuppressWarnings("unused")
 public class REPLJobCallbackAutoTune implements Consumer<REPLJob.JobEvent> {
 
@@ -99,12 +102,21 @@ public class REPLJobCallbackAutoTune implements Consumer<REPLJob.JobEvent> {
     private final HashMap<Integer, DurationHistory> durationHistories = new HashMap<>();
 
 
+    /**
+     * Create a new AutoTune job callback. Each instance should only be used once, with a single job.
+     * @param minConcurrency The minimum concurrency level this callback will ever set.
+     * @param maxConcurrency The maximum concurrency level this callback will ever set.
+     */
     public REPLJobCallbackAutoTune(int minConcurrency, int maxConcurrency) {
         if (minConcurrency < 1 || minConcurrency > maxConcurrency) throw new IllegalArgumentException("[" + minConcurrency + ", " + maxConcurrency + "] is not a valid concurrency interval");
         this.minConcurrency = minConcurrency;
         this.maxConcurrency = maxConcurrency;
     }
 
+    /**
+     * For internal use only.
+     * @param ev A new job event.
+     */
     @Override
     public void accept(REPLJob.JobEvent ev) {
         if (ev.eventType() != REPLJob.JobEventType.INPUT_SUCCESS && ev.eventType() != REPLJob.JobEventType.INPUT_ERROR) return;
@@ -276,10 +288,19 @@ public class REPLJobCallbackAutoTune implements Consumer<REPLJob.JobEvent> {
         return result;
     }
 
+    /**
+     * Get the current minimum concurrency limit.
+     * @return The current minimum concurrency limit.
+     */
     public synchronized int getMinConcurrency() {
         return minConcurrency;
     }
 
+    /**
+     * Set a new minimum concurrency limit. Must be bigger than 0 and can not be greater then the maximum concurrency limit.
+     * You can safely invoke this method while the associated job is active.
+     * @param minConcurrency The new minimum concurrency limit.
+     */
     public synchronized void setMinConcurrency(int minConcurrency) {
         if (minConcurrency < 1 || minConcurrency > maxConcurrency) throw new IllegalArgumentException("[" + minConcurrency + ", " + maxConcurrency + "] is not a valid concurrency interval");
         this.minConcurrency = minConcurrency;
@@ -287,10 +308,19 @@ public class REPLJobCallbackAutoTune implements Consumer<REPLJob.JobEvent> {
         forcePeriodicRescan = true;
     }
 
+    /**
+     * Get the current maximum concurrency limit.
+     * @return The current maximum concurrency limit.
+     */
     public synchronized int getMaxConcurrency() {
         return maxConcurrency;
     }
 
+    /**
+     * Set a new maximum concurrency limit. Must not be smaller than the minimum concurrency limit.
+     * You can safely invoke this method while the associated job is active.
+     * @param maxConcurrency The new maximum concurrency limit.
+     */
     public synchronized void setMaxConcurrency(int maxConcurrency) {
         if (minConcurrency > maxConcurrency) throw new IllegalArgumentException("[" + minConcurrency + ", " + maxConcurrency + "] is not a valid concurrency interval");
         this.maxConcurrency = maxConcurrency;

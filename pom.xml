@@ -513,6 +513,32 @@
           <author>false</author>
           <nohelp>true</nohelp>
           <bottom>Copyright &#169; 2023&#x2013;{currentYear} Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</bottom>
+          <sourceFileExcludes>
+            <exclude>de/uni_kiel/rz/fdr/repl/Helpers.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/REPLAgent.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/SshTerminal.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/StreamRedirector.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/TtyFilterOutputStream.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdBreakpoint.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdEditFileSSH.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdEditSSH.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdGrabREPL.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdJob.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamized.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamizedExpando.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamizeTransformer1.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamizeTransformer2.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyLoadOrderTransformer.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyPatchesTransformer.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyShellCommand.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyShellService.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/GroovyCmdMCRCli.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/GroovySourceDirsStartupHandler.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/Log4jListAppender.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/REPLJobProcessableProxy.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/REPLMyCoReAuthenticator.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/mycore/REPLStartupHandler.java</exclude>
+          </sourceFileExcludes>
         </configuration>
       </plugin>
 

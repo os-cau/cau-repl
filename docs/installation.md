@@ -20,7 +20,7 @@ This will produce the following two JARs:
 - `target/cau-repl-X.Y.Z-fatjar-nogpl.jar` can be used as a standalone Java agent and contains all of cau-repls dependencies
 - `target/cau-repl-agent-X.Y.Z.jar` is an optional lightweight loader-only agent that can be used to load the full `fatjar`
   into a specific classloader. Use this if your application places its classes in a non-default classloader (e.g.
-  webapplications in a servlet container). See the [Classloader Selection](#classloader-selection) section for details. 
+  web applications in a servlet container). See the [Classloader Selection](#classloader-selection) section for details. 
 
 ### Loading the Agent
 
@@ -44,11 +44,11 @@ depends on it). Whether this step is necessary, depends on your target applicati
 java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar --add-opens 'java.base/java.lang=ALL-UNNAMED' -DCAU.Groovy.UseSystemClassLoader=true ...
 ```
 
-The REPL will listen for SSH connections on port 8512 on the local interface. You can use any user name to login. A
+The REPL will listen for SSH connections on port 8512 on the local interface. You can use any username to log in. A
 per-session password will be printed to STDERR on startup. **Be careful to make sure that it does not end up in a public
 logfile**, e.g. Systemd's journal. Any local user who can read this password can connect to the REPL and execute code
 with the permissions of your application. To secure your installation permanently, see the [Configuration](configuration.md) section for ways to set your own
-static password without producing log output. The confiration section also describes various parameters that you can
+static password without producing log output. The configuration section also describes various parameters that you can
 use to customize ports, directories, etc.
 
 By default, cau-repl will store its state in the `cau-repl` directory, which it will create in the current working
@@ -73,7 +73,7 @@ changing or adding classes in your target. Note that this will have security imp
 depends on the separation provided by Java's module system.
 
 _Remark_: it is currently not possible to patch the class that the agent triggers
-on (by the time it is seen, it is to late to block it). So make sure to select a trigger that triggers in the correct
+on (by the time it is seen, it is too late to block it). So make sure to select a trigger that triggers in the correct
 classloader, but before the first class you would like to patch.
 
 ## MyCoRe plugin
@@ -103,7 +103,7 @@ cp /path/to/cau-repl-X.Y.Z-fatjar-gpl.jar /path/to/mycore/lib
 echo "CAU.REPL.Enabled=true" >> /path/to/mycore/mycore.properties
 ```
 Then (re-) start your servlet container. The REPL will listen for SSH connections on port 8512 on the localhost. You can
-login with the username `administrator` and the corresponding MyCoRe password of the account. See the
+log in with the username `administrator` and the corresponding MyCoRe password of the account. See the
 [Configuration](configuration.md) section for more settings that you can customize from your `.properties`.
 
 By default, cau-repl will store its state in the `cau-repl` subdirectory, which it will create in your MyCoRe

@@ -87,12 +87,13 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 >   text representation of each succeeding further parameter. Excess parameters will be joined with a newline.
 >
 > **Optional Named Parameters**
-> - `ReplLog.LOG_TARGETS[] targets = REPLLog.DEFAULT_LOG_TARGETS` - The list of targets that will receive this message. See the [REPLLog](TODO)
->   documentation for possible values. If omitted, the message will be logged to Log4J if it is availble or stderr if
+> - `ReplLog.LOG_TARGETS[] targets = REPLLog.DEFAULT_LOG_TARGETS` - The list of targets that will receive this message.
+>   See the [REPLLog](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html) documentation for possible values.
+>   If omitted, the message will be logged to Log4J if it is available or stderr if
 >   not. In addition, it will be written to the REPL's own logfile in its work directory.
 > - `PrintStream[] streams = []` - A list of multiple `PrintStream` that will receive this message. Empty by default.
 > 
-> **Returns** The [REPLLogEntry](TODO) that was logged
+> **Returns** The [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) that was logged
 
 **Retrieve the REPL log file**
 > **Function**
@@ -102,7 +103,7 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 > Retrieves the contents of the REPL's internal log file, which is rotated every time
 > the target application starts up.
 > 
-> **Returns** a list of [REPLLogEntry](TODO) in chronological order.
+> **Returns** a list of [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) in chronological order.
 
 **Retrieve the Tomcat log**
 > **Function**
@@ -115,7 +116,7 @@ The REPL has built-in logging functions that will make use of Log4J if it is ins
 > **Returns** an array of `String`, in chronological order.
 
 
-**Related Classes:** [REPLLog](TODO), [REPLLogEntry](TODO) provide additional functionality related to logging.
+**Related Classes:** [REPLLog](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html), [REPLLogEntry](../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html) provide additional functionality related to logging.
 
 **Examples:**
 ```text
@@ -215,12 +216,12 @@ on, even after restarting the target application.
 >
 > `Boolean retryerror = true` - When resuming a job, disable to not retry inputs that threw an exception.
 > 
-> `Boolean retrysuccess = false` - When resudimg a job, enable to also retry inputs that were successful.
+> `Boolean retrysuccess = false` - When resuming a job, enable to also retry inputs that were successful.
 > 
 > `ThreadFactory threadfactory` - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
 > system default is used.
 > 
-> **Returns** the [ReplJob](TODO) that was created.
+> **Returns** the [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
 
 **List current jobs**
 > **Shell Command**
@@ -241,7 +242,7 @@ on, even after restarting the target application.
 > Retrieves the ReplJob that has the given `index` number in the `:J` listing, or whose `key` matches the argument.
 > Print its JobProgress to the console and return the job object.
 >
-> **Returns** The [ReplJob](TODO) that was requested.
+> **Returns** The [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was requested.
 **Pause or unpause a job**
 > **Shell Command**
 >
@@ -290,8 +291,8 @@ on, even after restarting the target application.
 > `:job archived`<br/>
 > `:J archived`
 >
-> Prints a list of all jobs' keys for which a state file in the REPL's work directory still exists.
-> This includes all current jobs as well as archived jobs from previous sessions.
+> Prints a list of all archived jobs' keys for which a state file in the REPL's work directory still exists.
+> This excludes any currently loaded job.
 >
 > **Returns** The list in text format.
 
@@ -306,7 +307,7 @@ on, even after restarting the target application.
 >
 > **Returns** The list of pruned keys in text format.
 
-**Related Classes:** [REPLJob](TODO), [REPLJobCallbackAutoTune](TODO) provide additional functionality related to job
+**Related Classes:** [ReplJob](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
 control.
 
 **Example: Simple Job**
@@ -425,14 +426,15 @@ dynamically at runtime, there is a support function available for you.
 > **Optional Named Parameters**
 >
 > `ClassLoader classloader = <REPL's classloader>` - The ClassLoader in which the generated classed should be put. Will
-> default to the REPL's ClassLoader, which is subject to the settings described in the [Installation](TODO) section.
+> default to the REPL's ClassLoader, which is subject to the settings described in the
+> [Installation](installation.md#loading-the-agent) section.
 > 
 > `String classpath = <REPL's classpath>` - The class path to use when locating targets of the @Patches annotation.
 > Defaults to the REPL's classpath.
 > 
-> **Returns** the [GroovySourceDirectory](TODO) with the results of the compilation.
+> **Returns** the [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) with the results of the compilation.
 
-**Related Classes:** [GroovySourceDirectory](TODO) provides additional functionality related to compilation.
+**Related Classes:** [GroovySourceDirectory](../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html) provides additional functionality related to compilation.
 
 **Examples:**
 ```text
@@ -473,7 +475,7 @@ can manage them in the REPL:
 > will be returned as the result of the `replbreakpoint` function call that triggered this breakpoint.<br/>
 > *Please Note:* for technical reasons, repeated whitespace characters in your feedback string will be merged into a
 > single space - even within quotes (which will be considered part of your feedback). If this is a problem, you should
-> use the [REPLBreakpoint.resume()](TODO) function instead.
+> use the [REPLBreakpoint.resume()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#resume(long)) function instead.
 >
 > **Returns** nothing.
 
@@ -484,12 +486,13 @@ can manage them in the REPL:
 > `:B disable [pattern]` / `:B enable [pattern]`
 >
 > Use this to disable or re-enable certain breakpoint matching a regular-expression pattern in Java RE syntax. A
-> triggered breakpoint with a [signature](TODO) that matches one of your disabled patterns will be silently ignored.
+> triggered breakpoint with a [signature](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#getSignature()) that matches one of your disabled patterns will be silently ignored.
 > Your breakpoints' signatures are displayed in the `:B` breakpoint list after the numeric key (e.g.
 > `org.example.Dummy::foo - My Breakpoint`).<br/>
 > *Please Note:* for technical reasons, repeated whitespace characters in your pattern string will be merged into a
 > single space - even within quotes (which will be considered part of your pattern). If this is a problem, you should
-> use the [REPLBreakpoint.disable()](TODO) / [REPLBreakpoint.enable()](TODO) functions instead.
+> use the [REPLBreakpoint.disable()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#disable(java.lang.String)) /
+> [REPLBreakpoint.enable()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#enable(java.lang.String)) functions instead.
 > 
 > **Returns** nothing.
 
@@ -508,10 +511,10 @@ can manage them in the REPL:
 > 
 > *Please Note:* for technical reasons, repeated whitespace characters in your code string will be merged into a
 > single space - even within quotes (which will be considered part of your code). If this is a problem, you should
-> use the [REPLBreakpoint.eval()](TODO) function instead.
+> use the [REPLBreakpoint.eval()](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#eval(long,de.uni_kiel.rz.fdr.repl.REPLBreakpoint.Eval)) function instead.
 >
 > **Returns** nothing when you submit code to run, or the results of your code wrapped in a
-> [REPLBreakpoint.EvalResult](TODO) when you retrieve the result.
+> [REPLBreakpoint.EvalResult](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.EvalResult.html) when you retrieve the result.
 
 **Set the maximum number of concurrent breakpoints**
 > **Shell Command**
@@ -526,7 +529,7 @@ can manage them in the REPL:
 >
 > **Returns** nothing.
 
-**Related Classes:** [REPLBreakpoint](TODO) provides additional functionality related to breakpoints.
+**Related Classes:** [REPLBreakpoint](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
 
 **Examples:**
 ```text
@@ -558,7 +561,7 @@ groovy:000> :B 0 some string data
 ## Hints
 - Tab-completion and line history is available.
 - When you mismatch parentheses or similar syntactic structures, the REPL may enter a state where it's waiting for you
-  to properly syntactivally finish your statement. To get out of this state, simply enter a single line consisting of
+  to properly syntactically finish your statement. To get out of this state, simply enter a single line consisting of
   just `:c`.
 - The return value of your last command is always available in the special `_` variable. This is useful to continue
   using it in the next line, or if you want to save it in a more persistent properly named variable. 

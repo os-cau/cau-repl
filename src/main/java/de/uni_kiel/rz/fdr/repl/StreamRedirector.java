@@ -11,6 +11,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * For internal use only. This class connects a process' in-/output streams to a SSH session.
+ */
 public class StreamRedirector implements Runnable {
 
     private final InputStream inStream;

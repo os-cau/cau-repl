@@ -30,6 +30,12 @@ import static de.uni_kiel.rz.fdr.repl.groovy.GroovyLoadOrderTransformer.getNumbe
 import static de.uni_kiel.rz.fdr.repl.groovy.GroovyLoadOrderTransformer.getAllSuperclasses;
 import static groovyjarjarasm.asm.Opcodes.*;
 
+/*
+    Disclaimer: The dynamization feature should be considered a very experimental proof-of-concept built for research
+    purposes. It might work for some cases, but is by no means a sane, comprehensive solution. Do not use in production
+    and expect a heavy performance impact.
+ */
+
 public class GroovyDynamizeTransformer2 extends CompilationCustomizer {
 
     public static final String DYNAMIZE_PREFIX = "_CAUREPL_D$";

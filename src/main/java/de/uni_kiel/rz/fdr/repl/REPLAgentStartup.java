@@ -17,13 +17,22 @@ import java.util.stream.Collectors;
 
 import static de.uni_kiel.rz.fdr.repl.REPLLog.INTERNAL_LOG_TARGETS;
 
+/**
+ * This class control the startup process when using the agent. It is only used in a static context.
+ */
 public class REPLAgentStartup {
+    /**
+     * The REPL's configured class path
+     */
     public static String classPath = System.getProperty("CAU.Groovy.ClassPath", System.getProperty("java.class.path", "."));
+    /**
+     * The REPL's configured ClassLoader
+     */
     public static ClassLoader classLoader = null;
     private static boolean started = false;
 
     @SuppressWarnings("unused")
-    public static void start(ClassLoader forceClassLoader) throws IOException {
+    protected static void start(ClassLoader forceClassLoader) throws IOException {
         started = true;
 
         // use groovy expando metaclasses globally
@@ -146,6 +155,12 @@ public class REPLAgentStartup {
                 .collect(Collectors.joining());
     }
 
+    /**
+     * You can run this .jar as a standalone executable and get a SSH interface only.
+     * @param args The command-line paramenters.
+     * @throws IOException A file could not be accessed.
+     * @throws InterruptedException The program was interrupted.
+     */
     public static void main(String[] args) throws IOException, InterruptedException {
         if (!started) {
             System.out.println("Starting Agent...");

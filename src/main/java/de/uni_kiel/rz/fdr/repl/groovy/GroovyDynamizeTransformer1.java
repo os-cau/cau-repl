@@ -17,6 +17,12 @@ import java.util.Set;
 
 import de.uni_kiel.rz.fdr.repl.Dynamize;
 
+/*
+    Disclaimer: The dynamization feature should be considered a very experimental proof-of-concept built for research
+    purposes. It might work for some cases, but is by no means a sane, comprehensive solution. Do not use in production
+    and expect a heavy performance impact.
+ */
+
 public class GroovyDynamizeTransformer1 extends CompilationCustomizer {
     private final Set<String> processed = new HashSet<>();
     private final HashMap<String, Boolean> dynamizedClasses = new HashMap<>();

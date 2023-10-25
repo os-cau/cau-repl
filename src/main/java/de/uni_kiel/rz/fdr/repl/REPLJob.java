@@ -25,18 +25,90 @@ import java.util.stream.Stream;
 import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
 
 
+/**
+ * This class represents a single job to be executed in the background. It also provides static methods to manage all
+ * jobs that are currently on file.
+ */
 @SuppressWarnings("unused")
 public class REPLJob implements Serializable {
+    /**
+     * A record containing a job's results for one single input item.
+     * @param key The key of the job that produced this result
+     * @param index The index of the item in the input list of the job
+     * @param epochMicrosFrom Timestamp when we started processing this result's input
+     * @param epochMicrosTo Timestamp when we finished processing this result's input, generating this record
+     * @param result The result of this input
+     * @param error Any exception that was thrown during processing
+     */
     public record InputResult(String key, int index, long epochMicrosFrom, long epochMicrosTo, Serializable result, Exception error) implements Serializable {}
 
+    /**
+     * The possible states that a job can be in.
+     */
     public enum JobState {
-        INTERNAL_ERROR, PAUSING, PAUSED, CANCELLING, CANCELLED, RUNNING, COMPLETED_SUCCESSFULLY, NOT_YET_STARTED, COMPLETED_WITH_ERRORS;
+        /**
+         * The job terminated with an internal error not related to your code
+         */
+        INTERNAL_ERROR,
+        /**
+         * The job is currently transitioning to {@code PAUSED}. Residual workers are finishing their inputs.
+         */
+        PAUSING,
+        /**
+         * The job is currently fully paused
+         */
+        PAUSED,
+        /**
+         * The job is currently transitioning to {@code CANCELLED}. Residual workers are finishing their inputs or are
+         * currently forcefully terminated.
+         */
+        CANCELLING,
+        /**
+         * The job was fully cancelled
+         */
+        CANCELLED,
+        /**
+         * The job is currently running
+         */
+        RUNNING,
+        /**
+         * The job has completed without errors
+         */
+        COMPLETED_SUCCESSFULLY,
+        /**
+         * The job has not been started yet
+         */
+        NOT_YET_STARTED,
+        /**
+         * The job has completed with errors
+         */
+        COMPLETED_WITH_ERRORS;
         @Override
         public String toString() {
             return name().toLowerCase(Locale.ROOT).replaceAll("_", " ");
         }
     }
 
+    /**
+     * A record that summarizes a job's state at one instant in time.
+     * @param state The job's state
+     * @param nextInput Index of the next input that we would enqueue for processing
+     * @param totalInputs Number of total inputs that the job was started with
+     * @param remainingInputs Number of inputs that have not yet been processed
+     * @param success Number of inputs that were successfully processed (excluding skipped successful inputs when resuming)
+     * @param skippedSuccess Number of inputs that were skipped when resuming a job because they were successful during an earlier run
+     * @param errors Number of inputs that raised an exception during processing (excluding skipped errors when resuming)
+     * @param skippedErrors Number of inputs that were skipped when resuming a job because they were not successful during an earlier run
+     * @param percentDone Current progress of the job
+     * @param pausedSince If currently paused: since when?
+     * @param cancelledSince If cancelled: since when?
+     * @param startTimestamp If started: since when?
+     * @param doneTimestamp If done (successfully or not): since when?
+     * @param eta Estimated time of completion
+     * @param etaSeconds Number of remaining seconds until estimated time of completion
+     * @param activeThreads Number of active worker threads processing inputs
+     * @param future A future for this job, so you can wait for its completion
+     */
     public record JobProgress(JobState state, Integer nextInput, int totalInputs, int remainingInputs, int success, int skippedSuccess, int errors, int skippedErrors, int percentDone, ZonedDateTime pausedSince, ZonedDateTime cancelledSince, ZonedDateTime startTimestamp, ZonedDateTime doneTimestamp, ZonedDateTime eta, Long etaSeconds, int activeThreads, Future<JobProgress> future) {
         private static boolean isActive(ZonedDateTime startTimestamp, ZonedDateTime doneTimestamp) {
             return JobProgress.isActive(startTimestamp != null ? startTimestamp.toInstant() : null, doneTimestamp != null ? doneTimestamp.toInstant(): null);
@@ -54,18 +126,37 @@ public class REPLJob implements Serializable {
             return remainingInputs == 0 && errors == 0 && skippedErrors == 0 && (success + skippedSuccess) == totalInputs;
         }
 
+        /**
+         * Determines whether the job is active. A job ist active after it has been started and may still produce further
+         * output in the future.
+         * @return The job's active status
+         */
         public boolean isActive() {
             return JobProgress.isActive(startTimestamp, doneTimestamp);
         }
 
+        /**
+         * Determines whether the job is complete. A job is complete if all its inputs have been processed or skipped
+         * (either successfully or unsuccessfully)
+         * @return The job's completion status
+         */
         public boolean isComplete() {
             return JobProgress.isComplete(remainingInputs);
         }
 
+        /**
+         * Determines whether the job was a success. A job is a success if there all inputs were successfully processed
+         * (during this or resumed previous runs)
+         * @return The job's success status
+         */
         public boolean isSuccess() {
             return JobProgress.isSuccess(remainingInputs, errors, skippedErrors, success, skippedSuccess, totalInputs);
         }
 
+        /**
+         * Get a textual representation of the job's ETA.
+         * @return A textual representation of the job's ETA
+         */
         public String etaText() {
             if (etaSeconds == null) return null;
             if (etaSeconds <= 60) return etaSeconds + "s";
@@ -83,12 +174,72 @@ public class REPLJob implements Serializable {
         }
     }
 
-    public enum JobEventType { JOB_START, JOB_DONE_SUCCESS, JOB_DONE_CANCELLED, JOB_DONE_INTERNALERROR, JOB_PAUSED, JOB_UNPAUSED, JOB_PAUSE_REQUESTED, JOB_CANCEL_REQUESTED, INPUT_SUCCESS, INPUT_SKIPPED, INPUT_ERROR }
+    /**
+     * The different event types that a {@code JobEvent} handler might receive.
+     */
+    public enum JobEventType {
+        /**
+         * The job was started
+         */
+        JOB_START,
+        /**
+         * The job finished without errors
+         */
+        JOB_DONE_SUCCESS,
+        /**
+         * The job has been fully cancelled
+         */
+        JOB_DONE_CANCELLED,
+        /**
+         * The job has finished with an internal error not related to your code
+         */
+        JOB_DONE_INTERNALERROR,
+        /**
+         * The job is fully paused
+         */
+        JOB_PAUSED,
+        /**
+         * The job was resumed from paused state
+         */
+        JOB_UNPAUSED,
+        /**
+         * Transition to pause state was requested, workers are finishing up
+         */
+        JOB_PAUSE_REQUESTED,
+        /**
+         * Transition to cancelled state was requested, workers are finishing up or being forecefully terminated
+         */
+        JOB_CANCEL_REQUESTED,
+        /**
+         * A single input was successfully processed
+         */
+        INPUT_SUCCESS,
+        /**
+         * A single input was skipped while resuming
+         */
+        INPUT_SKIPPED,
+        /**
+         * A single input generated an error during processing
+         */
+        INPUT_ERROR
+    }
+
+    /**
+     * Represents an event that occured during job processing, to be consumed by an event handler.
+     * @param job The job that generated the event
+     * @param timestamp The event's timestamp
+     * @param eventType The type of event that happened
+     * @param inputIndex The index of the input that generated the event (if applicable)
+     */
     public record JobEvent(REPLJob job, Instant timestamp, JobEventType eventType, Integer inputIndex) {}
 
-    public static final String STATE_FILE_PREFIX = "job";
-    public static final String STATE_FILE_SUFFIX = "state";
-    
+    private static final String STATE_FILE_PREFIX = "job";
+    private static final String STATE_FILE_SUFFIX = "state";
+
+    /**
+     * A predefined job event handler that you can use; it logs regular process messages to your SSH session. This
+     * will make it hard to use the session interactively while the job is running.
+     */
     public static final Consumer<JobEvent> CALLBACK_LOG_TO_SHELL = evt -> {
         switch (evt.eventType) {
             case INPUT_SKIPPED, INPUT_SUCCESS -> {
@@ -108,7 +259,11 @@ public class REPLJob implements Serializable {
             default -> evt.job.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "Job {}: {}", evt.job.key, evt), Set.of(LOG_TARGETS.REPL_ALL_SHELLS));
         }
     };
-    
+
+    /**
+     * A predefined job event handler you can use, it pauses the job whenever an error happens. if you enabled
+     * concurrency, multiple errors might accumulate in pause event.
+     */
     public static final Consumer<JobEvent> CALLBACK_PAUSE_ON_ERROR = evt -> {
         if (evt.eventType != JobEventType.INPUT_ERROR) return;
         evt.job.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "Job {}: Pausing due to input #{} error: {}", evt.job.key, evt.inputIndex, evt.job.results[evt.inputIndex].error), Set.of(LOG_TARGETS.REPL_ALL_SHELLS));
@@ -123,11 +278,19 @@ public class REPLJob implements Serializable {
 
     private static final Map<String, REPLJob> jobs = Collections.synchronizedMap(new LinkedHashMap<>());
 
-    
+
+    /**
+     * Get the list of all jobs that are not archived - that is: loaded in memory.
+     * @return the list of all jobs that are not archived
+     */
     public static List<REPLJob> list() {
         return new ArrayList<>(jobs.values());
     }
 
+    /**
+     * Get the list of all archived jobs' keys.
+     * @return The list of all archived jobs' keys.
+     */
     public static List<String> listArchived() {
         Pattern pattern = Pattern.compile("^" + Pattern.quote(STATE_FILE_PREFIX) + "-(.*)\\." + Pattern.quote(STATE_FILE_SUFFIX));
         ArrayList<String> result = new ArrayList<>();
@@ -141,6 +304,13 @@ public class REPLJob implements Serializable {
         return result;
     }
 
+    /**
+     * Stream all archived jobs without adding them to the list of active jobs. This can be a time-consuming operation,
+     * because all inputs and results will be loaded as well. Note that the job instances that this method streams are
+     * not resumable by design. If this is important, use one of the various
+     * {@link REPLJob#resume(String, Closure<Serializable>) resume()} methods instead.
+     * @return A stream of all archived jobs.
+     */
     public static Stream<REPLJob> streamArchived() {
         return listArchived().stream().map(k -> {
             try {
@@ -151,6 +321,10 @@ public class REPLJob implements Serializable {
         });
     }
 
+    /**
+     * Removes the state files of all archived jobs that were completed {@link JobProgress#isSuccess() successfully}.
+     * @return The keys of all pruned jobs.
+     */
     public static List<String> pruneArchived() {
         return streamArchived()
                         .filter(j -> j.getProgress().isSuccess())
@@ -160,63 +334,145 @@ public class REPLJob implements Serializable {
                         .toList();
     }
 
+    /**
+     * Get a loaded job by key.
+     * To retrieve an archived job, use one of the {@link REPLJob#load(String) load()} or {@link REPLJob#resume resume()} methods instead.
+     * @param key The key to look up.
+     * @return The Job with the key, or {@code null} if none was found.
+     */
     public static REPLJob get(String key) {
         return jobs.get(key);
     }
 
+    /**
+     * Archives a loaded job. Jobs that are still {@link JobProgress#isActive() active} can't be archived. Archiving
+     * an active job will throw an exception.
+     * @param job The job to archive.
+     * @return Flag indicating whether this job was archived or not.
+     */
     public static boolean archive(REPLJob job) {
         return archive(job.key);
     }
 
+    /**
+     * Archives a loaded job. Jobs that are still {@link JobProgress#isActive() active} can't be archived. Archiving
+     * an active job will throw an exception.
+     * @param key The key of the job to archive.
+     * @return Flag indicating whether this job was archived or not.
+     */
     public static boolean archive(String key) {
         REPLJob j = jobs.get(key);
         if (j != null && j.getProgress().isActive()) throw new RuntimeException("can't archive a job that is still active");
         return jobs.remove(key) != null;
     }
 
+    /**
+     * Creates a new job without inputs or concurrency that is ready to be started.
+     * @param supplier The job action.
+     * @return The new job.
+     */
     public static REPLJob repljob(Supplier<Serializable> supplier) {
         return repljob((x, y) -> supplier.get(), null, 1, null);
     }
-    
+
+    /**
+     * Creates a new job without inputs that is ready to be started.
+     * @param supplier The job action.
+     * @param concurrency The concurrency level to use.
+     * @return The new job.
+     */
     public static REPLJob repljob(Supplier<Serializable> supplier, int concurrency) {
         return repljob((x, y) -> supplier.get(), null, concurrency, null);
     }
 
-    
+    /**
+     * Creates a new job without inputs or concurrency that is ready to be started.
+     * @param supplier The job action.
+     * @param name A name for the job that will be displayed in the job list.
+     * @return The new job.
+     */
     public static REPLJob repljob(Supplier<Serializable> supplier, String name) {
         return repljob((x, y) -> supplier.get(), null, 1, name);
     }
 
+    /**
+     * Creates a new job with inputs or concurrency that is ready to be started.
+     * @param function The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @return The new job.
+     */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs) {
         return repljob(function, inputs, 1, null);
     }
 
+    /**
+     * Creates a new job with inputs and no concurrency that is ready to be started.
+     * @param closure The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @return The new job.
+     */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs) {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, 1, null);
         closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Creates a new job with inputs that is ready to be started.
+     * @param function The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param concurrency The concurrency level to use.
+     * @return The new job.
+     */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency) {
         return repljob(function, inputs, concurrency, null);
     }
 
+    /**
+     * Creates a new job with inputs that is ready to be started.
+     * @param closure The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param concurrency The concurrency level to use.
+     * @return The new job.
+     */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency) {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, null);
         closure.setDelegate(j);
         return j;
     }
 
+    /**
+     * Creates a new job with inputs and no concurrency that is ready to be started.
+     * @param function The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param name A name for the job that will be displayed in the job list.
+     * @return The new job.
+     */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, String name) {
         return repljob(function, inputs, 1, name);
     }
 
+    /**
+     * Creates a new job with inputs and no concurrency that is ready to be started.
+     * @param closure The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param name A name for the job that will be displayed in the job list.
+     * @return The new job.
+     */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, String name) {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, name);
         closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Creates a new job with inputs that is ready to be started.
+     * @param function The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param concurrency The concurrency level to use.
+     * @param name A name for the job that will be displayed in the job list.
+     * @return The new job.
+     */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) {
         REPLJob job = new REPLJob(TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, inputs, concurrency, name);
         if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey());
@@ -224,80 +480,204 @@ public class REPLJob implements Serializable {
         return job;
     }
 
+    /**
+     * Creates a new job with inputs that is ready to be started.
+     * @param closure The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param concurrency The concurrency level to use.
+     * @param name A name for the job that will be displayed in the job list.
+     * @return The new job.
+     */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name) {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, name);
         closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Creates a new job with inputs that is ready to be started.
+     * @param closure The job action.
+     * @param inputs The inputs that the job action will operate on.
+     * @param concurrency The concurrency level to use.
+     * @param name A name for the job that will be displayed in the job list.
+     * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
+     * @return The new job.
+     */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name, boolean becomeDelegate) {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, name);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param key The key of the archived job to resume.
+     * @param closure The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param key The key of the archived job to resume.
+     * @param function The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException {
         return resume(key, function, false, true);
     }
 
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param key The key of the archived job to resume.
+     * @param supplier The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException {
         return resume(key, supplier, false, true);
     }
 
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param key The key of the archived job to resume.
+     * @param closure The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
     }
 
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param key The key of the archived job to resume.
+     * @param closure The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
     }
 
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param key The key of the archived job to resume.
+     * @param function The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException {
         REPLJob oldJob = jobs.get(key);
         if (oldJob != null && oldJob.getProgress().isActive()) throw new RuntimeException("Can't resume a job that is still active");
         return resume(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile(), function, retrySuccess, retryErrors);
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param key The key of the archived job to resume.
+     * @param supplier The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException {
         return resume(key, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
 
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param path The location of the archived job's state file.
+     * @param closure The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
     }
 
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param path The location of the archived job's state file.
+     * @param function The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException {
         return resume(path, function, false, true);
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares unfinished and unsuccessful inputs for resuming.
+     * @param path The location of the archived job's state file.
+     * @param supplier The job action.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException {
         return resume(path, supplier, false, true);
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param path The location of the archived job's state file.
+     * @param closure The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param path The location of the archived job's state file.
+     * @param closure The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
     }
-    
+
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param path The location of the archived job's state file.
+     * @param function The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException {
         REPLJob job = new REPLJob(path, TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, retrySuccess, retryErrors);
         if (job.inputs == null || job.inputs.length == 0) throw new RuntimeException("can't resume a job that had no inputs");
@@ -306,27 +686,82 @@ public class REPLJob implements Serializable {
         return job;
     }
 
+    /**
+     * Loads an archived job instance and prepares it for resuming.
+     * @param path The location of the archived job's state file.
+     * @param supplier The job action.
+     * @param retrySuccess Controls whether previously successful inputs should be resubmitted.
+     * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
+     * @return A new instance of the archived job that can be resumed.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException {
         return resume(path, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
-    
+
+    /**
+     * Loads an archived job without preparing it for resuming. Such instances can't be started, but allow you to
+     * inspect their state unaltered.
+     * @param key The key of the job to load.
+     * @return The job.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob load(String key) throws IOException {
         return load(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile());
     }
-    
+
+    /**
+     * Loads an archived job without preparing it for resuming. Such instances can't be started, but allow you to
+     * inspect their state unaltered.
+     * @param path The location of the archived job's state file.
+     * @return The job.
+     * @throws IOException A file could not be accessed.
+     */
     public static REPLJob load(File path) throws IOException {
         return new REPLJob(path, null, null, false, false);
     }
 
+    /**
+     * Internal use only.
+     */
     protected String key;
+    /**
+     * Internal use only.
+     */
     protected final transient BiFunction<Serializable, REPLJob, Serializable> function;
+    /**
+     * Internal use only.
+     */
     protected int concurrency;
+    /**
+     * Internal use only.
+     */
     protected String name;
+    /**
+     * Internal use only.
+     */
+
     protected Instant createdTimestamp;
+    /**
+     * Internal use only.
+     */
+
     protected final String resumedKey;
+    /**
+     * Internal use only.
+     */
     protected Serializable[] inputs;
+    /**
+     * Internal use only.
+     */
     protected final InputResult[] results;
+    /**
+     * Internal use only.
+     */
     private final ConcurrentLinkedQueue<REPLLogEntry> jobLog = new ConcurrentLinkedQueue<>(); // a wait-free list, ATTENTION: .size() is not O(1)
+    /**
+     * Internal use only.
+     */
     private REPLLogEntry lastLogEntry = null;
     private final transient AppendableObjectStore objectStore;
     private transient PausableThreadPoolExecutor executor;
@@ -341,7 +776,13 @@ public class REPLJob implements Serializable {
     private transient int errors = 0;
     private transient int skippedSuccess = 0;
     private transient int success = 0;
+    /**
+     * Internal use only.
+     */
     private Instant startTimestamp = null;
+    /**
+     * Internal use only.
+     */
     private Instant doneTimestamp = null;
     private transient Instant pausedSince = null;
     private transient Long pausedMillis = null;
@@ -428,18 +869,44 @@ public class REPLJob implements Serializable {
         }
     }
 
+    /**
+     * Starts processing. Each job instance can only be started once.
+     * @return A Future that will complete once the job is no longer active.
+     */
     public Future<JobProgress> start() {
         return start(null, null);
     }
 
+    /**
+     * Starts processing. Each job instance can only be started once.
+     * @param threadFactory A custom Thread Factory that will be used for the worker threads.
+     * @return A Future that will complete once the job is no longer active.
+     */
     public Future<JobProgress> start(ThreadFactory threadFactory) {
         return start(threadFactory, null);
     }
 
+    /**
+     * Starts processing. Each job instance can only be started once.
+     * @param progressCallback A callback that can monitor and control the job's execution. Multiple callbacks can
+     *                         be chained with {@link Consumer#andThen(Consumer)}. Note that your callback will be run
+     *                         from the job's main control thread, so you should offload long-running activities triggered
+     *                         by it to a different thread or risk lowering the job's throughput.
+     * @return A Future that will complete once the job is no longer active.
+     */
     public Future<JobProgress> start(Consumer<JobEvent> progressCallback) {
         return start(null, progressCallback);
     }
 
+    /**
+     * Starts processing. Each job instance can only be started once.
+     * @param threadFactory A custom Thread Factory that will be used for the worker threads.
+     * @param progressCallback A callback that can monitor and control the job's execution. Multiple callbacks can
+     *                         be chained with {@link Consumer#andThen(Consumer)}. Note that your callback will be run
+     *                         from the job's main control thread, so you should offload long-running activities triggered
+     *                         by it to a different thread or risk lowering the job's throughput.
+     * @return A Future that will complete once the job is no longer active.
+     */
     public Future<JobProgress> start(ThreadFactory threadFactory, Consumer<JobEvent> progressCallback) {
         if (future != null) throw new RuntimeException("this job has already been started");
         future = new CompletableFuture<>() {
@@ -620,7 +1087,11 @@ public class REPLJob implements Serializable {
         }
         if (TRACE || TRACE_JOBS) trace("done.");
     }
-    
+
+    /**
+     * Gets the job's current progress.
+     * @return The job's current progress.
+     */
     public synchronized JobProgress getProgress() {
         // eta
         ZonedDateTime eta = null;
@@ -671,15 +1142,37 @@ public class REPLJob implements Serializable {
                 pausedSince == null ? eta : null, pausedSince == null ? etaSeconds : null, threads, future);
     }
 
+    /**
+     * Flag the input item with the specified index for resuming. This makes sure that it will be reprocessed regardless
+     * of its previous success. You must call this method before starting the job.
+     * @param index The index of the input item to resume.
+     */
     public synchronized void retryIndex(int index) {
         if (startTimestamp != null) throw new RuntimeException("this job has already been started");
         results[index] = null;
     }
 
+    /**
+     * Cancels a running job. The instance will immediately transition to {@code CANCELLING} status and wait for all
+     * currently active workers to finish their current inputs. When they all have terminated, the job will transition
+     * to {@code CANCELLED} status. If some workers hang around for too long, it is safe to subsequently call
+     * {@link REPLJob#cancelForce(int) cancelForce()} again on the job.
+     * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
+     * finished in the meantime.
+     */
     public boolean cancel() {
         return doCancel(null);
     }
 
+    /**
+     * Forcefully cancels a running job. The instance will immediately transition to {@code CANCELLING} status and wait
+     * the specified number of seconds for all currently active workers to finish their current inputs. If a worker is
+     * still active after the timeout, an attempt is made to forecefully terminate its thread.
+     * After this, the job will transition to {@code CANCELLED} status.
+     * @param timeoutSeconds The number of seconds to wait before forcefully terminating a worker's thread.
+     * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
+     * finished in the meantime.
+     */
     public boolean cancelForce(int timeoutSeconds) {
         return doCancel(timeoutSeconds);
     }
@@ -701,6 +1194,14 @@ public class REPLJob implements Serializable {
         return true;
     }
 
+    /**
+     * Pauses a running job. The job will immediately transition to {@code PAUSING} state and workers will no longer be
+     * supplied with new inputs. After all workers have finisihed their current inputs, the job will transition to
+     * {@code PAUSED}. Note that jobs without inputs can't be paused. The invocation will raise an exception in this
+     * case.
+     * @return A flag indicating whether the job was newly paused, or whether no actual change was made (e.g. because it
+     * had already been paused).
+     */
     @SuppressWarnings("UnusedReturnValue")
     public boolean pause() {
         if (inputs == null) throw new RuntimeException("Jobs without inputs can't be paused");
@@ -715,6 +1216,12 @@ public class REPLJob implements Serializable {
         return true;
     }
 
+    /**
+     * Restarts processing after a job has been paused. Note that jobs without inputs can't be paused. The invocation
+     * will raise an exception in this case.
+     * @return The length of this pause period in milliseconds, or {@code null} if the job was not actually unpaused
+     * (e.g. because it was not actually paused before).
+     */
     @SuppressWarnings("UnusedReturnValue")
     public Long unpause() {
         return unpause(true);
@@ -737,14 +1244,28 @@ public class REPLJob implements Serializable {
         return d;
     }
 
+    /**
+     * Get the job's key.
+     * @return The job's key.
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * Get the job's concurrency level.
+     * @return The job's concurrency level.
+     */
     public synchronized int getConcurrency() {
         return concurrency;
     }
 
+    /**
+     * Set the job's concurrency level. This method is safe to use while the job is running, unless you are using
+     * {@link REPLJobCallbackAutoTune the Auto Tune feature}. If you reduce a job's
+     * concurrency, your change will take effect gradually as old workers finish their prior input.
+     * @param concurrency The new concurrency level.
+     */
     public synchronized void setConcurrency(int concurrency) {
         if (concurrency < 1) throw new IllegalArgumentException("concurrency must be > 0");
         if (executor != null) {
@@ -758,55 +1279,109 @@ public class REPLJob implements Serializable {
         this.concurrency = concurrency;
     }
 
+    /**
+     * Get the job's name.
+     * @return The job's name.
+     */
     public String getName() {
         return name;
     }
-    
+
+    /**
+     * Gets the job's current progress callback.
+     * @return The job's current progress callback.
+     */
     public Consumer<JobEvent> getProgressCallback() {
         return progressCallback;
     }
 
+    /**
+     * Sets the job's progress callback. This method is safe to use while the job is active.
+     * @param progressCallback The new progress callback.
+     */
     public void setProgressCallback(Consumer<JobEvent> progressCallback) {
         this.progressCallback = progressCallback;
     }
 
+    /**
+     * For internal purposes only. <b>Do not use.</b>
+     * @param internalCallback For internal purposes only.
+     */
     public synchronized void setInternalCallback(Consumer<JobEvent> internalCallback) {
         if (startTimestamp != null) throw new RuntimeException("Can't change the internal callback after the job has started. This methods is for internal use only. You should generally use setProgressCallback() instead.");
         this.internalCallback = internalCallback;
     }
 
+    /**
+     * For internal purposes only. <b>Do not use.</b>
+     * @return The internal callback.
+     */
     public Consumer<JobEvent> getInternalCallback() {
         return internalCallback;
     }
 
+    /**
+     * Gets the list of the job's inputs.
+     * @return The job's input as an unmodifiable list.
+     */
     public List<Serializable> getInputs() {
         return inputs != null ? Collections.unmodifiableList(Arrays.asList(inputs)) : null;
     }
 
+    /**
+     * Gets the list of the job's results.
+     * @return The job's results as an unmodifiable list.
+     */
     public List<InputResult> getResults() {
         return results != null ? Collections.unmodifiableList(Arrays.asList(results)) : null;
     }
 
+    /**
+     * Get the state file of this job.
+     * @return The state file of this job.
+     */
     public File getStateFile() {
         return Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + this.key + "." + STATE_FILE_SUFFIX).toFile();
     }
 
+    /**
+     * Get the job's private log, which contains messages logged with {@link REPLJob#info(Object...)} and similar methods.
+     * @return The job's private log.
+     */
     public List<REPLLogEntry> getJobLog() {
         return new ArrayList<>(jobLog);
     }
 
+    /**
+     * Returns a future that you can wait on. It will be completed as soon as the job has finished.
+     * @return The future, or {@code null} if the job has not yet been started.
+     */
     public CompletableFuture<JobProgress> getFuture() {
         return future;
     }
 
+    /**
+     * Gets the key of the job which was resumed with this instance.
+     * @return The previous key, or {@code null} if this job did not resume another one.
+     */
     public String getResumedKey() {
         return resumedKey;
     }
 
+    /**
+     * Gets the time at which this instance was created. This is not the start time, which you can instead
+     * determine from {@link REPLJob#getProgress()}.
+     * @return The time of the job's instantiation.
+     */
     public Instant getCreatedTimestamp() {
         return createdTimestamp;
     }
 
+    /**
+     * Allows serializing this object to an {@link ObjectOutputStream}.
+     * @param out The output stream.
+     * @throws IOException Data could not be written.
+     */
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeObject(key);
@@ -816,6 +1391,12 @@ public class REPLJob implements Serializable {
         out.writeObject(inputs);
     }
 
+    /**
+     * Allows deserializing this object from an {@link ObjectInputStream}.
+     * @param in The input stream.
+     * @throws IOException Data could not be read.
+     * @throws ClassNotFoundException A class could not be loaded.
+     */
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         key = (String) in.readObject();
@@ -831,10 +1412,19 @@ public class REPLJob implements Serializable {
         return key + " (" + name + ")";
     }
 
+    /**
+     * Returns the latest entry from the job's private log.
+     * @return The latest log entry.
+     */
     public REPLLogEntry getLastLogEntry() {
         return lastLogEntry;
     }
 
+    /**
+     * Logs a message with log level {@code TRACE} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry trace(Object... args) {
         if (args != null && args.length > 0 && args[0] instanceof String s) args[0] = "Job " + key + ": " + s;
         REPLLogEntry e = REPLLog.trace(args);
@@ -842,6 +1432,11 @@ public class REPLJob implements Serializable {
         return e;
     }
 
+    /**
+     * Logs a message with log level {@code DEBUG} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry debug(Object... args) {
         if (args != null && args.length > 0 && args[0] instanceof String s) args[0] = "Job " + key + ": " + s;
         REPLLogEntry e = REPLLog.debug(args);
@@ -850,6 +1445,11 @@ public class REPLJob implements Serializable {
 
     }
 
+    /**
+     * Logs a message with log level {@code INFO} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry info(Object... args) {
         if (args != null && args.length > 0 && args[0] instanceof String s) args[0] = "Job " + key + ": " + s;
         REPLLogEntry e = REPLLog.info(args);
@@ -857,7 +1457,12 @@ public class REPLJob implements Serializable {
         return e;
 
     }
-    
+
+    /**
+     * Logs a message with log level {@code WARN} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry warn(Object... args) {
         if (args != null && args.length > 0 && args[0] instanceof String s) args[0] = "Job " + key + ": " + s;
         REPLLogEntry e = REPLLog.warn(args);
@@ -866,6 +1471,11 @@ public class REPLJob implements Serializable {
 
     }
 
+    /**
+     * Logs a message with log level {@code ERROR} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry error(Object... args) {
         if (args != null && args.length > 0 && args[0] instanceof String s) args[0] = "Job " + key + ": " + s;
         REPLLogEntry e = REPLLog.error(args);
@@ -873,14 +1483,30 @@ public class REPLJob implements Serializable {
         return e;
     }
 
+    /**
+     * Logs a message with log level {@code INFO} to the global REPL log, as well as the job's private persistent log.
+     * @param args The log message.
+     * @return The log entry which has been persisted to the logs.
+     */
     public REPLLogEntry log(Object... args) {
         return info(args);
     }
 
+    /**
+     * Logs a given message to the global REPL log, as well as the job's private persistent log.
+     * @param entry The log message.
+     */
     public void log(REPLLogEntry entry) {
         log(entry, DEFAULT_LOG_TARGETS);
     }
 
+
+    /**
+     * Logs a given message to the global REPL log, as well as the job's private persistent log.
+     * @param entry The log message.
+     * @param targets The log targets. The job's internal log is always implicitly a target.
+     * @param streams Additional PrintStreams that will receive this message.
+     */
     public void log(REPLLogEntry entry, Set<LOG_TARGETS> targets, PrintStream... streams) {
         REPLLog.log(entry, targets, streams);
         doLog(entry);

@@ -1,6 +1,6 @@
 # Extending your Target with Groovy Classes
 
-You can use the REPL's bundeled Groovy environment to extend your target application with your own Groovy classes.
+You can use the REPL's bundled Groovy environment to extend your target application with your own Groovy classes.
 Those classes might either be entirely new - ready to be integrated using the application's own dependency injection
 mechanism - or they might be new versions of the application's own classes, which you can tweak to your liking. When you
 override a pre-existing class, you can alter the application's behavior even if it does not provide a mechanism for
@@ -125,7 +125,7 @@ with a special annotation:
 > The result of this transformation is that your Groovy class will replace the target class in the
 > application, while the functionality of the target continues to be available to you from your Groovy class.
 > You only have to override the methods that you would like to alter and can inherit the rest.
-> One may invoke it's methods via `super()`, including access to all its private methods and fields, which cau-repl will
+> One may invoke its methods via `super()`, including access to all its private methods and fields, which cau-repl will
 > transparently patch to `public` access.<br/>
 > You do not have to import this annotation manually. It is always available.
 > 
@@ -252,7 +252,7 @@ class Example {
 }
 ```
 
-**Related Classes:** [REPLBreakpoint](TODO) provides additional functionality related to breakpoints.
+**Related Classes:** [REPLBreakpoint](../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html) provides additional functionality related to breakpoints.
 
 ## Updating methods at runtime
 
@@ -269,7 +269,7 @@ implementation and have it take effect everywhere in the JVM - including from Ja
 > `@Dynamize`
 >
 > Classes that have this annotation are transparently augmented with a dynamic method dispatcher, enabling you to update
-> a method's code and have the change be visible from the non-dymanic Java world in your JVM without restarting the
+> a method's code and have the change be visible from the non-dynamic Java world in your JVM without restarting the
 > application.<br/>
 > You do not have to import this annotation manually. It is always available.
 >

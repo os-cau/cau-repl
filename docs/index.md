@@ -10,7 +10,7 @@ The cau-repl comes bundled with an additional [MyCoRe](https://mycore.de) module
 
 > **This project is in a very early stage: expect bugs.**
 
-As of today, testing was exclusively on Linux. While the code is intended to be OS agnostic, there will certainly be
+As of today, testing was exclusively on Linux. While the code is intended to be OS-agnostic, there will certainly be
 issues if you run it on Windows (it might run fine on the WSL, though). Pull requests for compatibility are welcome!
 
 Testing of the MyCoRe plugin was until now conducted only in a Tomcat environment.
@@ -116,7 +116,7 @@ Your commands run directly in MyCoRe's JVM. Try pinging a Solr core:
     groovy:000> MCRSolrClientFactory.mainSolrClient.ping()
     ===> {responseHeader={zkConnected=null,status=0,QTime=13,params={q={!lucene}*:*,distrib=false,df=allMeta,facet.field=mods.genre,echoParams=all,fl=*,score,sort=score desc, mods.dateIssued desc,facet.mincount=1,rows=20,wt=javabin,version=2,facet=true,rid=-26}},status=OK}
 
-Numerous helper functions are avaliable. Go retrieve a document and inspect it:
+Numerous helper functions are available. Go retrieve a document and inspect it:
 
     groovy:000> doc = mcrxml("mods", filter=".[//mods:title='SOMETITLEHERE']")[0]
     ===> [Document:  No DOCTYPE declaration, Root is [Element: <mycoreobject/>]]

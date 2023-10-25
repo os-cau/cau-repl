@@ -29,10 +29,16 @@ import static de.uni_kiel.rz.fdr.repl.Helpers.darkInvocation;
 import static de.uni_kiel.rz.fdr.repl.Helpers.isPatchedClass;
 import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
 
+/**
+ * Use this class to compile a directory of Groovy sources.
+ */
 public class GroovySourceDirectory {
 
+    /**
+     * All the Groovy classes that were successfully compiled by all GroovySourceDirectory instances.
+     */
     public static Set<Class<?>> groovyClasses = new ConcurrentHashMap<Class<?>, Boolean>().keySet(true);
-    public static boolean KEEP_TEMPFILES = false;
+    private static boolean KEEP_TEMPFILES = false;
 
 
     private final Path root;
@@ -43,6 +49,13 @@ public class GroovySourceDirectory {
     private final boolean deferredMetaClasses;
     private final boolean reorderSources;
 
+    /**
+     * Compiles the Groovy sources in a directory and its subdirectories, loading it into a private ClassLoader.
+     * @param root The directory or alternatively a single file to compile.
+     * @throws IOException A file or directory can't be accessed.
+     * @throws IllegalAccessException There was a problem loading a class.
+     * @throws RuntimeException When your sources caused a compilation error.
+     */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root) throws IOException, IllegalAccessException {
         this.root = root.toAbsolutePath();
@@ -53,6 +66,14 @@ public class GroovySourceDirectory {
         compile();
     }
 
+    /**
+     * Compiles the Groovy sources in a directory and its subdirectories.
+     * @param root The directory or alternatively a single file to compile.
+     * @param classLoader The ClassLoader that the compiled classes will be put in.
+     * @throws IOException A file or directory can't be accessed.
+     * @throws IllegalAccessException There was a problem loading a class.
+     * @throws RuntimeException When your sources caused a compilation error.
+     */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root, ClassLoader classLoader) throws IOException, IllegalAccessException {
         this.root = root.toAbsolutePath();
@@ -63,6 +84,15 @@ public class GroovySourceDirectory {
         compile();
     }
 
+    /**
+     * Compiles the Groovy sources in a directory and its subdirectories.
+     * @param root The directory or alternatively a single file to compile.
+     * @param classLoader The ClassLoader that the compiled classes will be put in.
+     * @param patcheeClassPath A custom class path that contains the target classes of the {@link de.uni_kiel.rz.fdr.repl.Patches @Patches} annotation.
+     * @throws IOException A file or directory can't be accessed.
+     * @throws IllegalAccessException There was a problem loading a class.
+     * @throws RuntimeException When your sources caused a compilation error.
+     */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath) throws IOException, IllegalAccessException {
         this.root = root.toAbsolutePath();
@@ -73,6 +103,19 @@ public class GroovySourceDirectory {
         compile();
     }
 
+    /**
+     * Compiles the Groovy sources in a directory and its subdirectories.
+     * @param root The directory or alternatively a single file to compile.
+     * @param classLoader The ClassLoader that the compiled classes will be put in.
+     * @param patcheeClassPath A custom class path that contains the target classes of the {@link de.uni_kiel.rz.fdr.repl.Patches @Patches} annotation.
+     * @param deferredMetaClasses If set, the compiled Groovy classes will not receive our {@link GroovyDynamizedExpando} metaclass yet.
+     *                            This postpones Java's class initialization, allowing you to trigger it at a later more convenient point in time.
+     *                            You must call {@link GroovySourceDirectory#addDynamizedMetaClass(Class)} on your dynamized classes manually before you can
+     *                            use them safely, which is also a method to trigger the initialization.
+     * @throws IOException A file or directory can't be accessed.
+     * @throws IllegalAccessException There was a problem loading a class.
+     * @throws RuntimeException When your sources caused a compilation error.
+     */
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses) throws IOException, IllegalAccessException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
@@ -82,6 +125,22 @@ public class GroovySourceDirectory {
         compile();
     }
 
+    /**
+     * Compiles the Groovy sources in a directory and its subdirectories.
+     * @param root The directory or alternatively a single file to compile.
+     * @param classLoader The ClassLoader that the compiled classes will be put in.
+     * @param patcheeClassPath A custom class path that contains the target classes of the {@link de.uni_kiel.rz.fdr.repl.Patches @Patches} annotation.
+     * @param deferredMetaClasses If set, the compiled Groovy classes will not receive our {@link GroovyDynamizedExpando} metaclass yet.
+     *                            This postpones Java's class initialization, allowing you to trigger it at a later more convenient point in time.
+     *                            You must call {@link GroovySourceDirectory#addDynamizedMetaClass(Class)} on your classes manually before you can
+     *                            use them safely, which is also a method to trigger the initialization.
+     * @param reorderSources Can be set to {@code false} to disable the source reordering logic. Only use this for debugging.
+     *                       Your sources will probably not compile correctly if disabled.
+     * @throws IOException A file or directory can't be accessed.
+     * @throws InvocationTargetException There was a problem loading a class.
+     * @throws IllegalAccessException There was a problem loading a class.
+     * @throws RuntimeException When your sources caused a compilation error.
+     */
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses, boolean reorderSources) throws IOException, InvocationTargetException, IllegalAccessException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
@@ -91,17 +150,34 @@ public class GroovySourceDirectory {
         compile();
     }
 
+    /**
+     * Get the ClassLoader of this directory's Groovy classes.
+     * @return The ClassLoader of this directory's Groovy classes.
+     */
     @SuppressWarnings("unused")
     public ClassLoader getClassLoader() {
         return classLoader;
     }
 
+    /**
+     * Get a list of all the Groovy source files found in this directory.
+     * @return A list of all the Groovy source files found in this directory.
+     */
     @SuppressWarnings("unused")
     public List<File> getSources() { return List.copyOf(sources); }
 
+    /**
+     * Get the list of the Groovy classes that were loaded by this instance.
+     * @return the list of the Groovy classes that were loaded by this instance.
+     */
     @SuppressWarnings("unused")
     public List<Class<?>> getClasses() { return List.copyOf(classes); }
 
+    /**
+     * Add a {@link GroovyDynamizedExpando} meta class to a compiled groovy class. You need to do this manually for
+     * dynamized classes if you explicitly deferred this in the settings.
+     * @param theClass The class to augment with the meta class.
+     */
     public static void addDynamizedMetaClass(Class<?> theClass) {
         // force static initializers of our class to run in a controlled way before adding the MetaClass will trigger it behind the scenes, silently dropping the initializer's exceptions
         try {

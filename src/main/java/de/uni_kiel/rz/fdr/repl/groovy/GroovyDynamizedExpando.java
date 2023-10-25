@@ -14,9 +14,14 @@ import static de.uni_kiel.rz.fdr.repl.REPLLog.TRACE;
 import static de.uni_kiel.rz.fdr.repl.REPLLog.TRACE_DYNAMIZE;
 
 // XXX remember that plain java subclasses of dynamized classes do not get a GroovyDynamizedExpando MetaClass
+
+/**
+ * This is the Groovy meta class that cau-repl uses for Groovy classes that it compiles. It is derived from Groovy's
+ * {@code ExpandoMetaClass} and allows for dynamization.
+ */
 public class GroovyDynamizedExpando extends ExpandoMetaClass {
 
-    public static String CONSTRUCTOR_METHOD = "<init>";
+    private static String CONSTRUCTOR_METHOD = "<init>";
 
     public GroovyDynamizedExpando(Class theClass) {
         super(theClass, true, true);
@@ -41,6 +46,7 @@ public class GroovyDynamizedExpando extends ExpandoMetaClass {
         if (TRACE || TRACE_DYNAMIZE) REPLLog.trace("[{}] registerInstanceMethod {}", theClass.getName(), metaMethod);
         super.registerInstanceMethod(metaMethod);
     }
+
 
     @Override
     public void registerInstanceMethod(String name, Closure closure) {

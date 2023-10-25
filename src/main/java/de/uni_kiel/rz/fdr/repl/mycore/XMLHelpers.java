@@ -14,17 +14,34 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Some helper functions related to JDOM XML.
+ */
 public class XMLHelpers {
 
-    // set the namespace of child and all of its descendants to the namespace of reference, but only if *none* of
-    // child or its descendants has a defined namespace
+    // utility class only
+    private XMLHelpers() {}
+
+    /**
+     * Sets the namespace of a child node and all of its descendants to the namespace of reference, but only if
+     * <b>none</b> of the child or its descendants has a defined namespace.
+     * @param reference The reference node for the namespace.
+     * @param child The child that will recursively inherit the namspace.
+     * @param <T> Class of the child.
+     * @return The child, whether modified or not.
+     */
     public static <T> T inheritNamespace(NamespaceAware reference, T child) {
         return inheritNamespace(reference, List.of(child)).stream().findFirst().orElseThrow();
     }
 
-    // for each child in children:
-    // set the namespace of child and all of its descendants to the namespace of reference, but only if *none* of
-    // the children or its descendants has a defined namespace.
+    /**
+     * For each child in children: sets the namespace of a child node and all of its descendants to the namespace of
+     * reference, but only if <b>none</b> of the children or their descendants have a defined namespace.
+     * @param reference The reference node for the namespace.
+     * @param children The child that will recursively inherit the namspace.
+     * @param <T> Class of the children.
+     * @return The childrem, whether modified or not.
+     */
     public static <T> Collection<T> inheritNamespace(NamespaceAware reference, Collection<T> children) {
         Namespace ns = null;
         if (reference instanceof Element e) ns = e.getNamespace();
@@ -48,7 +65,11 @@ public class XMLHelpers {
         return children;
     }
 
-    // returns all elements and attributes below, including root itself
+    /**
+     * Returns all elements and attributes below the root, including the root itself.
+     * @param root The root node to recurse from.
+     * @return The list of the sub-elements and attributes, including the root itself.
+     */
     public static List<NamespaceAware> recurse(NamespaceAware root) {
         if (root instanceof Parent p) {
             List<NamespaceAware> all = new ArrayList<>(List.of(p));
@@ -63,7 +84,7 @@ public class XMLHelpers {
         }
     }
 
-    public static List<Content> stringToElement(String s, NamespaceAware nsReference) throws JDOMException {
+    private static List<Content> stringToElement(String s, NamespaceAware nsReference) throws JDOMException {
         Element nsRoot = new Element("root");
         if (nsReference != null) for (Namespace ns : nsReference.getNamespacesInScope()) nsRoot.addNamespaceDeclaration(ns);
         String nsRootStr = new XMLOutputter(org.jdom2.output.Format.getRawFormat()).outputString(nsRoot).trim();
@@ -79,7 +100,7 @@ public class XMLHelpers {
         return List.copyOf(doc.getRootElement().getContent()).stream().map(Content::detach).toList();
     }
 
-    public static Collection<Content> collectionToContent(Collection<?> content, NamespaceAware nsReference) throws JDOMException {
+    private static Collection<Content> collectionToContent(Collection<?> content, NamespaceAware nsReference) throws JDOMException {
         List<Content> list = new ArrayList<>();
         for (Object x : content) {
             if (x instanceof String s) {
@@ -95,10 +116,32 @@ public class XMLHelpers {
         return list;
     }
 
+    /**
+     * Adds content to a JDOM node, automatically coverting XML-like strings to JDOM elements.
+     * @param parent The parent node to which the content will be added.
+     * @param content The content that will be added, either JDOM {@code Content} or {@code String}. The latter
+     *                will be automatically converted to a JDOM {@code Element} if it starts with "{@code <}" and
+     *                ends with "{@code >}".
+     * @param nsInherit Controls whether the content shall inherit the parent's XML namespace according to the rules of
+     *                  {@link XMLHelpers#inheritNamespace(NamespaceAware, Object) inheritNamespace()}.
+     * @return The parent node, with the added content.
+     * @throws JDOMException If your XML-like string is malformed.
+     */
     public static Parent addStringOrElement(Parent parent, Object content, boolean nsInherit) throws JDOMException {
         return addStringOrElement(parent, List.of(content), nsInherit);
     }
 
+    /**
+     * Adds content to a JDOM node, automatically coverting XML-like strings to JDOM elements.
+     * @param parent The parent node to which the content will be added.
+     * @param content The content that will be added, either JDOM {@code Content} or {@code String}. The latter
+     *                will be automatically converted to a JDOM {@code Element} if it starts with "{@code <}" and
+     *                ends with "{@code >}".
+     * @param nsInherit Controls whether the content shall inherit the parent's XML namespace according to the rules of
+     *                  {@link XMLHelpers#inheritNamespace(NamespaceAware, Object) inheritNamespace()}.
+     * @return The parent node, with the added content.
+     * @throws JDOMException If any of your XML-like strings are malformed.
+     */
     public static Parent addStringOrElement(Parent parent, Collection<?> content, boolean nsInherit) throws JDOMException {
         if (parent instanceof Element e) {
             e.addContent(collectionToContent(content, nsInherit ? parent : null));
@@ -108,10 +151,32 @@ public class XMLHelpers {
         return parent;
     }
 
+    /**
+     * Sets the content of a JDOM node, automatically coverting XML-like strings to JDOM elements.
+     * @param parent The parent node whose content will be set.
+     * @param content The content that will be added, either JDOM {@code Content} or {@code String}. The latter
+     *                will be automatically converted to a JDOM {@code Element} if it starts with "{@code <}" and
+     *                ends with "{@code >}".
+     * @param nsInherit Controls whether the content shall inherit the parent's XML namespace according to the rules of
+     *                  {@link XMLHelpers#inheritNamespace(NamespaceAware, Collection) inheritNamespace()}.
+     * @return The parent node, with the altered content.
+     * @throws JDOMException If your XML-like string is malformed.
+     */
     public static Parent setStringOrElement(Parent parent, Object content, boolean nsInherit) throws JDOMException {
         return setStringOrElement(parent, List.of(content), nsInherit);
     }
 
+    /**
+     * Sets the content of a JDOM node, automatically coverting XML-like strings to JDOM elements.
+     * @param parent The parent node whose content will be set.
+     * @param content The content that will be added, either JDOM {@code Content} or {@code String}. The latter
+     *                will be automatically converted to a JDOM {@code Element} if it starts with "{@code <}" and
+     *                ends with "{@code >}".
+     * @param nsInherit Controls whether the content shall inherit the parent's XML namespace according to the rules of
+     *                  {@link XMLHelpers#inheritNamespace(NamespaceAware, Object) inheritNamespace()}.
+     * @return The parent node, with the altered content.
+     * @throws JDOMException If your XML-like string is malformed.
+     */
     public static Parent setStringOrElement(Parent parent, Collection<?> content, boolean nsInherit) throws JDOMException {
         if (parent instanceof Element e) {
             e.setContent(collectionToContent(content, nsInherit ? parent : null));

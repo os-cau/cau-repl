@@ -2,6 +2,7 @@ site_name: cau-repl
 # TODO site_url: ''
 repo_url: 'https://github.com/os-cau/cau-repl'
 site_description: 'Documentation for the cau-repl software'
+copyright: Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.
 nav:
   - About: index.md
   - Installation: installation.md
@@ -9,6 +10,7 @@ nav:
   - Using the REPL: repl.md
   - MyCoRe Integration: mycore.md
   - Extending your Target: extending.md
+  - Java API Docs: apidocs/index.html
 extra_css:
   - custom.css
 remote_branch: gh-pages

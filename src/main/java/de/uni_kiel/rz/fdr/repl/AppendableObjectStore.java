@@ -12,7 +12,7 @@ import java.util.zip.GZIPOutputStream;
 
 import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
 
-public class AppendableObjectStore implements Iterator<Serializable>, AutoCloseable {
+class AppendableObjectStore implements Iterator<Serializable>, AutoCloseable {
 
     public static final byte[] MAGIC = new byte[]{(byte) 0xAC, (byte) 0xED, (byte) 0xBE, (byte) 0xEF, (byte) 0xAF, (byte) 0xFE, (byte) 0xFE, (byte) 0xED};
     public static final int MAX_QUEUED_ITEMS = 100;
