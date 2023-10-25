@@ -161,6 +161,8 @@ MCRDerivate.metaClass.getAt << { List q -> return _CAUREPL_setRo(delegate.create
 
 MCRDerivate.metaClass.call << { -> return delegate.createXML().call() }
 
+MCRDerivate.metaClass.getFiles << { -> return mcrderfiles(delegate.id) }
+
 org.mycore.datamodel.metadata.MCRObjectStructure.metaClass.getAt << { String q -> return _CAUREPL_setRo(delegate.createXML().getAt(q)) }
 
 org.mycore.datamodel.metadata.MCRObjectStructure.metaClass.getAt << { List q -> return _CAUREPL_setRo(delegate.createXML().getAt(q)) }
@@ -493,6 +495,30 @@ def mcrderxml(selector=null, filter=null) {
     def x = mcrderstreamxml(selector, filter).toList()
     if (selector instanceof MCRObjectID || (selector instanceof String && MCRObjectID.isValid(selector))) return x.isEmpty() ? null : x.get(0) as Document
     return x as List<Document>
+}
+
+
+def mcrderfiles(def... selector) {
+    def ids = mcrderids(selector)
+    if (!ids) throw new RuntimeException("Derivate selector ${selector} matched nothing")
+    def attrResolver = { p -> try { return java.nio.file.Files.readAttributes(p, org.mycore.datamodel.niofs.MCRFileAttributes.class) } catch (Exception e) { return null } }
+    def files = []
+    for (def id : ids) {
+        def root = org.mycore.datamodel.niofs.MCRPath.getPath(id.toString(), "/")
+        try (def ds = java.nio.file.Files.walk(root)) {
+            files.addAll(
+                    ds
+                            .map(p -> (org.mycore.datamodel.niofs.MCRPath) p)
+                            .collect(java.util.stream.Collectors.toMap(p -> p, attrResolver))
+                            .entrySet()
+                            .stream()
+                            .filter(x -> x == null || !x.value.isDirectory())
+                            .map(x -> [derid: id, path: x.key, attributes: x.value])
+                            .toList()
+            )
+        }
+    }
+    return files
 }
 
 

@@ -156,6 +156,28 @@ functions related to those kinds of tasks.
 >
 > **Returns** a Stream of MCRDerivate instances matching your arguments in repository default order.
 
+<a name="mcrderfiles"></a>**Retrieving derivates' files**
+> **Function**
+>
+> `mcrderfiles(...selector)`
+>
+> Retrieve all files of the derivate(s) matching the `selector`.
+>
+> **Positional Parameters**
+>
+> `String | Collection<String> selector` *optional, repeatable* - The selectors to search for. See the [mcrderids()](#mcrderids)
+> function for details.
+>
+> **Returns** in a single list: for each file a `Map` containing the keys `derid` (as `MCRObjectID`), `path` (as `MCRPath`) and `attributes`
+> (as `MCRFileAttributes`).
+
+The same functionality is also mirrored for Derivate instances:
+
+> **File Mixins for org.mycore.datamodel.metadata.MCRDerivate**
+>
+> `derivate.files` invoked on an `MCRDerivate` instance also returns the derivate's files in the same format as [#mcrderfiles](mcrderfiles()). 
+
+
 **Examples:**
 ```text
 // generating a list of all "foo_mods" documents
@@ -171,6 +193,10 @@ groovy:000> mcrstream(null, "/mycoreobject/structure/derobjects/derobject[maindo
 groovy:000> mcrmods("mods", {it.getServiceFlag("createdby").equals("administrator")})
 ===> [MCRMODSWrapper(foo_mods_00000004), MCRMODSWrapper(foo_mods_00000005), MCRMODSWrapper(foo_mods_00000009), 
 [...]
+
+// find all derivates' files whose on-disk md5 checksum does not match the on-record checksum
+groovy:000> mcrderfiles().findAll{ !it.path.toPhysicalPath().toFile().bytes.md5().equals(it.attributes.md5sum) }
+===> []
 ```
 
 ------------------------------
