@@ -21,7 +21,7 @@ import static de.uni_kiel.rz.fdr.repl.REPLLog.TRACE_DYNAMIZE;
  */
 public class GroovyDynamizedExpando extends ExpandoMetaClass {
 
-    private static String CONSTRUCTOR_METHOD = "<init>";
+    private static final String CONSTRUCTOR_METHOD = "<init>";
 
     public GroovyDynamizedExpando(Class theClass) {
         super(theClass, true, true);

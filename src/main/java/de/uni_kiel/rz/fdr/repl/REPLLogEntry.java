@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 @SuppressWarnings("unused")
 public class REPLLogEntry implements Serializable {
 
-    private static String TRACE_PREFIX = "=====";
+    private static final String TRACE_PREFIX = "=====";
 
     /**
      * The different levels of criticality for a log message.

@@ -413,7 +413,8 @@ def mcrids(Map params=[:], Object... selector) {
         def isDer = x.toString().contains("_derivate_") || x.toString().endsWith("_derivate") || x.toString().equals("derivate")
         if (!derivates && isDer) continue
         if (!documents && !isDer) continue
-        if (MCRObjectID.isValid(x.toString())) ids.add(MCRObjectID.getInstance(x))
+        if (x instanceof MCRObjectID) ids.add(x)
+        else if (MCRObjectID.isValid(x.toString())) ids.add(MCRObjectID.getInstance(x.toString()))
         else if (x.count("_") > 1) throw new RuntimeException("malformed mcr object id: " + x)
         else if (x.contains("_")) ids.addAll(MCRXMLMetadataManager.instance().listIDsForBase(x).collect({MCRObjectID.getInstance(it)}))
         else ids.addAll(MCRXMLMetadataManager.instance().listIDsOfType(x).collect({MCRObjectID.getInstance(it)}))
