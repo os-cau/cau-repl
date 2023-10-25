@@ -26,7 +26,6 @@ import org.apache.sshd.common.session.Session;
 import org.apache.sshd.common.session.SessionListener;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthFactory;
-import org.apache.sshd.server.auth.UserAuthNoneFactory;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.auth.password.UserAuthPasswordFactory;
 import org.apache.sshd.server.channel.ChannelSession;
@@ -218,7 +217,8 @@ public class GroovyShellService {
             sshd.setPasswordAuthenticator(this.passwordAuthenticator);
             auth = new UserAuthPasswordFactory();
         } else {
-            auth = new UserAuthNoneFactory();
+            throw new RuntimeException("will not start ssh service without authenticator");
+            //disabled for security: auth = new UserAuthNoneFactory();
         }
         sshd.setUserAuthFactories(singletonList(auth));
     }
