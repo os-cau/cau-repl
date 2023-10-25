@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>MyCoRe Integration - cau-repl</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "MyCoRe Integration";
+        var mkdocs_page_input_path = "mycore.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../repl/">Using the REPL</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">MyCoRe Integration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#retrieving-documents">Retrieving Documents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-xml">Working with XML</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#changing-documents">Changing documents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#solr-queries">Solr Queries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sessions-transactions-jobs">Sessions, Transactions, Jobs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mycores-native-cli">MyCoRe's native CLI</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#compiling">Compiling</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../extending/">Extending your Target</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">MyCoRe Integration</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/mycore.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="mycore-integration">MyCoRe Integration</h1>
+<p>If you compile cau-repl with GPL code enabled (the <code>-gpl</code> version), the REPL supports some additional command that
+provide better integration with <a href="https://www.mycore.de">MyCoRe</a> than the default generic version. As a MyCoRe user, you
+should <a href="../installation/#mycore-plugin">install the REPL as a MyCoRe plugin</a>. In this section you will find outlined some
+additional features that you can use.</p>
+<hr />
+<h2 id="retrieving-documents">Retrieving Documents</h2>
+<p>There are numerous functions available for retrieving Documents from you repository. If you intend on working with a
+document's XML structure, please refer to the <a href="#working-with-xml">Working with XML</a> section, which describes the 
+functions related to those kinds of tasks.</p>
+<p><a name="mcrids"></a><strong>Get document IDs</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrids(...selector)</code></p>
+<p>This function returns the IDs of all documents (not including derivates) that match the given <code>selector</code>.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code><em>optional, repeatable</em> - The selectors to search for. Each selector parameter
+instance can either be a String or a Collection of multiple selectors. Valid selectors are MyCoRe type strings ("<code>mods</code>"), base
+strings ("<code>foo_mods</code>") and strings representing MyCoRe IDs ("<code>foo_mods_00000001</code>").<br/>
+If you omit this parameter, all documents' IDs (excluding derivates) will be returned.</p>
+<p><strong>Returns</strong> a list of the <code>MCRObjectID</code> IDs from your repository's documents matching any of your selectors.</p>
+</blockquote>
+<p><a name="mcrderids"></a><strong>Get derivate IDs</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrderids(...selector)</code></p>
+<p>This function returns the IDs of all derivates that match the given <code>selector</code>.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code><em>optional, repeatable</em> - The selectors to search for. Each selector parameter
+instance can either be a String or a Collection of multiple selectors. Valid selectors are MyCoRe type strings
+("<code>derivate</code>"), base strings ("<code>foo_derivate</code>") and strings representing MyCoRe IDs ("<code>foo_derivate_00000001</code>").<br/>
+If you omit this parameter, all derivates' IDs will be returned.</p>
+<p><strong>Returns</strong> a list of the <code>MCRObjectID</code> IDs from your repository's derivates matching any of your selectors.</p>
+</blockquote>
+<p><a name="mcrobj"></a><strong>Retrieving documents</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrobj(selector, filter)</code></p>
+<p>This function returns all documents matching both selector and filter arguments.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a> function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. It can either be an XPath
+string (returning only those documents for which its result is not empty), or a Closure (returning only those
+documents for which its results is truthy).<br/>
+If you omit this parameter, exactly the documents matching the <code>selector</code> will be returned.</p>
+<p><strong>Returns</strong> the list of MCRObjects matching your criteria. In the special case where your selector is an MCRObjectID
+or a valid MyCoRe ID in string form, the single result is automatically unwrapped and returned as an MCRObject without
+a list (or <code>null</code> if not matched).</p>
+</blockquote>
+<p><a name="mcrmods"></a><strong>Retrieving MODS documents</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrmods(selector, filter)</code></p>
+<p>This function returns all MODS documents matching both selector and filter arguments.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector = "mods"</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> the list of MCRMODSWrapper objects matching your criteria. In the special case where your selector is an
+MCRObjectID or a valid MyCoRe ID in string form, the single result is automatically unwrapped and returned as an
+MCRMODSWrapper without a list (or <code>null</code> if not matched).</p>
+</blockquote>
+<p><a name="mcrder"></a><strong>Retrieving derivates</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrder(selector, filter)</code></p>
+<p>This function returns all derivates matching both selector and filter arguments.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrderids">mcrderids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> the list of MCRDerivate objects matching your criteria. In the special case where your selector is an
+MCRObjectID or a valid MyCoRe ID in string form, the single result is automatically unwrapped and returned as an
+MCRDerivate without a list (or <code>null</code> if not matched).</p>
+</blockquote>
+<p><a name="mcrstream"></a><strong>Streaming documents</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrstream(selector, filter)</code></p>
+<p>Streams all documents matching both selector and filter arguments. Documents are loaded lazily, so you can abort the
+stream early without having to scan the entire repository.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> a Stream of MCRObject instances matching your arguments in repository default order.</p>
+</blockquote>
+<p><a name="mcrmodsstream"></a><strong>Streaming MODS documents</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrmodsstream(filter, selector)</code></p>
+<p>Streams all MODS documents matching both selector and filter arguments. Documents are loaded lazily, so you can abort
+the stream early without having to scan the entire repository.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector = "mods"</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> a Stream of MCRMODSWrapper instances matching your arguments in repository default order.</p>
+</blockquote>
+<p><a name="mcrderstream"></a><strong>Streaming derivates</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrderstream(filter, selector)</code></p>
+<p>Streams all derivates matching both selector and filter arguments. Derivates are loaded lazily, so you can abort the
+stream early without having to scan the entire repository.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrderids">mcrderids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> a Stream of MCRDerivate instances matching your arguments in repository default order.</p>
+</blockquote>
+<p><a name="mcrderfiles"></a><strong>Retrieving derivates' files</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrderfiles(...selector)</code></p>
+<p>Retrieve all files of the derivate(s) matching the <code>selector</code>.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional, repeatable</em> - The selectors to search for. See the <a href="#mcrderids">mcrderids()</a>
+function for details.</p>
+<p><strong>Returns</strong> in a single list: for each file a <code>Map</code> containing the keys <code>derid</code> (as <code>MCRObjectID</code>), <code>path</code> (as <code>MCRPath</code>) and <code>attributes</code>
+(as <code>MCRFileAttributes</code>).</p>
+</blockquote>
+<p>The same functionality is also mirrored for Derivate instances:</p>
+<blockquote>
+<p><strong>File Mixins for org.mycore.datamodel.metadata.MCRDerivate</strong></p>
+<p><code>derivate.files</code> invoked on an <code>MCRDerivate</code> instance also returns the derivate's files in the same format as <a href="#mcrderfiles">mcrderfiles()</a>. </p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// generating a list of all &quot;foo_mods&quot; documents
+groovy:000&gt; mcrobj(&quot;foo_mods&quot;)
+===&gt; [foo_mods_00000001, foo_mods_00000002, foo_mods_00000003,
+[...]
+
+// finding the first document with a maindoc named 'sample.pdf'
+groovy:000&gt; mcrstream(null, &quot;/mycoreobject/structure/derobjects/derobject[maindoc='sample.pdf']&quot;).findFirst()
+===&gt; Optional[foo_mods_00000101]
+
+// generating a list of all MODS documents that were created by the admin user
+groovy:000&gt; mcrmods(&quot;mods&quot;, {it.getServiceFlag(&quot;createdby&quot;).equals(&quot;administrator&quot;)})
+===&gt; [MCRMODSWrapper(foo_mods_00000004), MCRMODSWrapper(foo_mods_00000005), MCRMODSWrapper(foo_mods_00000009), 
+[...]
+
+// find all derivates' files whose on-disk md5 checksum does not match the on-record checksum
+groovy:000&gt; mcrderfiles().findAll{ !it.path.toPhysicalPath().toFile().bytes.md5().equals(it.attributes.md5sum) }
+===&gt; []
+</code></pre>
+<hr />
+<h2 id="working-with-xml">Working with XML</h2>
+<p>There are specialized functions available for retrieving documents if you plan to work with their XML structure
+directly. In contrast to the functions that were introduced in the last section, these XML-centric functions allow you
+to change the XML directly on the element-level and write your changes back to the repository after you are done.</p>
+<p><a name="mcrxml"></a><strong>Retrieving documents' XML</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrxml(selector, filter)</code></p>
+<p>Retrieves the XML data of the documents matching <code>selector</code> and <code>filter</code>.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> the list of JDOM Document objects matching your criteria. In the special case where your selector is an
+MCRObjectID or a valid MyCoRe ID in string form, the single result is automatically unwrapped and returned as a JDOM
+document without a list (or <code>null</code> if not matched).</p>
+</blockquote>
+<p><a name="mcrderxml"></a><strong>Retrieving derivates' XML</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrderxml(selector, filter)</code></p>
+<p>Retrieves the XML data of the derivates matching <code>selector</code> and <code>filter</code>.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrderids">mcrderids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> the list of JDOM Document objects matching your criteria. In the special case where your selector is an
+MCRObjectID or a valid MyCoRe ID in string form, the single result is automatically unwrapped and returned as a JDOM
+document without a list (or <code>null</code> if not matched).</p>
+</blockquote>
+<p><a name="mcrstreamxml"></a><strong>Streaming documents' XML</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrstreamxml(selector, filter)</code></p>
+<p>Streams the XML representation of all documents matching both selector and filter arguments. Documents are loaded
+lazily, so you can abort the stream early without having to scan the entire repository.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> a Stream of JDOM Document instances matching your arguments in repository default order.</p>
+</blockquote>
+<p><a name="mcrderstreamxml"></a><strong>Streaming derivates' XML</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrderstreamxml(selector, filter)</code></p>
+<p>Streams the XML representation of all derivates matching both selector and filter arguments. Derivates are loaded
+lazily, so you can abort the stream early without having to scan the entire repository.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String | Collection&lt;String&gt; selector</code> <em>optional</em> - The selectors to search for. See the <a href="#mcrderids">mcrids()</a>
+function for details.</p>
+<p><code>String | Closure filter</code> <em>optional</em> - An additional filter to apply after the selector. See the <a href="#mcrobj">mcrobj()</a>
+function for details.</p>
+<p><strong>Returns</strong> a Stream of JDOM Document instances matching your arguments in repository default order.</p>
+</blockquote>
+<p><a name="mcrxslt"></a><strong>Apply an XSLT transform</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrxslt(source, ...stylesheet)</code></p>
+<p>Transforms the XML document <code>source</code> with the XSLT <code>stylesheet</code> and returns the result.</p>
+<p><em>Please Note:</em> This function currently only sets up a simple environment for XSLT transformations. It can't - yet -
+handle MyCoRe stylesheets that need a more complex setup.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Document | MCRObject | MCRDerivate | MCRMODSWrapper | MCRObjectID | String source</code> - The source XML document, which can be
+passed in a variety of formats. When you call this function with a <code>String</code>, there is a special logic in place: if the
+string is a syntactically valid MyCoRe Object ID, the Document referenced by it will be used as the source. If it is
+not a valid ID, the string's content itself will be parsed as an XML document.</p>
+<p><code>String stylesheet</code> <em>optional, repeatable</em> - The names of the XSLT stylesheets to be applied. This function will
+resolve the names with MyCoRe's <code>MCRXSLTransformer.getInstance()</code> method, so the same naming conventions used there
+apply here. If you pass multiple instances of this parameter, the stylesheets will be applied in the same order.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Map&lt;String, String&gt; params = null</code> - You can add some extra parameters that will be set during the XSLT
+transformation. The values from your MyCoRe configuration will always be set by default, as usual, and you don't have
+to specify them here explicitly.</p>
+<p>You can additionally use all the named parameters of the <a href="#mcrdo">mcrdo()</a> function to control the session environment
+for the XSLT transformation. Without any further parameters and in absence of a pre-existing session, the REPL's
+default admin session will be used. If this function is called from a session-context, the pre-existing session will
+be reused instead.</p>
+<p><strong>Returns</strong> the transformed XML as a JDOM <code>Document</code> object.</p>
+</blockquote>
+<p><strong>Interacting with XML Objects</strong></p>
+<blockquote>
+<p><strong>XML Mixins for org.jdom2.Document</strong></p>
+<p><code>doc()</code> - Returns the full XML of <code>Document doc</code> as a <code>String</code>.</p>
+<p><code>doc[]</code> - Returns the structure of the root element of <code>Document doc</code> as a <code>String</code>.</p>
+<p><code>doc[xpath]</code> - Returns the first match of the XPath query <code>String xpath</code> on <code>Document doc</code>.</p>
+<p><code>doc[[xpath]]</code> - Returns all matches of the XPath query <code>String xpath</code> on <code>Document doc</code> as a list.</p>
+<p><code>doc &lt;&lt; element</code> - Sets the root element of <code>Document doc</code> to <code>Element element</code>. You can alternatively pass a <code>String</code>
+in XML syntax to have it converted to an <code>Element</code> automatically.</p>
+<p><code>doc.reload()</code> - Reload <code>Document doc</code> from the repository in-place.</p>
+<p><code>doc.id</code> - Returns the ID of the MyCoRe object contained in <code>Document doc</code> as a <code>String</code>.</p>
+</blockquote>
+<!-- keep me for spacing -->
+<blockquote>
+<p><strong>XML Mixins for org.jdom2.Element</strong></p>
+<p><code>element()</code> - Returns the full XML of <code>Element element</code> as a <code>String</code>.</p>
+<p><code>element[]</code> - Returns the structure of <code>Element element</code> as a <code>String</code>.</p>
+<p><code>element[index]</code> - Returns the child of <code>Element element</code> at position <code>int index</code>. </p>
+<p><code>element[xpath]</code> - Returns the first match of the XPath query <code>String xpath</code> on <code>Element element</code>.</p>
+<p><code>element[[xpath]]</code> - Returns all matches of the XPath query <code>String xpath</code> on <code>Element element</code> as a list.</p>
+<p><code>element &lt;&lt; content</code> - Sets the contents of <code>Element element</code> to
+<code>Content | Attribute | String | Collection&lt;Content | Attribute | String&gt; content</code>.
+If you pass <code>String</code> arguments in XML-like syntax (i.e. starting with <code>&lt;</code> and ending with <code>&gt;</code>), they will
+automatically be converted to an <code>Element</code>. If you do not specify any namespaces in <code>content</code>, all your elements will
+inherit the namespace of <code>element</code>. Once you specify a single namespace, no automatic inheritance will be performed.</p>
+<p><code>element + content</code> - Appends <code>Content | Attribute | String | Collection&lt;Content | Attribute | String&gt; content</code> to the
+contents of <code>element</code>. The <code>+</code> operator behaves somewhat unusually in that it performs this change <strong>in-place</strong>,
+contrary to the usual arithmetic <em>plus</em> operator. The rules for namespace inheritance and <code>String</code> conversion are the
+same as for the <code>&lt;&lt;</code> operator.</p>
+</blockquote>
+<p>To remove an element, JDOM's builtin method <code>Element.detach()</code> may be used.</p>
+<blockquote>
+<p><strong>XML Mixins for org.jdom2.Attribute</strong></p>
+<p><code>attribute()</code> - Returns the value of <code>Attribute attribute</code> as a <code>String</code>.</p>
+<p><code>attribute &lt;&lt; value</code> - Sets the value of <code>Attribute attribute</code> to <code>String value</code>.</p>
+</blockquote>
+<p>To remove an attribute, JDOM's builtin method <code>Attribute.detach()</code> may be used.</p>
+<blockquote>
+<p><strong>XML Mixins for org.jdom2.Text</strong></p>
+<p><code>text()</code> - Returns the value of <code>Text text</code> as a <code>String</code>.</p>
+<p><code>text &lt;&lt; value</code> - Sets the contents of <code>Text text</code> to <code>String value</code>.</p>
+<p><code>text + value</code> - Appends <code>String value</code> to the contents of <code>Text text</code>. The <code>+</code> operator behaves somewhat unusually in
+that it performs this change <strong>in-place</strong>, contrary to the usual arithmetic <em>plus</em> operator.</p>
+</blockquote>
+<p>To remove a text block, JDOM's builtin method <code>Text.detach()</code> may be used.</p>
+<blockquote>
+<p><strong>XML Mixins for org.mycore.datamodel.metadata.MCRObject</strong></p>
+<p><code>MCRObject</code> also mirrors most of the mixins from <code>org.jdom2.Document</code>, except for those that change the XML.</p>
+</blockquote>
+<!-- keep me for spacing -->
+<blockquote>
+<p><strong>XML Mixins for org.mycore.datamodel.metadata.MCRDerivate</strong></p>
+<p><code>MCRDerivate</code> also mirrors most of the mixins from <code>org.jdom2.Document</code>, except for those that change the XML.</p>
+</blockquote>
+<!-- keep me for spacing -->
+<blockquote>
+<p><strong>XML Mixins for org.mycore.mods.MCRMODSWrapper</strong></p>
+<p><code>mods.JDomDocument</code> - Returns the entire <code>Document</code> behind the <code>MCRMODSWrapper mods</code> (i.e. including the parts outside
+of the MODS container).</p>
+<p><code>mods.createXML()</code> - Returns the result of invoking <code>createXML()</code> on the wrapped <code>MCRObject</code>.</p>
+<p><code>MCRMODSWrapper</code> also mirrors most of the mixins from <code>org.jdom2.Document</code>, except for those that change the XML.</p>
+</blockquote>
+<p>If you'd like to change a document's XML, you should use object returned by the <code>mcrxml()</code> function.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// retrieving XML
+groovy:000&gt; x = mcrxml(&quot;foo_mods_00000194&quot;)
+===&gt; [Document:  No DOCTYPE declaration, Root is [Element: &lt;mycoreobject/&gt;]]
+
+// inspecting first level structure
+groovy:000&gt; x[]
+===&gt; [Element: &lt;mycoreobject/&gt;]:
+       [[Text: 
+         ], [Element: &lt;structure/&gt;], [Text: 
+         ], [Element: &lt;metadata/&gt;], [Text: 
+         ], [Element: &lt;service/&gt;], [Text: 
+       ]]
+
+// XPath queries...
+groovy:000&gt; x[&quot;//mods:title/text()&quot;]
+===&gt; [Text: An Example Doc]
+// ...or directly as a string
+groovy:000&gt; x[&quot;//mods:title/text()&quot;]()
+===&gt; An Example Doc
+
+// dumping full XML text
+groovy:000&gt; x[&quot;//mods:name&quot;]()
+===&gt; 
+&lt;mods:name xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; type=&quot;personal&quot; xlink:type=&quot;simple&quot;&gt;
+  &lt;mods:role&gt;
+    &lt;mods:roleTerm authority=&quot;marcrelator&quot; type=&quot;code&quot;&gt;aut&lt;/mods:roleTerm&gt;
+  &lt;/mods:role&gt;
+  &lt;mods:displayForm&gt;Doe, John&lt;/mods:displayForm&gt;
+  &lt;mods:nameIdentifier type=&quot;example&quot;&gt;foo@bar&lt;/mods:nameIdentifier&gt;
+  &lt;mods:namePart type=&quot;family&quot;&gt;Doe&lt;/mods:namePart&gt;
+  &lt;mods:namePart type=&quot;given&quot;&gt;John&lt;/mods:namePart&gt;
+&lt;/mods:name&gt;
+
+// updating an element with text content
+groovy:000&gt; x[&quot;//mods:title&quot;] &lt;&lt; &quot;New Title&quot;
+===&gt; [Element: &lt;mods:title [Namespace: http://www.loc.gov/mods/v3]/&gt;]
+groovy:000&gt; x()
+[...]
+          &lt;mods:titleInfo xlink:type=&quot;simple&quot;&gt;                                                                                      
+            &lt;mods:title&gt;New Title&lt;/mods:title&gt;
+          &lt;/mods:titleInfo&gt;
+[...]
+
+// adding a new child element, xml-like strings are auto-converted to xml with namespace inheritance
+groovy:000&gt; x[&quot;//mods:mods&quot;] + &quot;&lt;identifier type='doi'&gt;10.5555/12345678&lt;/identifier&gt;&quot;                                               
+===&gt; [Element: &lt;mods:mods [Namespace: http://www.loc.gov/mods/v3]/&gt;] 
+groovy:000&gt; x[&quot;//mods:mods&quot;]()
+[...]
+  &lt;mods:identifier type=&quot;doi&quot;&gt;10.5555/12345678&lt;/mods:identifier&gt;
+&lt;/mods:mods&gt;
+
+// XSLT-transforming a document, overriding some parameters
+groovy:000&gt; mcrxslt(&quot;foo_mods_00000001&quot;, &quot;xsl/mods2oai_dc.xsl&quot;, params:[WebApplicationBaseURL: &quot;https://example.org/&quot;,
+ServletsBaseURL: &quot;https://example.org/&quot;])
+===&gt; [Document:  No DOCTYPE declaration, Root is [Element: &lt;record [Namespace: http://www.openarchives.org/OAI/2.0/]/&gt;]]
+groovy:000&gt; _()
+===&gt; 
+&lt;record xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;&gt;
+[...]
+      &lt;dc:identifier&gt;https://example.org/receive/foo_mods_00000001&lt;/dc:identifier&gt;
+      &lt;dc:identifier&gt;https://example.org/MCRZipServlet/foo_derivate_00000001&lt;/dc:identifier&gt;
+[...]
+</code></pre>
+<hr />
+<h2 id="changing-documents">Changing documents</h2>
+<p>Here are some functions that you can use to update a document's state in the repository.</p>
+<p><a name="mcrsave"></a><strong>Update or create a document</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsave(...object)</code></p>
+<p>Creates or updates documents in the repository. The changes will be performed in a transaction. If the saved documents
+were present in one of MyCoRe's caches, those entries will automatically be invalidated.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Document | MCRObject | MCRDerivate | MCRMODSWrapper | Collection&lt;&gt; object</code> <em>repeatable</em> - The documents to save.
+Pre-existing documents will be updated and new documents will be created. You may optionally pass your documents
+wrapped in a <code>Collection</code>.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Boolean jointransaction = true</code> - Controls whether we will join an existing transaction. If set to <code>false</code> and
+<code>mcrsave()</code> is called from an ongoing transaction, an exception will be raised.</p>
+<p><code>Boolean reload = false</code> - You may optionally trigger an in-place reload for all saved documents from the repository
+after they were persisted.
+This is to ensure that your variables reflect the actual state of the document on-disk - including changes added by
+event-handlers triggered when saving. The default is to not reload the documents (which is faster, but can cause
+problems if you try to save your not-reloaded variables a second time).</p>
+<p><code>Boolean update = true</code> - Set this to <code>false</code> to make sure that all your documents were actually new and not
+pre-existing. In the case of pre-existing documents, an exception will be raised. By default, the pre-existing
+documents would be updated with your new version.</p>
+<p>You can additionally use all the named parameters of the <a href="#mcrsession">mcrsession()</a> function to control the session
+environment. Without any further parameters and in absence of a pre-existing session, the REPL's
+default admin session will be used to start and commit a new transaction. If the call is from a
+session-context, the pre-existing session will be reused.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><a name="mcrdiff"></a><strong>Show differences between revisions of a document</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrdiff(old, updated)</code></p>
+<p>Shows the XML-level differences between two versions of a document.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Document | MCRObject | MCRDerivate | MCRMODSWrapper old</code> <em>optional</em> - The old version of the document. If omitted, it
+will automatically be fetched from the repository by the id of the <code>new</code> document.</p>
+<p><code>Document | MCRObject | MCRDerivate | MCRMODSWrapper updated</code> - The new version of the document.</p>
+<p><strong>Returns</strong> a <code>String</code> representation of the differences in unified diff format, or <code>null</code> if both versions are
+identical.</p>
+</blockquote>
+<p><a name="mcrinvalidate"></a><strong>Invalidate a document in MyCoRe's caches</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrinvalidate(...id)</code></p>
+<p>Invalidates the specified documents in MyCoRe's Creator Cache and Permission Caches. This is required to make sure
+that changes you made to the documents are properly reflected in the system.<br/>
+If you use <code>mcrsave()</code> to update
+documents, this is done for you automatically and you do not have to call <code>mcrinvalidate()</code> explicitly.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Document | MCRObject | MCRDerivate | MCRMODSWrapper | MCRObjectID | String | Collection&lt;&gt; id</code> <em>repeatable</em> - The
+documents whose state you want to invalidate in the caches. In addition to the usual formats, you can also pass an ID
+as a String, or a Collection of these types.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">groovy:000&gt; x=mcrxml(&quot;foo_mods_00000229&quot;)
+===&gt; [Document:  No DOCTYPE declaration, Root is [Element: &lt;mycoreobject/&gt;]]
+// let's change the document a bit
+groovy:000&gt; x[&quot;//mods:title&quot;] &lt;&lt; &quot;The new title.&quot;
+===&gt; [Element: &lt;mods:title [Namespace: http://www.loc.gov/mods/v3]/&gt;]
+groovy:000&gt; x[&quot;//mods:physicalDescription&quot;].detach()
+===&gt; [Element: &lt;mods:physicalDescription [Namespace: http://www.loc.gov/mods/v3]/&gt;]
+groovy:000&gt; x[&quot;//mods:mods&quot;] + &quot;&lt;identifier type='urn'&gt;urn:uuid:c8b34090-6cd8-11ee-b962-0242ac120002&lt;/identifier&gt;&quot;
+===&gt; [Element: &lt;mods:mods [Namespace: http://www.loc.gov/mods/v3]/&gt;]
+
+// show the differences in the xml before saving
+groovy:000&gt; mcrdiff(x)
+===&gt; 
+--- old
++++ updated
+@@ -24,3 +24,3 @@
+           &lt;mods:titleInfo xlink:type=&quot;simple&quot;&gt;
+-            &lt;mods:title&gt;Upload Test.&lt;/mods:title&gt;
++            &lt;mods:title&gt;The new title.&lt;/mods:title&gt;
+           &lt;/mods:titleInfo&gt;
+@@ -55,6 +55,3 @@
+           &lt;/mods:name&gt;
+-          &lt;mods:physicalDescription&gt;
+-            &lt;mods:note xlink:type=&quot;simple&quot;&gt;Datenstruktur 1&amp;#xD;
+-Datenstruktur 2&lt;/mods:note&gt;
+-          &lt;/mods:physicalDescription&gt;
++          &lt;mods:identifier type=&quot;urn&quot;&gt;urn:uuid:c8b34090-6cd8-11ee-b962-0242ac120002&lt;/mods:identifier&gt;
+         &lt;/mods:mods&gt;
+
+// saving the changes
+groovy:000&gt; mcrsave(x, reload: true)
+===&gt; null
+// note that the object was auto-reloaded in-place, reflecting all the changes applied during saving
+groovy:000&gt; x[&quot;//servdate[@type='modifydate']/text()&quot;]()
+===&gt; 2023-10-17T11:13:31.449Z
+</code></pre>
+<hr />
+<h2 id="solr-queries">Solr Queries</h2>
+<p><a name="mcrsolr"></a><strong>Solr Query, retrieving all matches</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsolr(query)</code></p>
+<p>Submit a query to a Solr server and return all results.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
+<p><code>Integer rows = Integer.MAX_VALUE</code> - The number of matches to return. If omitted, this number is practically
+unlimited, so all matches will be returned.</p>
+<p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
+<p><code>Integer start = 0</code> - Include results starting with this position in the result set. If omitted, we will start at the
+beginning. </p>
+<p><strong>Returns</strong> the QueryResponse object containing your results.</p>
+</blockquote>
+<p><a name="mcrsolrids"></a><strong>SOLR Query, retrieving IDs of all matches</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsolrids(query)</code></p>
+<p>Submit a query to a Solr server and return the MyCoRe IDs of all matching documents.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>Integer rows = Integer.MAX_VALUE</code> - The number of matches to return. If omitted, this number is practically
+unlimited, so all matches will be returned.</p>
+<p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
+<p><code>Integer start = 0</code> - Include results starting with this position in the result set. If omitted, we will start at the
+beginning.</p>
+<p><strong>Returns</strong> a <code>List&lt;String&gt;</code> of MyCoRe IDs matching your query.</p>
+</blockquote>
+<p><a name="mcrsolrfirst"></a><strong>SOLR Query, retrieving first match only</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsolrfirst(query)</code></p>
+<p>Submit a query to a Solr server and return the first matching result.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
+<p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
+<p><code>Integer start = 0</code> - Return the result at this position in the result set. If omitted, we will return the first result.</p>
+<p><strong>Returns</strong> the SolrDocument of your query's first match, or <code>null</code> if there were no qualifying documents.</p>
+</blockquote>
+<p><a name="mcrsolrstream"></a><strong>SOLR Query, streaming matches</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsolrstream(query)</code></p>
+<p>Submit a query to a Solr server and stream all the results incrementally, so they may be processed while the
+query is still active. You can cancel streaming queries before all results were transferred if it is convenient for you.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Integer chunksize = 1000</code> - Size of each chunk that will be transferred vom server to client.</p>
+<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
+<p><code>Boolean parallel = false</code> - If enabled, this function will return a parallel stream, which may allows for faster
+processing at the price of losing ordering information. Defaults to <code>false</code>, returning a sequential, ordered stream.</p>
+<p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
+<p><strong>Returns</strong> a <code>Stream&lt;SolrDocument&gt;</code> containing your results.</p>
+</blockquote>
+<p><strong>Interacting with Solr Documents</strong></p>
+<blockquote>
+<p><strong>Mixins for org.apache.solr.common.SolrDocument</strong></p>
+<p>Because <code>SolrDocument</code> implements Java's <code>Map</code> interface, you get access to all of
+<a href="https://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html">Groovy's convenience methods for Maps</a>. Especially
+noteworthy are the following:</p>
+<p><code>solrdoc.field</code> - Returns the value of the literal expression <code>field</code> contained in the Solr result <code>SolrDocument solrdoc</code>. Does not support field names
+containing special characters.</p>
+<p><code>solrdoc[field]</code> - Returns the value of the <code>String field</code> contained in the Solr result <code>SolrDocument solrdoc</code>. This method also supports
+field names containing special characters.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// find the ids of all MODS documents with &quot;Test&quot; in the title, recently modified documents first
+groovy:000&gt; mcrsolrids(&quot;mods.title:*Test*&quot;, sort:&quot;modified desc&quot;)
+===&gt; [foo_mods_00000292, foo_mods_00000289, foo_mods_00000270,
+[...]
+
+// retrieve author names' of a single publication from the Solr server 
+groovy:000&gt; mcrsolrfirst(&quot;id:foo_mods_00000252&quot;)[&quot;mods.name&quot;].join(&quot;; &quot;)
+===&gt; Blaubär, Käptn; Blöd, Hein
+
+// check for MyCoRe objects that exist in the Solr, but not the repository
+groovy:000&gt; `mcrsolrstream(&quot;objectKind:mycoreobject&quot;, fl: &quot;id&quot;).map(x -&gt; new MCRObjectID(x.id))
+.filter(x -&gt; !MCRXMLMetadataManager.instance().exists(x)).toList()`
+===&gt; []
+</code></pre>
+<hr />
+<h2 id="sessions-transactions-jobs">Sessions, Transactions, Jobs</h2>
+<p>The REPL's MyCoRe support functions handle sessions and transactions automatically for you. If you'd like to perform
+longer-running batch edits, or would like to interact directly with MyCoRe's classes within a session context, there
+are additional functions available that enable you to manage sessions yourself.</p>
+<p><a name="mcrsession"></a><strong>Create a MyCoRe session</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrsession()</code></p>
+<p>Creates a new MyCoRe session without activating it. If invoked without parameters, it will return a default admin-level session which is
+associated with your current REPL session.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>MCRSession session</code> - Use this pre-existing session.</p>
+<p><code>String sessionid</code> - Use the pre-existing session identified by this id.</p>
+<p><code>MCRUser user</code> - Create a new session belonging to this user.</p>
+<p><code>String userid</code> - Create a new session belonging to the user identified by this id.</p>
+<p><strong>Returns</strong> the <code>MCRSession</code> you requested.</p>
+</blockquote>
+<p><a name="mcrdo"></a><strong>Run code in a MyCoRe session / transaction</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrdo(closure)</code></p>
+<p>Executes a parameterless Groovy closure inside a MyCoRe session and optionally also a transaction.
+The session is transparently entered and left at entry and exit. The transaction will automatically be committed on
+success and rolled back if an exception is thrown.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Closure closure</code> - The parameterless Groovy closure that will be executed. </p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Boolean join = false</code> - Join the active outer session instead of creating a new one. In this case, this function
+will not release the session on exit.</p>
+<p><code>Boolean quiet = false</code> - Silence the warning that is emitted when running with an active outer session and <code>join = false</code>.</p>
+<p><code>Boolean transaction = false</code> - Create a new transaction and commit it on exit, or roll it back if an exception is thrown.</p>
+<p>You can additionally use all the named parameters of the <a href="#mcrsession">mcrsession()</a> function to control the session
+that will be created. Without any further parameters, the REPL's default admin session will be used.</p>
+<p><strong>Returns</strong> the return value of your <code>closure</code>.</p>
+</blockquote>
+<p><a name="mcrjob"></a><strong>Create a new job</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrjob(closure)</code></p>
+<p>This is a MyCoRe-enhanced version of <a href="../repl/#job">the REPL's universal job() function</a>. The major additional features
+that it provides are session- and transaction-management as well as integration with MyCoRe's processing
+infrastructure. You can view the progress of an <code>mcrjob()</code> in MyCoRe's web interface.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Closure closure</code> - The closure to execute. See <a href="../repl/#job">job()</a> for details.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Boolean convert = false</code> - Because the job's <code>input</code> parameter must be serializable, you can't use <code>MCRObject</code>,
+<code>MCRDerivate</code> or <code>MCRMODSWrapper</code> type objects as input. When this parameter is enabled, these types of objects will
+automatically be converted to JDOM's <code>Document</code> class, which can be used instead. Note that it is generally
+recommended to pass documents' IDs as inputs and not the documents itself.</p>
+<p><code>ThreadFactory threadfactory</code> - This parameter analogous to its version in <a href="../repl/#job">job()</a>, with the added
+difference that <code>mcrjob()</code> uses it internally to manage MyCoRe session. You should refrain from setting it when using
+<code>mcrjob()</code>, or lose session and transaction handling features.</p>
+<p><code>Boolean transaction = false</code> - Execute the job inside a MyCoRe transaction. It will be auto-committed if less than
+<code>transactionerrors</code> errors happened, or rolled back otherwise.</p>
+<p><code>Integer transactionerrors = 1</code> - If you set <code>transaction</code>, and the number of failed inputs reaches this limit, the
+entire job will be cancelled and the transaction rolled back. By default, this will happen on the first error.</p>
+<p>You can additionally use all the named parameters of the <a href="../repl/#job">job()</a> function as well as the
+the <a href="#mcrsession">mcrsession()</a> to tweak job processing and its MyCoRe session environment. If you do not specify any
+session parameters, your closure will run inside a newly created admin-level session.</p>
+<p><strong>Returns</strong> the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a> that was created.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">REPLJob</a>, <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html">REPLJobCallbackAutoTune</a> provide additional functionality related to job
+control.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// sessions can be nested
+groovy:000&gt; mcrdo({
+groovy:001&gt;   println(MCRSessionMgr.currentSession)
+groovy:002&gt;   mcrdo({ println(MCRSessionMgr.currentSession) }, userid: &quot;editor&quot;, quiet: true)
+groovy:003&gt;   println(MCRSessionMgr.currentSession)
+groovy:004&gt; })
+MCRSession[c86a247f-ef95-4a20-853f-d27e9a935dc9,user:'administrator',ip:127.0.0.1]
+MCRSession[17a156c4-613c-4453-8ab7-71302a58bed0,user:'editor',ip:127.0.0.1]
+MCRSession[c86a247f-ef95-4a20-853f-d27e9a935dc9,user:'administrator',ip:127.0.0.1]
+
+// bulk editing in a transaction. for a speedup, try adding &quot;concurrency: 5&quot; to the parameters
+// THIS EXAMPLE WILL MAKE PERMANENT CHANGES TO YOUR DOCUMENTS
+groovy:000&gt; ids = mcrsolrids(&quot;mods.title:*Test*&quot;)
+===&gt; [foo_mods_00000272, foo_mods_00000273, foo_mods_00000274,
+[...]
+groovy:000&gt; mcrjob({ id, job -&gt;
+groovy:001&gt;   def doc = mcrxml(id)
+groovy:002&gt;   def title = doc[&quot;//mods:title&quot;]
+groovy:003&gt;   title &lt;&lt; title.text.replaceAll(/(?i)Test/, &quot;Bork Bork Bork&quot;)
+groovy:004&gt;   mcrsave(doc)
+groovy:005&gt;   return title.text
+groovy:006&gt; }, inputs: ids, transaction: true, progress: true)
+===&gt; 20231017-125903-180455901 (Job 20231017-125903-180455901)
+[2023-10-17 12:59:03] INFO Job 20231017-125903-180455901: 4% done, eta 52s
+[...]                            
+</code></pre>
+<hr />
+<h2 id="mycores-native-cli">MyCoRe's native CLI</h2>
+<p>MyCoRe's native CLI commands can be invoked from the REPL. Some of MyCoRe's CLI commands implicitly assume that there
+is only one CLI session active globally, so do not execute multiple commands in parallel (especially not in a parallelized job).</p>
+<p><a name="mcrcli"></a><strong>Use MyCoRe's native CLI</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrcli(command)</code></p>
+<p>The REPL integrates MyCoRe's native CLI, which you can access from the SSH session.<br/>
+<em>Please Note:</em> Some of MyCoRe's CLI commands implicitly assume that there is only one CLI session active globally, so
+do not execute multiple commands in parallel (especially not in a parallelized job).</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String command</code> - The command to execute, exactly as you would type it in MyCoRe's native CLI.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Boolean errors_from_log = true</code> - If enabled, log messages with the level <code>ERROR</code> or above will be treated as a
+failed CLI command. Many MyCoRe CLI commands do not throw exceptions when an error occurs, so this is necessary to
+detect failure conditions.</p>
+<p><code>MCRSession mcrsession = &lt;the REPL's default admin session&gt;</code> - You can optionally specify a MyCoRe session that your
+command will run in. If omitted, the REPL's default administrator-level session will be used.</p>
+<p><strong>Returns</strong> <code>true</code> if there were no errors, <code>false</code> if there were errors. Further details are available in the
+<code>cauCLIResult</code> MyCoRe session variable (access it e.g. by <code>mcrsession().get("cauCLIResult")</code>).<br></p>
+<p><strong>Shell Command</strong></p>
+<p><code>:mcrcli [command]</code><br/>
+<code>:M [command]</code></p>
+<p>This is the shell command version of the <a href="#mcrcli">mcrcli()</a> function. It provides identical functionality, and is more
+convenient to work with since it does not require you to quote your command.<br/>
+<em>Please Note:</em> for technical reasons, repeated whitespace characters in your command string will be merged into a
+single space - even within quotes (which will be considered part of your command). If this is a problem, you should
+use the <a href="#mcrcli">mcrcli()</a> function instead.</p>
+<p><strong>Returns</strong> <code>true</code> if there were no errors, <code>false</code> if there were errors. Further details are available in the
+<code>cauCLIResult</code> MyCoRe session variable (access it e.g. by <code>mcrsession().get("cauCLIResult")</code>).<br/></p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// let's select some documents
+groovy:000&gt; :M select objects with solr query id:foo_mods_00000001 in core main
+Syntax matched (executed): select objects with solr query {0} in core {1}
+1 objects selected
+CLI finished successfully: 1 commands
+Hint: retrieve detailed results from the &quot;cauCLIResult&quot; session variable, e.g.: mcrsession().get(&quot;cauCLIResult&quot;)
+===&gt; true
+===&gt; true
+groovy:000&gt; :M list selected
+Syntax matched (executed): list selected
+List selected MCRObjects
+foo_mods_00000001 
+CLI finished successfully: 1 commands
+Hint: retrieve detailed results from the &quot;cauCLIResult&quot; session variable, e.g.: mcrsession().get(&quot;cauCLIResult&quot;)
+===&gt; true
+===&gt; true
+
+// let's now intentionally trigger an error
+groovy:000&gt; :M set main file of invalid_id to foo
+Syntax matched (executed): set main file of {0} to {1}
+invalid_id is not valid. 
+ERROR: Command 'set main file of invalid_id to foo' failed
+java.lang.RuntimeException: invalid_id is not valid.
+CLI finished with 1 errors
+Hint: retrieve detailed results from the &quot;cauCLIResult&quot; session variable, e.g.: mcrsession().get(&quot;cauCLIResult&quot;)
+ERROR java.lang.RuntimeException:
+invalid_id is not valid.
+        at groovysh_evaluate.mcrcli (groovysh_evaluate:31)
+        at groovysh_evaluate.mcrcli (groovysh_evaluate)
+// we can retrieve detailed results from the session variable
+groovy:000&gt; mcrsession().get(&quot;cauCLIResult&quot;)
+===&gt; [[cmd:set main file of invalid_id to foo, log:Syntax matched (executed): set main file of {0} to {1}
+invalid_id is not valid. 
+, error:java.lang.RuntimeException: invalid_id is not valid., timestamp:2023-10-10T11:19:39.861122497Z]]
+</code></pre>
+<hr />
+<h2 id="compiling">Compiling</h2>
+<p>The REPL will normally compile your Groovy sources when the target application starts. If you want to compile code
+dynamically at runtime, there is a support function available for you.</p>
+<p><a name="mcrcompile"></a><strong>Compile Groovy sources</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>mcrcompile(path)</code></p>
+<p>Compile the Groovy sources at the specified path and load them into a suitable classloader. This is a specialized
+version of the generic <a href="../repl/#compile">compile()</a> function which will automatically use the proper ClassLoader and
+class path of your servlet container.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Path | File | String path</code> - The location of the sources to compile. If you pass a directory, all <code>.groovy</code> files
+below it will be compiled as one coherent unit.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>ClassLoader classloader = &lt;MyCoRe's classloader&gt;</code> - The ClassLoader in which the generated classed should be put. Will
+default to MyCoRe's ClassLoader.</p>
+<p><code>String classpath = &lt;MyCoRe's classpath&gt;</code> - The class path to use when locating targets of the @Patches annotation.
+Defaults to the MyCoRe's classpath.</p>
+<p><strong>Returns</strong> the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html">GroovySourceDirectory</a> with the results of the compilation.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html">GroovySourceDirectory</a> provides additional functionality related to compilation.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../repl/" class="btn btn-neutral float-left" title="Using the REPL"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../extending/" class="btn btn-neutral float-right" title="Extending your Target">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../repl/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../extending/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

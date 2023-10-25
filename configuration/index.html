@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Configuration - cau-repl</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configuration";
+        var mkdocs_page_input_path = "configuration.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Configuration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#system-properties-for-the-universal-java-agent">System Properties for the Universal Java Agent</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mycore-plugin-properties">MyCoRe Plugin Properties</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../repl/">Using the REPL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mycore/">MyCoRe Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../extending/">Extending your Target</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/configuration.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="configuration">Configuration</h1>
+<p>If you use the cau-repl Java agent, you can configure it via Java system properties. Set them e.g. from the command
+line, as in <code>java -DCAU.REPL.Enabled=true</code>, or by Java's <code>@</code> parameter syntax to read them from a file.
+Users of the MyCoRe plugin should use their <code>mycore.properties</code> file and only resort to system properties to configure the agent in support mode if they
+enabled the early-loading mechanism.</p>
+<h2 id="system-properties-for-the-universal-java-agent">System Properties for the Universal Java Agent</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CAU.Groovy.ClassPath</td>
+<td><em>&lt;Java System Classpath&gt;</em></td>
+<td>The classpath to use when compiling your <code>.groocy</code> sources.</td>
+</tr>
+<tr>
+<td>CAU.Groovy.DeferMetaClasses</td>
+<td><code>false</code></td>
+<td>Only needed in special cases. Do not add Groovy MetaClasses to compiled <code>.groovy</code> files from the agent. This has the effect of leaving your classes uninitialized so you can manually initialize them in a specific order later on. You can use the <code>GroovySourceDirectory.addDynamizedMetaClass()</code> to add the MetaClasses later on and force class initialization. If you set this to <code>true</code> and do not invoke this method for your classes, some features of cau-repl (e.g. <code>@Dynamize</code>) will be broken.</td>
+</tr>
+<tr>
+<td>CAU.Groovy.ReorderSources</td>
+<td><code>true</code></td>
+<td>Set to <code>false</code> to disable the logic that determines the proper compilation order for your <code>.groovy</code> sources. Disabling this setting will break compilation unless your classes are trivial, so you should only disable it for debugging.</td>
+</tr>
+<tr>
+<td>CAU.Groovy.SourceDirs</td>
+<td></td>
+<td>A comma-separated list of directories. All <code>.groovy</code> files in all subdirectories will be compiled into the JVM on startup.</td>
+</tr>
+<tr>
+<td>CAU.Groovy.UseSystemClassLoader</td>
+<td><code>false</code></td>
+<td>Set this to <code>true</code> to use the system-default ClassLoader and make your classes available outside of the REPL. See the <a href="../installation/#loading-the-agent">Installation</a> instructions for further details if you enable this.</td>
+</tr>
+<tr>
+<td>CAU.JavaAgent.AutoExec</td>
+<td></td>
+<td>A Groovy command that will be executed on startup directly after your sources have been compiled and before starting the REPL.</td>
+</tr>
+<tr>
+<td>CAU.JavaAgent.ClassPath</td>
+<td></td>
+<td>JARs that the agent will add to the system classpath, e.g. to specify the location of the cau-repl fat jar if it is off-path.</td>
+</tr>
+<tr>
+<td>CAU.JavaAgent.SupportMode</td>
+<td></td>
+<td>Set this to <code>true</code> when you use the agent in conjunction with the MyCoRe plugin</td>
+</tr>
+<tr>
+<td>CAU.JavaAgent.Triggers</td>
+<td></td>
+<td>Loads the REPL in the same classloader as this package or class (e.g. <code>org/example/</code>).</td>
+</tr>
+<tr>
+<td>CAU.REPL.EditorSSH</td>
+<td><code>/usr/bin/vim --not-a-term</code></td>
+<td>The editor to use for interactive file editing within the SSH environment. <strong>Must be able to run without a TTY.</strong></td>
+</tr>
+<tr>
+<td>CAU.REPL.Enabled</td>
+<td><code>true</code></td>
+<td>If set, the REPL will listen for SSH connections.</td>
+</tr>
+<tr>
+<td>CAU.REPL.Log.Internal</td>
+<td></td>
+<td>If set to <code>file</code>, redirects cau-repl's internal log messages from STDERR (or Log4J if installed) to the <code>repl.log</code> file in its work dir. If set to <code>stderr</code>, messages are always redirected to STDERR (never to Log4J).</td>
+</tr>
+<tr>
+<td>CAU.REPL.Log.Trace</td>
+<td><code>false</code></td>
+<td>Enable very fine grained logging of the REPL's internals. Only use this for debugging. These types of messages will then be written to <code>repl.log</code>. Set <code>CAU.REPL.Log.Internal = stderr</code> to also see them at the console.</td>
+</tr>
+<tr>
+<td>CAU.REPL.MaxBreakpoints</td>
+<td><code>20</code></td>
+<td>Maximum number of breakpoints that can remain uncontinued at a given time. Further triggered breakpoints will be dropped.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.ListenAddr</td>
+<td><code>127.0.0.1</code></td>
+<td>The address that the REPL should listen on for SSH connections. Protect outside access to this port as you would protect a normal SSH port with shell access: users who connect can execute arbitrary commands.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.ListenPort</td>
+<td><code>8512</code></td>
+<td>The port that the REPL should listen on for SSH connections.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.Password</td>
+<td></td>
+<td>The password that grants access to the REPL via SSH. Pass this from a file via Java's <code>@</code> parameter syntax. Otherwise, it will be visible in the process list for all local users. Even then, your application might dump the value of all properties into a debug log, so you should generally use the CAU.REPL.SSH.PasswordCommand property instead.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.PasswordCommand</td>
+<td></td>
+<td>A command that returns the password to be used for the REPL's SSH on STDOUT. Mutually exclusive with CAU.REPL.SSH.Password.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.Timeout</td>
+<td><code>43200</code> (12h)</td>
+<td>Disconnect SSH connections after they have been idle for this many seconds.</td>
+</tr>
+<tr>
+<td>CAU.REPL.WorkDir</td>
+<td><code>./cau-repl</code></td>
+<td>The directory in which the REPL will store its state.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mycore-plugin-properties">MyCoRe Plugin Properties</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CAU.REPL.Groovy.ReorderSources</td>
+<td><code>true</code></td>
+<td>Set to <code>false</code> to disable the logic that determines the proper compilation order for your <code>.groovy</code> sources. Disabling this setting will break compilation unless your classes are trivial, so you should only disable it for debugging.</td>
+</tr>
+<tr>
+<td>CAU.Groovy.SourceDirs.1,<br/>CAU.Groovy.SourceDirs.2,<br/>...</td>
+<td></td>
+<td>Root directories for your Groovy sources. All <code>.groovy</code> files in all their subdirectories will be compiled into the JVM on startup.</td>
+</tr>
+<tr>
+<td>CAU.REPL.Groovy.Startup.Scripts.1<br/>CAU.REPL.Groovy.Startup.Scripts.2,<br/>...</td>
+<td></td>
+<td>Each Groovy script file you list here will be executed in the REPL whenever you connect to it as if you had typed it there.</td>
+</tr>
+<tr>
+<td>CAU.REPL.Groovy.Startup.Commands.1<br/>CAU.REPL.Groovy.Startup.Commands.2,<br/>...</td>
+<td></td>
+<td>Each Groovy command you list here will be executed in the REPL whenever you connect to it as if you had typed it there.</td>
+</tr>
+<tr>
+<td>CAU.REPL.EditorSSH</td>
+<td><code>/usr/bin/vim --not-a-term</code></td>
+<td>The editor to use for interactive file editing within the SSH environment. <strong>Must be able to run without a TTY.</strong></td>
+</tr>
+<tr>
+<td>CAU.REPL.Enabled</td>
+<td><code>false</code></td>
+<td>If set, the REPL will listen for SSH connections.</td>
+</tr>
+<tr>
+<td>CAU.REPL.Log.Trace</td>
+<td><code>false</code></td>
+<td>Enable very fine grained logging of the REPL's internals. Only use this for debugging.</td>
+</tr>
+<tr>
+<td>CAU.REPL.MaxBreakpoints</td>
+<td><code>20</code></td>
+<td>Maximum number of breakpoints that can remain uncontinued at a given time. Further triggered breakpoints will be dropped.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.ListenAddr</td>
+<td><code>127.0.0.1</code></td>
+<td>The address that the REPL should listen on for SSH connections. Protect outside access to this port as you would protect a normal SSH port with shell access: users who connect can execute arbitrary commands.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.ListenPort</td>
+<td><code>8512</code></td>
+<td>The port that the REPL should listen on for SSH connections.</td>
+</tr>
+<tr>
+<td>CAU.REPL.SSH.TimeoutSeconds</td>
+<td><code>43200</code> (12h)</td>
+<td>Disconnect SSH connections after they have been idle for this many seconds.</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../repl/" class="btn btn-neutral float-right" title="Using the REPL">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../repl/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

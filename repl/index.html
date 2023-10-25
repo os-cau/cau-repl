@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Using the REPL - cau-repl</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Using the REPL";
+        var mkdocs_page_input_path = "repl.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Using the REPL</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#basic-operation">Basic Operation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#editing-files">Editing Files</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#job-management">Job Management</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#loading-maven-artifacts">Loading Maven Artifacts</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#compiling">Compiling</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#managing-breakpoints">Managing Breakpoints</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#hints">Hints</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mycore/">MyCoRe Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../extending/">Extending your Target</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Using the REPL</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/repl.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="using-the-repl">Using the REPL</h1>
+<p>Once the REPL is started, simply connect to it with your SSH client.
+The foundation of cau-repl is Groovy's <code>groovysh</code>, so for the very basics you can refer to
+the <a href="https://groovy-lang.org/groovysh.html">groovysh Documentation</a>.</p>
+<p>The general idea behind the REPL is that you can enter Groovy code, which is immediately executed in the same JVM as
+your target application. The results of your invocation are displayed to you after every single command and can be
+further modified with the next command you enter. This concept is known as a
+<a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">Read-Eval-Print Loop</a> (REPL). All the classes the
+application uses internally are available to you, enriching it with full scripting capabilities.</p>
+<hr />
+<h2 id="basic-operation">Basic Operation</h2>
+<p>Apart from the normal Groovy syntax, the REPL provides a number of built-in commands. See the
+<a href="https://groovy-lang.org/groovysh.html#GroovyShell-RecognizedCommands">groovysh Command List</a>. We will only focus on cau-repl specific additions in the following.</p>
+<hr />
+<h2 id="editing-files">Editing Files</h2>
+<p>When you enter longer blocks of code - such as functions or loops - it is convenient to use a full-featured editor.
+cau-repl provides two commands for this.
+As a prerequisite, a suitable terminal-based editor must be installed on the system running cau-repl. By default,
+<code>vim</code> is configured. <strong>If you configure a different editor, make sure that it supports running without a TTY.</strong> Not all
+editor have this capability.</p>
+<p><strong>Edit and evaluate a file</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:editssh [filename]</code><br/>
+<code>:E [filename]</code></p>
+<p>Opens an existing or new file named <code>filename</code> in an editor and immediately evaluates its content after returning to the REPL.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String filename</code> <em>optional</em> - The name of the file to open</p>
+<p><strong>Returns</strong> the return value of the last statement in the file.</p>
+</blockquote>
+<p><strong>Edit a file without evaluating it</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:editfilessh [filename]</code><br/>
+<code>:EF [filename]</code></p>
+<p>Opens an existing or new file named <code>filename</code> in an editor without evaluating it in the REPL.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String filename</code> <em>optional</em> - The name of the file to open</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text"># invocation without a filename parameter
+# creates a temporary one-off file that is automatically deleted after evaluation
+groovy:000&gt; :E
+
+# most convenient: invocation with a simple name - no path and no extension
+# creates / opens a persistent file named e.g. editbuffer-1.groovy in the REPL's workdir
+groovy:000&gt; :E 1
+
+# invocation with a full path creates / opens exactly this file
+groovy:000&gt; :E /tmp/foo.groovy
+</code></pre>
+<hr />
+<h2 id="logging">Logging</h2>
+<p>The REPL has built-in logging functions that will make use of Log4J if it is installed, but also work without it.</p>
+<p><strong>Log a message</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>trace(...msgs) / debug(...msgs) / warn(...msgs) / error(...msgs)</code></p>
+<p>Logs the given message to suitable logging systems with the log-level corresponding to the method name.</p>
+<p><strong>Positional Parameters</strong>
+- <code>String msgs</code> <em>repeatable</em> - The objects that will be logged after invoking their <code>.toString()</code> method. The first
+  instance of this parameter is special in that it can contain <code>{}</code> placeholders. These will be replaced with the
+  text representation of each succeeding further parameter. Excess parameters will be joined with a newline.</p>
+<p><strong>Optional Named Parameters</strong>
+- <code>ReplLog.LOG_TARGETS[] targets = REPLLog.DEFAULT_LOG_TARGETS</code> - The list of targets that will receive this message.
+  See the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html">REPLLog</a> documentation for possible values.
+  If omitted, the message will be logged to Log4J if it is available or stderr if
+  not. In addition, it will be written to the REPL's own logfile in its work directory.
+- <code>PrintStream[] streams = []</code> - A list of multiple <code>PrintStream</code> that will receive this message. Empty by default.</p>
+<p><strong>Returns</strong> The <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html">REPLLogEntry</a> that was logged</p>
+</blockquote>
+<p><strong>Retrieve the REPL log file</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>repllog()</code></p>
+<p>Retrieves the contents of the REPL's internal log file, which is rotated every time
+the target application starts up.</p>
+<p><strong>Returns</strong> a list of <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html">REPLLogEntry</a> in chronological order.</p>
+</blockquote>
+<p><strong>Retrieve the Tomcat log</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>tomcatlog()</code></p>
+<p>Retrieves the contents of Tomcat's main <code>catalina.out</code> log file. This will only be successful, if you use Tomcat with
+a standard logging setup.</p>
+<p><strong>Returns</strong> an array of <code>String</code>, in chronological order.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLLog.html">REPLLog</a>, <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLLogEntry.html">REPLLogEntry</a> provide additional functionality related to logging.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// log a formatted message to sensible default targets
+groovy:000&gt; info(&quot;Java version {} on {}/{}&quot;, System.getProperty(&quot;java.version&quot;), System.getProperty(&quot;os.name&quot;),
+System.getProperty(&quot;os.arch&quot;))
+===&gt; [2023-09-28 12:33:58] INFO Java version 17.0.8 on Linux/amd64
+
+// log a message to the REPL's log file and print it on all connected SSH sessions
+groovy:000&gt; warn(&quot;restarting in 5min&quot;, targets:[REPLLog.LOG_TARGETS.REPL_FILE, REPLLog.LOG_TARGETS.REPL_ALL_SHELLS])
+===&gt; [2023-09-28 12:37:02] WARN restarting in 5min
+</code></pre>
+<hr />
+<h2 id="job-management">Job Management</h2>
+<p>You can start long-running jobs in the REPL that will execute in the background and continue running after you end the
+SSH session. Jobs can be associated with a list of inputs to be processed. If you can list your inputs in advance,
+cau-repl can automatically parallelize your jobs. This also makes it possible to re-run just the inputs that failed later
+on, even after restarting the target application.</p>
+<p><a name="job"></a><strong>Create a new job</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>job(closure)</code></p>
+<p>Run the Groovy <code>Closure</code> closure in the background. You can optionally pass a list of input work items, which is then
+subsequently processed, tracking the job's progress in a file in the REPL's work
+directory. This makes it possible for you to resume aborted or failed executions as well as inspect the job's results
+even after restarting the target application. Jobs instances that throw an exception will be considered failed.
+Instances that do not throw an exception will be considered successful.<br/>
+MyCoRe users should use the <a href="../mycore/#mcrjob">mcrjob()</a> function instead,
+which is additionally integrated with MyCoRe's job system.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Closure closure</code> - The Groovy Closure to execute. If you do not specify the named parameter <code>inputs</code>, pass a closure
+that does not require any parameters (<code>{ -&gt; foo() }</code>). If you do specify <code>inputs</code>, pass a closure that accepts two
+parameters (<code>{ x, j -&gt; foo(x) }</code>). cau-repl will pass the current input in the first parameter and the job that it
+belongs to in the second parameter.<br/>
+The return value of the closure is considered the result of the job for the current input item.
+Return values' class must implement the <code>Serializable</code> interface, so cau-repl can persist your output. The
+results of each invocation of the closure are kept in memory, so
+design your jobs to return only small data structures. If you need to generate larger structures, you should persist
+them somewhere else yourself and only return a status code here.<br/>
+The <code>ReplJob</code> that is created by this call will by default be set as the closure's
+<a href="https://groovy-lang.org/closures.html#_delegation_strategy">delegate</a>, providing variants of the logging methods
+<code>info()</code> and so forth. This will cause your log messages to additionally be persisted in the job's state file, so you
+can review them via the <code>ReplJob.jobLog()</code> method.<br/>
+To signal a failure, throw any exception.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>Boolean autostart = true</code> - Controls whether your job should immediately be started or placed in the master job list
+in a paused state.</p>
+<p><code>Integer autotune</code> <em>experimental</em> - If set, enables automatic parallelization for the processing of your input items.
+cau-repl will measure the throughput of work items and optimize the degree of parallelism on-the-fly. This works best
+when your work items are homogenous and individual processing time is small. The number you specify here is the
+maximum degree of parallelism you will allow. <em>Note:</em> to use a fixed number of parallel worker threads, just specify
+the <code>concurrency</code> parameter (see below) and don't set <code>autotune</code>.</p>
+<p><code>Boolean background = true</code> - Controls whether this call should return immediately, or only after the job has finished
+running. You might want to disable background processing when you also enable progress messages.</p>
+<p><code>Boolean becomedelegate = true</code> - Controls whether cau-repl will set the newly created <code>ReplJob</code> as your closure's
+delegate before executing it. This makes the instance methods of your <code>ReplJob</code> (especially the versions of the
+logging methods <code>info()</code>, etc. that also log to your job's private log) readily available for your closure. 
+More information is available in
+<a href="https://groovy-lang.org/closures.html#_delegation_strategy">Groovy's closure documentation</a>. </p>
+<p><code>int concurrency = 1</code> - Spawn this many worker threads and process inputs in parallel. You can also change the concurrency
+level of a job while it is running. If you also pass the <code>autotune</code> parameter,
+the value of <code>concurrency</code> will be used as the initial concurrency level to start the tuning-process from.</p>
+<p><code>Boolean errorpause = false</code> - If set, the job will be paused on the first error (i.e. when your closure throws an
+exception). If there are other parallel workers, the work items they are currently processing will not be aborted and
+your job will be fully paused after they too have finished their current work items.</p>
+<p><code>Collection&lt;Serializable&gt; inputs</code> - The work items that will be sequentially - in the order you specified them -
+passed as the first parameter to subsequent executions of your closure. The entire list will be kept in memory, so
+only use small objects here. To process larger objects, pass their ids or addresses instead and fetch them yourself
+from your closure. If you omit this parameter, your closure will simply be called once without input arguments.</p>
+<p><code>String name = &lt;job's key&gt;</code> - Set a descriptive name for your job to make identifying it easier. If omitted, your job's
+auto-generated key will also be used as its name.</p>
+<p><code>Boolean progress = false</code> - Log job progress to the REPL periodically. Best combined with <code>background = false</code>.</p>
+<p><code>String resume</code> - Pass the <code>key</code> of a finished ReplJob here to resume it. When you resume a job, your
+new job's state will be initialized from the persistent state file of the old job in the REPL's work directory.
+This includes inputs, results as well as its internal log.
+By default, only inputs that were not successfully processed (i.e. inputs that have failed, never started or started and
+did not finish at all) will be processed when you start the new job. Do not pass the <code>inputs</code> parameter when you
+resume - input values will automatically be read from the old job's state file.</p>
+<p><code>Boolean retryerror = true</code> - When resuming a job, disable to not retry inputs that threw an exception.</p>
+<p><code>Boolean retrysuccess = false</code> - When resuming a job, enable to also retry inputs that were successful.</p>
+<p><code>ThreadFactory threadfactory</code> - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
+system default is used.</p>
+<p><strong>Returns</strong> the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a> that was created.</p>
+</blockquote>
+<p><strong>List current jobs</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job</code><br/>
+<code>:J</code></p>
+<p>Prints a list of all jobs that were created in this session as well as their status.</p>
+<p><strong>Returns</strong> The list in text format.</p>
+</blockquote>
+<p><strong>Retrieve a current job and print its progress</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job [index]</code> / <code>:job [key]</code><br/>
+<code>:J [index]</code> / <code>:J [key]</code></p>
+<p>Retrieves the ReplJob that has the given <code>index</code> number in the <code>:J</code> listing, or whose <code>key</code> matches the argument.
+Print its JobProgress to the console and return the job object.</p>
+<p><strong>Returns</strong> The <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a> that was requested.
+<strong>Pause or unpause a job</strong>
+<strong>Shell Command</strong></p>
+<p><code>:job pause [key]</code> / <code>:job unpause [key]</code><br/>
+<code>:J pause [key]</code> / <code>:J unpause [key]</code><br/></p>
+<p>Pauses the job with the given <code>key</code>. When paused, workers will finish their currently assigned work item, but will not
+receive any new work items. While residual items are still being processed, the job's state will be given as
+"pausing", after which it will transition to "paused".</p>
+<p>Unpausing a paused job will cause unprocessed work items to be submitted to the workers again.</p>
+<p><strong>Returns</strong> when pausing: a boolean indicating if the job transitioned to the "pausing" state (could e.g. be false for already
+paused jobs); when unpausing: the number of milliseconds that the jobs has in the paused state.
+</p>
+</blockquote>
+<p><strong>Cancel a job</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job cancel [key]</code> / <code>:job cancelforce [key]</code><br/>
+<code>:J cancel [key]</code> / <code>:J cancelforce [key]</code><br/></p>
+<p>Cancels the job with the given <code>key</code>. No further input items will be passed to the worker threads. When invoked as
+<code>cancel</code>, previously active threads will be allowed to continue indefinitely until they have finished their previously
+assigned inputs. During this phase, the job state will be "cancelling" after which it will transition to "cancelled".
+The job is then ready for archiving or resuming it.</p>
+<p>When invoked as <code>cancelforce</code>, previously active threads will be forcefully terminated after a grace period of 10s.</p>
+<p><strong>Returns</strong> a boolean indicating if the job transitioned to the "cancelling" or "cancelled" state (could e.g. be
+false for jobs that finished in the meantime).</p>
+</blockquote>
+<p><strong>Archive a job</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job archive [key]</code><br/>
+<code>:J archive [key]</code></p>
+<p>Archives the finished job with the given <code>key</code>, removing it from the job list and freeing its memory.</p>
+<p><strong>Returns</strong> a boolean indicating if the job was archived or not.</p>
+</blockquote>
+<p><strong>List all job keys, including archived jobs</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job archived</code><br/>
+<code>:J archived</code></p>
+<p>Prints a list of all archived jobs' keys for which a state file in the REPL's work directory still exists.
+This excludes any currently loaded job.</p>
+<p><strong>Returns</strong> The list in text format.</p>
+</blockquote>
+<p><strong>Prune all successfully completed jobs, including archived jobs</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:job prune</code><br/>
+<code>:J prune</code></p>
+<p>Removes the state file of all jobs that have successfully completed (i.e. all inputs were processed without error)
+from the REPL's work directory. This includes both current and archived jobs.</p>
+<p><strong>Returns</strong> The list of pruned keys in text format.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a>, <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html">REPLJobCallbackAutoTune</a> provide additional functionality related to job
+control.</p>
+<p><strong>Example: Simple Job</strong></p>
+<pre><code class="language-text">// copy a file in a background job without parameters (please adjust filenames)...
+groovy:000&gt; job({ return java.nio.file.Files.copy(java.nio.file.Path.of(&quot;/path/to/source&quot;),
+java.nio.file.Path.of(&quot;/path/to/destination&quot;)) as String })
+===&gt; 20231002-115717-998860232 (Job 20231002-115717-998860232)
+// ...now view the job's progress
+groovy:000&gt; :J
+===&gt; 
+[1] 20231002-115717-998860232 - Job 20231002-115717-998860232 - completed successfully (0/1 threads active), 100%
+</code></pre>
+<p><strong>Example: Parallel Job with Inputs</strong></p>
+<pre><code class="language-text">// calculate primes around the 8th mersenne prime using a naive algorithm, 4 workers in parallel 
+groovy:000&gt; j = job({BigInteger x, j -&gt; x &gt; 1G &amp;&amp; (x &lt;= 3G || !(2G..x.sqrt()).find{ x.mod(it) == 0G })},
+inputs:(2147000000G..2148000000G), concurrency:4)
+// monitor progress with the :J command (or run the job with &quot;progress: true&quot; to watch it in realtime)
+groovy:000&gt; :J
+===&gt; 
+[1] 20231002-143021-171027612 - Job 20231002-143021-171027612 - running (4/4 threads active), 7%, eta 2m
+// after the job is done, view the results
+groovy:000&gt; j.results.findAll{ it.result }.collect{ j.inputs[it.index] }
+===&gt; [2147000041, 2147000081, 2147000111, 2147000117, 2147000173, 2147000189, 2147000243, 2147000281, 2147000293,
+[...]
+// now archive the job to free its memory
+groovy:000&gt; :J archive 20231002-143021-17102761
+groovy:000&gt; j = null
+</code></pre>
+<p><strong>Example: Resuming</strong></p>
+<pre><code class="language-text">// start the calculation again, cancelling and resuming it. disable status updates this time
+groovy:000&gt; j = job({BigInteger x, j -&gt; x &gt; 1G &amp;&amp; (x &lt;= 3G || !(2G..x.sqrt()).find{ x.mod(it) == 0G })},
+inputs:(2147000000G..2148000000G), concurrency:4)
+===&gt; 20231002-151111-065054552 (Job 20231002-151111-065054552)
+// wait a bit until the job is about half done, and then cancel it
+groovy:000&gt; :J cancel 20231002-151111-065054552
+===&gt; true
+// verify that the job's state is no longer &quot;cancelling&quot;, but &quot;cancelled&quot;
+groovy:000&gt; :J
+===&gt; 
+[2] 20231002-151111-065054552 - Job 20231002-151111-065054552 - cancelled (0/4 threads active), 48%
+// you may now restart the target application (but you don't have to)
+[...]
+// let's resume our cancelled calculation, disabling autostart so we can inspect it's initial state
+groovy:000&gt; j = job({BigInteger x, j -&gt; x &gt; 1G &amp;&amp; (x &lt;= 3G || !(2G..x.sqrt()).find{ x.mod(it) == 0G })},
+resume:&quot;20231002-151111-065054552&quot;, concurrency:4, autostart:false)
+===&gt; 20231002-151645-393465402 (Resume: Job 20231002-151111-065054552)
+// you can see that the &quot;success&quot; counter is at about 50%. results of the previous run were loaded
+groovy:000&gt; j.progress
+===&gt; JobProgress[state=not yet started, nextInput=0, totalInputs=1000001, remainingInputs=1000001, success=480790,
+skippedSuccess=0, errors=0, skippedErrors=0, percentDone=0, pausedSince=null, cancelledSince=null, startTimestamp=null,
+doneTimestamp=null, eta=null, etaSeconds=null, activeThreads=0, future=null]
+groovy:000&gt; j.results[0]
+===&gt; InputResult[key=20231002-151111-065054552, index=0, epochMicrosFrom=1696252271190601,
+epochMicrosTo=1696252271200158, result=false, error=null]
+// the job's private log - that you can write to with the info(),... methods from your closure - was also restored
+groovy:000&gt; j.jobLog[0]
+===&gt; [2023-10-02 15:11:11] INFO Job 20231002-151111-065054552: Starting job...
+// resuming from where we cancelled
+groovy:000&gt; j.start()
+===&gt; de.uni_kiel.rz.fdr.repl.REPLJob$1@4a183138[Not completed]
+// the first 50% of progress will pass very quickly, as the job skips all already completed inputs
+// now simply wait for the rest of the calculation to finish
+</code></pre>
+<hr />
+<h2 id="loading-maven-artifacts">Loading Maven Artifacts</h2>
+<p>You can load maven artifacts into the repl at runtime, without altering the installation of your target application.</p>
+<p><strong>Load a maven artifact into the REPL</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:grabrepl [group[:module[:version|*[:classifier]]]][@ext]</code><br/>
+<code>:G [group[:module[:version|*[:classifier]]]][@ext]</code></p>
+<p>Fetches the maven artifact described by the parameters as well as its dependencies and loads it into the REPL for this
+session. Downloaded artifacts will be cached in the REPL's work directory to speed up the process in subsequent
+sessions. Specifying <code>group</code>, <code>module</code> and <code>version</code> is usually sufficient.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// fetch the apache-commons numbers module for primes and load it into the repl
+groovy:000&gt; :G org.apache.commons:commons-numbers-primes
+// now import one of its classes
+groovy:000&gt; import org.apache.commons.numbers.primes.Primes
+===&gt; [...], org.apache.commons.numbers.primes.Primes
+// and use it to find the prime factors of a number
+groovy:000&gt; Primes.primeFactors(34592523)
+===&gt; [3, 7, 773, 2131]
+</code></pre>
+<hr />
+<h2 id="compiling">Compiling</h2>
+<p>The REPL will normally compile your Groovy sources when the target application starts. If you want to compile code
+dynamically at runtime, there is a support function available for you.</p>
+<p><a name="compile"></a><strong>Compile Groovy sources</strong></p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>compile(path)</code></p>
+<p>Compile the Groovy sources at the specified path and load them into a suitable classloader. MyCoRe user should use the
+<a href="../mycore/#mcrcompile">mcrcompile()</a> function instead, which will use default parameter values suitable for MyCoRe.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>Path | File | String path</code> - The location of the sources to compile. If you pass a directory, all <code>.groovy</code> files
+below it will be compiled as one coherent unit.</p>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>ClassLoader classloader = &lt;REPL's classloader&gt;</code> - The ClassLoader in which the generated classed should be put. Will
+default to the REPL's ClassLoader, which is subject to the settings described in the
+<a href="../installation/#loading-the-agent">Installation</a> section.</p>
+<p><code>String classpath = &lt;REPL's classpath&gt;</code> - The class path to use when locating targets of the @Patches annotation.
+Defaults to the REPL's classpath.</p>
+<p><strong>Returns</strong> the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html">GroovySourceDirectory</a> with the results of the compilation.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/groovy/GroovySourceDirectory.html">GroovySourceDirectory</a> provides additional functionality related to compilation.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// compile a single groovy class
+groovy:000&gt; compile(&quot;Dummy.groovy&quot;)
+===&gt; de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory@130807a5
+// now import it to the REPL
+groovy:000&gt; import foo.Dummy
+===&gt; [...], foo.Dummy
+groovy:000&gt; x = new Dummy()
+===&gt; foo.Dummy@4cc38db
+</code></pre>
+<hr />
+<h2 id="managing-breakpoints">Managing Breakpoints</h2>
+<p>You can add breakpoints to your Groovy code. When triggered, they pause its execution and transfer control to the REPL.
+See the <a href="../extending/#adding-interactive-breakpoints">Extending</a> section to start using this feature. Once you have augmented your code with breakpoints, you
+can manage them in the REPL:</p>
+<p><strong>List currently triggered breakpoints and disabled patterns</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:breakpoint</code><br/>
+<code>:B</code></p>
+<p>Lists all currently triggered breakpoints: their numeric key, function and name.
+Will output a list of all currently disabled breakpoint patterns</p>
+<p><strong>Returns</strong> the list in text format.</p>
+</blockquote>
+<p><strong>Resume a currently triggered breakpoint</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:breakpoint [key [feedback]]</code><br/>
+<code>:B [key [feedback]]</code></p>
+<p>Resumes the currently triggered breakpoint with the specified <code>key</code>. You can optionally pass a feedback result, which
+will be returned as the result of the <code>replbreakpoint</code> function call that triggered this breakpoint.<br/>
+<em>Please Note:</em> for technical reasons, repeated whitespace characters in your feedback string will be merged into a
+single space - even within quotes (which will be considered part of your feedback). If this is a problem, you should
+use the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#resume(long)">REPLBreakpoint.resume()</a> function instead.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Disable or enable breakpoints</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:breakpoint disable [pattern]</code> / <code>:breakpoint enable [pattern]</code><br/>
+<code>:B disable [pattern]</code> / <code>:B enable [pattern]</code></p>
+<p>Use this to disable or re-enable certain breakpoint matching a regular-expression pattern in Java RE syntax. A
+triggered breakpoint with a <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#getSignature()">signature</a> that matches one of your disabled patterns will be silently ignored.
+Your breakpoints' signatures are displayed in the <code>:B</code> breakpoint list after the numeric key (e.g.
+<code>org.example.Dummy::foo - My Breakpoint</code>).<br/>
+<em>Please Note:</em> for technical reasons, repeated whitespace characters in your pattern string will be merged into a
+single space - even within quotes (which will be considered part of your pattern). If this is a problem, you should
+use the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#disable(java.lang.String)">REPLBreakpoint.disable()</a> /
+<a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#enable(java.lang.String)">REPLBreakpoint.enable()</a> functions instead.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Execute code in the thread of a triggered breakpoint</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:breakpoint eval [key] [code]</code> / <code>:breakpoint eval [key]</code><br/>
+<code>:B eval [key] [code]</code> / <code>:B eval [key]</code></p>
+<p>You can run code in the thread of a triggered breakpoint. Just pass the <code>key</code> of the target breakpoint and the
+Groovy <code>code</code> to run end it will execute. The environment executing your snippet will have the special variable <code>this</code>
+and also <code>x</code> set to the REPLBreakpoint instance that triggered.</p>
+<p>You know that your code has finished executed, when your breakpoint has a <code>*</code> marker in the <code>:B</code> list. You may now
+retrieve the result of you code using the <code>eval [key]</code> subcommand (i.e. without a code argument).</p>
+<p><em>Please Note:</em> for technical reasons, repeated whitespace characters in your code string will be merged into a
+single space - even within quotes (which will be considered part of your code). If this is a problem, you should
+use the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html#eval(long,de.uni_kiel.rz.fdr.repl.REPLBreakpoint.Eval)">REPLBreakpoint.eval()</a> function instead.</p>
+<p><strong>Returns</strong> nothing when you submit code to run, or the results of your code wrapped in a
+<a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.EvalResult.html">REPLBreakpoint.EvalResult</a> when you retrieve the result.</p>
+</blockquote>
+<p><strong>Set the maximum number of concurrent breakpoints</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:breakpoint max [limit]</code><br/>
+<code>:B max [limit]</code></p>
+<p>Sets the global limit for the number of unresumed triggered breakpoint instances. The first time more than this many
+instances are triggered, a warning is logged and all further breakpoints are ignored (i.e. executed without
+interruption) until the total number on unresumed instances drops below this threshold.<br/>
+Set this to <code>0</code> to temporarily disable all breakpoints globally.</p>
+<p><strong>Returns</strong> nothing.</p>
+</blockquote>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html">REPLBreakpoint</a> provides additional functionality related to breakpoints.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-text">// you need a triggered breakpoint for this example. see the &quot;writing code&quot; section of the docs for further info.
+
+// list all triggered breakpoints
+groovy:000&gt; :B
+===&gt; 
+   0 org.example.Dummy::foo - My Breakpoint
+
+// let's evaluate some code in the breakpoint's context that returns its thread
+groovy:000&gt; :B eval 0 Thread.currentThread()
+// note the asterisk &quot;*&quot;, which signals that our code has returned a result
+groovy:000&gt; :B
+===&gt; 
+   0 org.example.Dummy::foo - My Breakpoint *
+// retrieve the result...
+groovy:000&gt; :B eval 0
+===&gt; EvalResult[result=Thread[GroovySh Client Thread: /127.0.0.1:57352,5,main], exception=null]
+// ...and save it to a variable
+groovy:000&gt; t = _
+
+// resume the breakpoint, passing a feedback string
+groovy:000&gt; :B 0 some string data
+</code></pre>
+<hr />
+<h2 id="hints">Hints</h2>
+<ul>
+<li>Tab-completion and line history is available.</li>
+<li>When you mismatch parentheses or similar syntactic structures, the REPL may enter a state where it's waiting for you
+  to properly syntactically finish your statement. To get out of this state, simply enter a single line consisting of
+  just <code>:c</code>.</li>
+<li>The return value of your last command is always available in the special <code>_</code> variable. This is useful to continue
+  using it in the next line, or if you want to save it in a more persistent properly named variable. </li>
+<li>groovysh's standard <code>:edit / :e</code> command is not very useful when accessing it via SSH, because it launches the editor in
+  the TTY of the server process. Use the <code>:editssh / :E</code> commands instead to edit a file directly in your
+  SSH session.</li>
+<li>groovysh's standard <code>:grab / :g</code> command does not use the correct classloader of the REPL. Use the <code>:grabrepl / :G</code>
+  commands instead.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../configuration/" class="btn btn-neutral float-left" title="Configuration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../mycore/" class="btn btn-neutral float-right" title="MyCoRe Integration">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../configuration/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../mycore/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

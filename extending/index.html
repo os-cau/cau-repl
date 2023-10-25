@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Extending your Target - cau-repl</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Extending your Target";
+        var mkdocs_page_input_path = "extending.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../repl/">Using the REPL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mycore/">MyCoRe Integration</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Extending your Target</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#adding-new-classes-agent">Adding new classes - Agent</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adding-new-classes-mycore">Adding new classes - MyCoRe</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#patching-existing-classes">Patching existing classes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adding-interactive-breakpoints">Adding interactive breakpoints</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#updating-methods-at-runtime">Updating methods at runtime</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Extending your Target</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/extending.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="extending-your-target-with-groovy-classes">Extending your Target with Groovy Classes</h1>
+<p>You can use the REPL's bundled Groovy environment to extend your target application with your own Groovy classes.
+Those classes might either be entirely new - ready to be integrated using the application's own dependency injection
+mechanism - or they might be new versions of the application's own classes, which you can tweak to your liking. When you
+override a pre-existing class, you can alter the application's behavior even if it does not provide a mechanism for
+dependency injection.</p>
+<blockquote>
+<p><strong>Important</strong></p>
+<p>If you distribute your own application-specific Groovy classes, you need to comply with your target application's
+license. Licenses such as the GPL have special provisions for aggregated works such as these. Always remember to check
+what is permitted according to your target's license conditions.</p>
+</blockquote>
+<p>Adding new classes to your application is generally very simple. The exact method depends on whether on you use the
+universal REPL Java agent, or the MyCoRe plugin.</p>
+<h2 id="adding-new-classes-agent">Adding new classes - Agent</h2>
+<p>To add new classes to your application using the universal agent, it needs to be properly set up first. The relevant
+configuration properties that you need to set up concern the ClassPath (<code>CAU.Groovy.ClassPath</code> and maybe
+<code>CAU.JavaAgent.ClassPath</code>), the class loader (you need to enable either <code>CAU.Groovy.UseSystemClassLoader</code> or
+<code>CAU.JavaAgent.Triggers</code>) and the locations of your <code>.groovy</code> sources (<code>CAU.Groovy.SourceDirs</code>). See the
+<a href="../installation/#loading-the-agent">Installation section</a> and the
+<a href="../configuration/#system-properties-for-the-universal-java-agent">Configuration section</a> for details.</p>
+<p>Once you have set these properties correctly, you can just place <code>.groovy</code> files in the source directories that you
+configured. The agent will automatically compile them and place them into the ClassLoader that you configured as soon
+as possible.</p>
+<p>Load order and timing are often critical to integrate you classes into an existing application, as is choosing the
+correct ClassLoader.
+For dependency injection to work, your class must be available before your target's mechanism resolves the configured
+classes and they need to be findable in the ClassLoader hierarchy.</p>
+<p><strong>Adding classes to the system ClassLoader</strong></p>
+<p>When you enable the <code>CAU.Groovy.UseSystemClassLoader</code>
+property, the agent will compile your classes before any other class of your target gets loaded. This provides you with
+a clean slate. On the other hand, this may have certain disadvantages if your own class uses classes of the target -
+these will also be loaded into the system ClassLoader, which can cause problems in the target if it expects its classes
+to be loaded in a special separate ClassLoader (web applications running in servlet containers are a typical example).
+You should have the agent trigger on the proper ClassLoader in those cases.</p>
+<p><strong>Adding classes to an application ClassLoader</strong></p>
+<p>To place your classes in a special ClassLoader, use the <code>CAU.JavaAgent.Triggers</code> property instead (see the 
+<a href="../installation/#classloader-selection">Installation section</a>). In this case, your Groovy sources will be compiled right
+after the first trigger class of your target was loaded and placed in the same ClassLoader as that triggering class.</p>
+<p><strong>Adding classes to the REPL only</strong></p>
+<p>If you only intend to use your classes from the interactive REPL, you don't have to set either of these two properties
+and can just leave the REPL at its default settings. in this case, they will be loaded into a separate ClassLoader that
+only the REPL itself can see.</p>
+<h2 id="adding-new-classes-mycore">Adding new classes - MyCoRe</h2>
+<p>To add classes to your MyCoRe installation, add their source directories to your <code>mycore.properties</code> file as lines in
+the form of <code>CAU.Groovy.SourceDirs.1=...</code>, <code>CAU.Groovy.SourceDirs.2=...</code>, and so forth. They will
+be compiled and loaded into MyCoRe's own ClassLoader as soon as MyCoRe initializes the REPL plugin. This is typically
+early enough to use your new classes (e.g. as an event handler) by simply referencing it by name from the same
+<code>mycore.properties</code> file.</p>
+<p>This allows you to easily extend MyCoRe without creating your own plugins.</p>
+<p>If you need your own class available earlier in MyCoRe's lifecycle, you should employ the hybrid approach of using both
+the MyCoRe plugin and the agent at the same time. See the
+<a href="../installation/#loading-the-plugin-earlier-with-the-agent">Installation section</a> for details. Remember that in the
+hybrid case, only the sources you directly pass via the Java command-line are compiled early. The sources from
+<code>mycore.properties</code> will still be compiled later during the normal MyCoRe plugin initialization.</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-groovy">// here is a MyCoRe event handler implemented in Groovy
+package foo
+
+import org.mycore.common.events.MCREventHandlerBase
+import org.mycore.datamodel.metadata.MCRObject
+import org.mycore.common.events.MCREvent
+import de.uni_kiel.rz.fdr.repl.REPLLog
+
+class GroovyTestEventHandler extends MCREventHandlerBase {
+   @Override
+   protected void handleObjectUpdated(MCREvent evt, MCRObject obj) { 
+       REPLLog.info(&quot;Groovy Event Handler saw: {}&quot;, obj.getId())
+   }
+}
+
+/*
+ 1. Save this file with a &quot;.groovy&quot; extension to a new directory
+ 2. echo &quot;CAU.Groovy.SourceDirs.1=/path/to/your/dir&quot; &gt;&gt; /path/to/mycore.properties
+ 3. echo &quot;MCR.EventHandler.MCRObject.933.Class=foo.GroovyTestEventHandler&quot; &gt;&gt; /path/to/mycore.properties
+ */
+</code></pre>
+<h2 id="patching-existing-classes">Patching existing classes</h2>
+<p>You might want to override the behavior of your target's own classes or of libraries which your target uses (<em>"patching"</em>
+a class). The
+easiest way to achieve this is to simply add a Groovy source file that contains a class with the same name in the same
+package as your target class and make sure that it is compiled before your target tries to load its version. Using this
+method, you need to re-implement all the methods of the class you are replacing yourself, even those whose behavior you
+did not mean to alter.</p>
+<p>To make this process more convenient, cau-repl has a special feature that simplifies the patching process and does not
+require access to the target's source code. To use cau-repl's patching feature, annotate your own version of the class
+with a special annotation:</p>
+<p><a name="patches"></a><strong>Patch a class</strong></p>
+<blockquote>
+<p><strong>Class Annotation</strong></p>
+<p><code>@Patches</code></p>
+<p>You should add this annotation to your own Groovy class with which you
+intend to override an existing class of your
+target or its libraries. Do not specify a superclass: it will be set up automatically. The package and name of your
+class must be identical to package and name of the target
+class.<br/>
+When cau-repl encounters the <code>@Patches</code> annotation during compilation, it will first locate the target class in
+the class path, load it into the ClassLoader under a different name (the suffix <code>_CAUREPL</code> will be appended to the
+original name) and set this renamed class as the superclass of your Groovy class. <br/>
+The result of this transformation is that your Groovy class will replace the target class in the
+application, while the functionality of the target continues to be available to you from your Groovy class.
+You only have to override the methods that you would like to alter and can inherit the rest.
+One may invoke its methods via <code>super()</code>, including access to all its private methods and fields, which cau-repl will
+transparently patch to <code>public</code> access.<br/>
+You do not have to import this annotation manually. It is always available.</p>
+<blockquote>
+<p><strong>Warning</strong></p>
+<p>This is an experimental feature. Expect problems. Do not patch database-backed classes: the renaming and
+subclassing of them may cause damage to your database structure and state.</p>
+</blockquote>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>String classPath = &lt;REPL's class path&gt;</code> - Specify an alternate class path in which the target class and its
+dependencies can be found.</p>
+<p><code>boolean force = false</code> - cau-repl will try to prevent a database-backed class (i.e. JPA-enabled) from being patched.
+The goal is to prevent destructive changes to your database induced by renaming classes and methods during the
+patching process. Set this to <code>true</code> to override this check, but only if you know what you are doing at the risk of
+your database state.</p>
+<p><code>boolean makePublic = true</code> - By default, non-public methods and fields as well as final methods and classes of the
+target will be set public and not-final during the patching process. Set this to <code>false</code> to preserve all original
+access modifiers, at the cost of making those methods not-overridable.</p>
+<p><code>boolean preserveSuper = true</code> - By default, we will try to preserve access to the target's original superclass during
+the patching process. Disable this to prevent this logic, at the cost of losing this access.</p>
+<p><code>String stripAnnotations</code> - A comma separated list of annotations to remove from your target class before it is
+loaded. You can either pass the annotation names fully qualified (i.e. including their package prefix) or in short
+form (just their name without any package).</p>
+</blockquote>
+<p><em>Hint:</em> If your patch target class contains inner classes, these will be renamed along with the target. Depending on the
+types of interactions between outer and inner classes, that may or may not be appropriate for your situation. If this
+causes your trouble (e.g. method signature mismatches), consider adding an inner class with the same name as the target's
+to your own patching class, which inherits from the <code>Target_CAUREPL.InnerClass</code> class. Then you can fine-tune its
+behavior.</p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>patcheeSuper(method, ...parameters)</code></p>
+<p>This function provides access to the methods of the <code>@Patches</code> target's original superclass, which are lost after
+patching, because the target class is now the superclass.<br/>
+You do not have to import this function manually. It is always available.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String method</code> - The name of the method you would like to invoke from the target's superclass.</p>
+<p><code>Object parameters</code> <em>optional, repeatable</em> - The parameters of the function call.</p>
+<p><strong>Returns</strong> the result that invoking <code>super.method(parameters)</code> from the target would have returned.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-groovy">// Let's patch the apache-commons-text TextStringBuilder class.
+// Install its .jar to your classpath. MyCoRe already includes it.
+// api: https://commons.apache.org/proper/commons-text/apidocs/org/apache/commons/text/TextStringBuilder.html
+// source: https://github.com/apache/commons-text/blob/master/src/main/java/org/apache/commons/text/TextStringBuilder.java  
+
+package org.apache.commons.text
+
+@Patches
+class TextStringBuilder {
+    @Override 
+    String toString() { 
+        def s = super.toString()
+        return &quot;Bork&quot;.equals(s) ? &quot;Bork Bork Bork&quot; : s
+    }
+}
+
+/*
+groovy:000&gt; x = new org.apache.commons.text.TextStringBuilder()
+===&gt;
+groovy:000&gt; x.append(&quot;Bo&quot;)
+===&gt; Bo
+groovy:000&gt; x.append(&quot;rk&quot;)
+===&gt; Bork Bork Bork
+ */
+</code></pre>
+<h2 id="adding-interactive-breakpoints">Adding interactive breakpoints</h2>
+<p>You can add interactive breakpoints to your Groovy classes. When they trigger, they transfer control to the SSH
+interface, where you can inspect their payload and then pass data back to the function which triggered them. The
+breakpoints are implemented as a normal function, so you can easily create conditional breakpoints by nesting them in
+an <code>if</code> statement. See the <a href="../repl/#managing-breakpoints">Managing breakpoints</a> section to learn about the corresponding
+REPL functionality.</p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>replbreakpoint(name, extra, timeoutMillis)</code></p>
+<p>Pauses execution of the current thread and transfers the <code>extra</code> object to the REPL. When this breakpoint is continued
+from the REPL, it will return the feedback data passed interactively from there.<br/>
+You do not have to import this function manually. It is always available.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String name</code> <em>optional</em> - A descriptive name of this breakpoint instance allowing for easy identification in the
+breakpoint list (including ids or timestamps is a good idea). If omitted, it will be auto-generated from the thread's stack.</p>
+<p><code>Object extra</code> <em>optional</em> - Any related extra data you would like to make available in the REPL.</p>
+<p><code>Long timeoutMillis</code> <em>optional</em> - Limit the amount of time that this breakpoint will wait for. When this much time has
+passed and no one has resumed the breakpoint instance from the REPL, it will continue anyway. The default behavior is
+to wait forever (<code>timeoutMillis = null</code>).</p>
+<p><strong>Returns</strong> the feedback value passed from the REPL, or <code>null</code> if none was passed.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-groovy">// here is a conditional breakpoint that also returns a value
+package foo
+class Example {
+    def doSomething(Integer data) {
+      // trigger a breakpoint only if input &gt; 100
+      if ((data?:0) &gt; 100) {
+       def feedback = replbreakpoint(&quot;foo.Example ${data}&quot;, data)
+       // if the breakpoint was continued from the REPL without feedback, continue (&quot;:B 0&quot;)
+       // else (&quot;:B 0 not good&quot;) abort
+       if (feedback) throw new RuntimeException(&quot;Abort at breakpoint requested: ${feedback}&quot;)
+      }
+     return (data?:0) * 2
+    }
+}
+</code></pre>
+<p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLBreakpoint.html">REPLBreakpoint</a> provides additional functionality related to breakpoints.</p>
+<h2 id="updating-methods-at-runtime">Updating methods at runtime</h2>
+<p>Dynamic languages that run in the JVM (like Groovy or JRuby) allow you to change the implementation of your classes at
+runtime without reloading your entire application. This feature has until now always be confined to the dynamic parts of
+the JVM: Java code interacting with your Groovy objects will not pick up the changes to their definition and continue to
+use the original class bytecode. Only calls initiated from Groovy code itself can use the updated implementations.</p>
+<p>cau-repl includes a <strong>very</strong> experimental feature which works around this limitation, allowing you to update a method's
+implementation and have it take effect everywhere in the JVM - including from Java callsites.</p>
+<blockquote>
+<p><strong>Class Annotation</strong></p>
+<p><code>@Dynamize</code></p>
+<p>Classes that have this annotation are transparently augmented with a dynamic method dispatcher, enabling you to update
+a method's code and have the change be visible from the non-dynamic Java world in your JVM without restarting the
+application.<br/>
+You do not have to import this annotation manually. It is always available.</p>
+<blockquote>
+<p><strong>Warning</strong></p>
+<p>Consider this a proof-of-concept. Expect bugs and problems, also a substantial
+performance overhead for each method-call into the affected classes. Do not enable in a production environment.</p>
+</blockquote>
+<p><strong>Optional Named Parameters</strong></p>
+<p><code>boolean inherit = true</code> - Subclasses of dynamized classes will automatically be dynamized as well. If you'd like to
+prevent this, set this to <code>false</code> (which is strongly discouraged and will cause all sorts of problems).</p>
+</blockquote>
+<p>You update a method by assigning a <code>Closure</code> to its metaclass, like using
+<a href="https://docs.groovy-lang.org/latest/html/api/groovy/lang/ExpandoMetaClass.html">Groovy's ExpandoMetaClass</a>. See below
+for an example.</p>
+<p>Because your updated code runs inside a closure, some of Groovy's language features are not readily available
+(especially <code>super</code> is missing). cau-repl includes some helper functions that you can use instead:</p>
+<blockquote>
+<p><strong>Function</strong></p>
+<p><code>dynamicSuper(method, ...parameters)</code></p>
+<p><code>dynamicSuper(int parents, method, ...parameters)</code></p>
+<p>These functions provide access to the methods of your class' superclass, which are not available from a closure.
+They are intended to be used from closure that you apply to a <code>@Dynamize</code> metaclass.<br/>
+You do not have to import these functions manually. It is always available.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>int parents = 1</code> <em>optional</em> - You may select a (grand-)parent in the class hierarchy
+(1 = <code>super</code>, 2 = <code>super.super</code>, ...).</p>
+<p><code>String method</code> - The name of the method you would like to invoke from your class' superclass.</p>
+<p><code>Object parameters</code> <em>optional, repeatable</em> - The parameters of the function call.</p>
+<p><strong>Returns</strong> the result that invoking <code>super.method(parameters)</code> from your class would have returned.</p>
+<p><strong>Function</strong></p>
+<p><code>dynamicPatcheeSuper(method, ...parameters)</code></p>
+<p>This function is intended to be used from closure that you apply to a <code>@Patches @Dynamize</code> metaclass.<br/>
+They provide access to the methods of your class' patch-target superclass, which is shadowed due to the patching
+process.<br/>
+You do not have to import these functions manually. It is always available.</p>
+<p><strong>Positional Parameters</strong></p>
+<p><code>String method</code> - The name of the method you would like to invoke from your patch target's superclass.</p>
+<p><code>Object parameters</code> <em>optional, repeatable</em> - The parameters of the function call.</p>
+<p><strong>Returns</strong> the result that invoking <code>super.method(parameters)</code> from your target would have returned.</p>
+</blockquote>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-groovy">package foo
+
+@Dynamize
+class Example {
+    int data
+
+    static String greetMe(def name) {
+       return &quot;Hi, ${name}&quot;
+    }
+
+    Example(int data) {
+       this.data = data
+    }
+
+    int calculate() {
+       return data * 2
+    } 
+}
+
+/*
+groovy:000&gt; compile(&quot;example.groovy&quot;)
+===&gt; de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory@d6b75cb
+groovy:000&gt; import &quot;foo.Example&quot;
+===&gt; de.uni_kiel.rz.fdr.repl.REPL, de.uni_kiel.rz.fdr.repl.REPLLog, de.uni_kiel.rz.fdr.repl.REPLLogEntry, de.uni_kiel.rz.fdr.repl.REPLLog.LOG_TARGETS, de.uni_kiel.rz.fdr.repl.REPLBreakpoint, de.uni_kiel.rz.fdr.repl.REPLJob, de.uni_kiel.rz.fdr.repl.REPLJobCallbackAutoTune, foo.Example
+groovy:000&gt; Example.greetMe(&quot;Bob&quot;)
+===&gt; Hi, Bob
+groovy:000&gt; e = new Example(3)
+===&gt; foo.Example@5dd95ba8
+groovy:000&gt; e.calculate()
+===&gt; 6
+
+// redefining a static method
+groovy:000&gt; Example.metaClass.static.greetMe = { name -&gt; &quot;Hello, ${name}&quot; }
+===&gt; groovysh_evaluate$_run_closure1@c60b893
+groovy:000&gt; Example.greetMe(&quot;Bob&quot;)
+===&gt; Hello, Bob
+
+// redefining an instance method
+groovy:000&gt; e.metaClass.calculate = { return data * 10 }
+===&gt; groovysh_evaluate$_run_closure1@3cfb3247
+groovy:000&gt; e.calculate()
+===&gt; 30
+ */
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../mycore/" class="btn btn-neutral float-left" title="MyCoRe Integration"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../apidocs/" class="btn btn-neutral float-right" title="Java API Docs">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../mycore/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../apidocs/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

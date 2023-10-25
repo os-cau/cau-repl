@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="Documentation for the cau-repl software" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>cau-repl</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "About";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">About</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#features">Features</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#license">License</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#for-universal-use-built-without-gpl-code">For universal use, built without GPL code</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#things-to-try">Things to try</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#for-use-in-mycore-built-with-gpl-code">For use in MyCoRe, built with GPL code</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#things-to-try_1">Things to try</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="repl/">Using the REPL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="mycore/">MyCoRe Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="extending/">Extending your Target</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">About</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/index.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cau-repl">cau-repl</h1>
+<p>Extend Java programs with Groovy at runtime. Add an interactive SSH-based REPL to any JVM and tweak it with your own custom Groovy
+classes: no sourcecode required!</p>
+<p>The cau-repl comes bundled with an additional <a href="https://mycore.de">MyCoRe</a> module for easy integration with your document repository.</p>
+<h2 id="disclaimer">Disclaimer</h2>
+<blockquote>
+<p><strong>This project is in a very early stage: expect bugs.</strong></p>
+</blockquote>
+<p>As of today, testing was exclusively on Linux. While the code is intended to be OS-agnostic, there will certainly be
+issues if you run it on Windows (it might run fine on the WSL, though). Pull requests for compatibility are welcome!</p>
+<p>Testing of the MyCoRe plugin was until now conducted only in a Tomcat environment.</p>
+<h2 id="features">Features</h2>
+<p><strong>Without access to an application's sourcecode</strong> and without making any changes to it, cau-repl enables you to:</p>
+<ul>
+<li>Connect to any Java application via SSH and run Groovy commands in its JVM. You can use all the application's classes
+  interactively.</li>
+<li>Load any Maven artifact into the REPL at runtime and use it just in your session</li>
+<li>Start long-running batch jobs from the SSH console that persist after you disconnect, monitor their status and easily
+  retry failed steps. Job inputs can be processed in parallel, with automatic tuning to determine the number of workers
+  that maximize throughput.</li>
+<li>Extend any Java program with your own Groovy classes, e.g. for dependency injection.</li>
+<li>Automatically run your own Groovy code each time the application is started.</li>
+<li>(experimental) Patch classes of any Java program replacing their methods with your own Groovy code, even if the methods are private.
+  All changes are applied ad-hoc each time the application starts without altering its installation.</li>
+<li>Use interactive breakpoints that transfer control to the SSH console under certain circumstances.</li>
+<li>(very experimental) change the code of methods at runtime, even if those methods are called from Java code.</li>
+</ul>
+<p>cau-repl can be built as a MyCoRe plugin that enables better integration:</p>
+<ul>
+<li>Simple installation: just put one <code>.jar</code> in your <code>lib/</code> directory and enable the REPL in your <code>.properties</code></li>
+<li>Extend your repository with your own EventHandlers, CronJobs, etc. - no need to create a plugin, set up a full
+  development environment or (re-)compile anything: just drop a single <code>.groovy</code> file in the right directory and the class will be available in MyCoRe.</li>
+<li>Numerous helper functions that make interacting with your repository from the REPL easy:<ul>
+<li>SOLR searches</li>
+<li>Retrieving documents and their XML via XPath</li>
+<li>Displaying, changing (by XSLT or manually), saving XML</li>
+<li>Generating diffs between updated XML and the original before saving</li>
+<li>Easy MyCoRe session management: run any command as any user, with automatic transactions</li>
+</ul>
+</li>
+<li>The REPL's Job system is integrated with MyCoRe's, so jobs started from the REPL can also be managed via the webinterface.</li>
+<li>MyCoRe's own CLI commands are also available and can be used from the REPL.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>Java 17 or 21 (other versions &gt; 17 may or may not work)</li>
+<li>Maven</li>
+<li>vim or any other console text editor that can run without a tty (optional: only if you want to edit files within the SSH session)</li>
+<li>MyCoRe 2022.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)</li>
+</ul>
+<h2 id="license">License</h2>
+<p>cau-repl is MIT licensed. Designated portions of it were imported from other projects and are Apache 2.0 licensed.</p>
+<p>The optional MyCoRe support module is GPL 3.0 licensed. It is not included in the build by default. The documentation contains
+instructions on building a version with the MyCoRe-specific helpers enabled (the <code>-gpl</code> build). You can use this build under the terms of
+the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GPL 3.0 license.</p>
+<p>See the bundled LICENSE.txt file and the SPDX identifier of each source file for details.</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>cau-repl can be built in two flavors: as a MyCoRe plugin, or as a generic Java agent from all kinds of java
+applications. Choose the quickstart instructions that apply to your use-case.</p>
+<h3 id="for-universal-use-built-without-gpl-code">For universal use, built without GPL code</h3>
+<pre><code>mvn clean package
+java -javaagent:target/cau-repl-X.Y.Z-fatjar-nogpl.jar -jar /path/to/your/application.jar
+# a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
+# you may now login with any username and the password that was just printed
+ssh "ssh://localhost:8512"
+</code></pre>
+<p><em>If you don't have a Java target application available and just want to see the REPL in action, you can also start the agent
+directly without a target:</em> <code>java -jar target/cau-repl-X.Y.Z-fatjar-nogpl.jar</code></p>
+<h4 id="things-to-try">Things to try</h4>
+<p>Your commands run in the target application's JVM. Try listing all threads:</p>
+<pre><code>groovy:000&gt; Thread.allStackTraces.entrySet().collect{ "${it.key} -&gt; ${it.value ? it.value[0] : ''}" }
+===&gt; [Thread[HikariPool-1 housekeeper,5,main] -&gt; java.base@17.0.8/jdk.internal.misc.Unsafe.park(Native Method),
+...
+</code></pre>
+<p>Now import a class of your target and start interacting</p>
+<pre><code>groovy:000&gt; import foo.bar.SomeClass
+groovy:000&gt; SomeClass.someStaticMethod()
+groovy:000&gt; x = new SomeClass()
+...
+</code></pre>
+<p>Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
+target.<br/>
+Want to define your own classes? Then you might have to configure cau-repl's ClassLoader use as well.<br/>
+Consult the <a href="installation/">installation manual</a> for details.</p>
+<h3 id="for-use-in-mycore-built-with-gpl-code">For use in MyCoRe, built with GPL code</h3>
+<pre><code>mvn -P gpl clean package
+cp target/cau-repl-X.Y.Z-fatjar-gpl.jar /path/to/mycore/lib
+echo "CAU.REPL.Enabled=true" &gt;&gt; /path/to/mycore/mycore.properties
+# now (re-)start your servlet container
+# a message like "REPLLog: REPL listening on 127.0.0.1:8512" should be logged
+# you may now login with the MyCoRe administrator password
+ssh "ssh://administrator@localhost:8512"
+</code></pre>
+<h4 id="things-to-try_1">Things to try</h4>
+<p>Your commands run directly in MyCoRe's JVM. Try pinging a Solr core:</p>
+<pre><code>groovy:000&gt; MCRSolrClientFactory.mainSolrClient.ping()
+===&gt; {responseHeader={zkConnected=null,status=0,QTime=13,params={q={!lucene}*:*,distrib=false,df=allMeta,facet.field=mods.genre,echoParams=all,fl=*,score,sort=score desc, mods.dateIssued desc,facet.mincount=1,rows=20,wt=javabin,version=2,facet=true,rid=-26}},status=OK}
+</code></pre>
+<p>Numerous helper functions are available. Go retrieve a document and inspect it:</p>
+<pre><code>groovy:000&gt; doc = mcrxml("mods", filter=".[//mods:title='SOMETITLEHERE']")[0]
+===&gt; [Document:  No DOCTYPE declaration, Root is [Element: &lt;mycoreobject/&gt;]]
+groovy:000&gt; doc()
+===&gt; 
+&lt;mycoreobject xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchema
+Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT" label="fdr_mods_00000299"&gt;
+...
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.5.3
+Build Date UTC : 2023-10-25 13:57:38.809101+00:00
+-->

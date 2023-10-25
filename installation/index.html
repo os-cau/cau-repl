@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Installation - cau-repl</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../custom.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Installation";
+        var mkdocs_page_input_path = "installation.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> cau-repl
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Installation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#universal-java-agent">Universal Java Agent</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#compiling">Compiling</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#loading-the-agent">Loading the Agent</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#classloader-selection">Classloader Selection</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mycore-plugin">MyCoRe plugin</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#compiling_1">Compiling</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#loading-the-plugin">Loading the Plugin</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#loading-the-plugin-earlier-with-the-agent">Loading the Plugin Earlier with the Agent</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../repl/">Using the REPL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../mycore/">MyCoRe Integration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../extending/">Extending your Target</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../apidocs/">Java API Docs</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">cau-repl</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/os-cau/cau-repl/edit/master/docs/installation.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="installation">Installation</h1>
+<p>cau-repl can be built in one of two flavors</p>
+<ul>
+<li>the standard build is an MIT-licensed universal Java agent that can be used with any Java application</li>
+<li>the GPL build is also a MyCoRe plugin, in addition to the Java agent functionality of the standard build</li>
+</ul>
+<h2 id="universal-java-agent">Universal Java Agent</h2>
+<h3 id="compiling">Compiling</h3>
+<p>Compile cau-repl as a universal Java agent with Maven:</p>
+<pre><code class="language-bash">mvn clean package
+# alternatively, if you would also like to run the integration test:
+# mvn clean install 
+</code></pre>
+<p>This will produce the following two JARs:</p>
+<ul>
+<li><code>target/cau-repl-X.Y.Z-fatjar-nogpl.jar</code> can be used as a standalone Java agent and contains all of cau-repls dependencies</li>
+<li><code>target/cau-repl-agent-X.Y.Z.jar</code> is an optional lightweight loader-only agent that can be used to load the full <code>fatjar</code>
+  into a specific classloader. Use this if your application places its classes in a non-default classloader (e.g.
+  web applications in a servlet container). See the <a href="#classloader-selection">Classloader Selection</a> section for details. </li>
+</ul>
+<h3 id="loading-the-agent">Loading the Agent</h3>
+<p>To simply get access to the SSH REPL, load cau-repl as a Java agent. You need to pass a special parameter to your
+Java command:</p>
+<pre><code class="language-bash">java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar ...
+</code></pre>
+<p>This also allows you to compile your own classes and use them in the REPL.</p>
+<p>If you would like to extend your own classes' availability to the entire application (and not just the REPL), they need
+to be loaded into the system-default classloader. Then you should configure cau-repl like this: </p>
+<pre><code class="language-bash">java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar -DCAU.Groovy.UseSystemClassLoader=true ...
+</code></pre>
+<p>If you use the system-default classloader and loading your classes fails with an exception, you might also need to
+disable the access protection provided by Java's module system (potentially impacting your target's security if it
+depends on it). Whether this step is necessary, depends on your target application:</p>
+<pre><code class="language-bash">java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar --add-opens 'java.base/java.lang=ALL-UNNAMED' -DCAU.Groovy.UseSystemClassLoader=true ...
+</code></pre>
+<p>The REPL will listen for SSH connections on port 8512 on the local interface. You can use any username to log in. A
+per-session password will be printed to STDERR on startup. <strong>Be careful to make sure that it does not end up in a public
+logfile</strong>, e.g. Systemd's journal. Any local user who can read this password can connect to the REPL and execute code
+with the permissions of your application. To secure your installation permanently, see the <a href="../configuration/">Configuration</a> section for ways to set your own
+static password without producing log output. The configuration section also describes various parameters that you can
+use to customize ports, directories, etc.</p>
+<p>By default, cau-repl will store its state in the <code>cau-repl</code> directory, which it will create in the current working
+directory.</p>
+<p>If you do not see your application's classes in the REPL, you need to load cau-repl into a specific classloader.</p>
+<h3 id="classloader-selection">Classloader Selection</h3>
+<p>To load cau-repl in a specific classloader of your application, place <code>cau-repl-X.Y.Z-fatjar-noglp.jar</code> in your
+application's classpath and use the lightweight loader JAR <code>cau-repl-agent-X.Y.Z.jar</code> as the agent. You can then
+configure the loader agent to place the main JAR into the same classloader that your application uses. Just identify
+a package or class that your target application will load and pass its resource path as a parameter to the loader agent:</p>
+<pre><code class="language-bash"># use the classloader that loads the first class from the org.example.* package
+java -javagent:/path/to/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.Triggers=org/example/
+# use the classloader that loads the class org.example.SomeClass
+java -javagent:/path/to/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.Triggers=org/example/SomeClass
+</code></pre>
+<p>As before, you might also have to set the <code>--add-opens 'java.base/java.lang=ALL-UNNAMED'</code> parameter if you plan on
+changing or adding classes in your target. Note that this will have security implications for your target application if it
+depends on the separation provided by Java's module system.</p>
+<p><em>Remark</em>: it is currently not possible to patch the class that the agent triggers
+on (by the time it is seen, it is too late to block it). So make sure to select a trigger that triggers in the correct
+classloader, but before the first class you would like to patch.</p>
+<h2 id="mycore-plugin">MyCoRe plugin</h2>
+<h3 id="compiling_1">Compiling</h3>
+<p>Compile cau-repl as a MyCoRe plugin with Maven:</p>
+<pre><code class="language-bash">mvn -P gpl clean package
+# alternatively, if you would also like to run the integration test:
+# mvn -P gpl clean install 
+</code></pre>
+<p>This will produce the following two JARs:</p>
+<ul>
+<li><code>target/cau-repl-X.Y.Z-fatjar-gpl.jar</code> can be used as a MyCoRe plugin (and also as a Java agent)</li>
+<li><code>target/cau-repl-agent-X.Y.Z.jar</code> is an optional lightweight loader-only agent that can be used to load the full <code>fatjar</code>
+  into a specific classloader. In a MyCoRe context, you would only have to use this if you want to give cau-repl
+  priority over MyCoRe's basic classes in the JVM's class load order. This is only necessary if you want to use cau-repl
+  to patch basic framework classes, so most MyCoRe users do not have to install this JAR.</li>
+</ul>
+<h3 id="loading-the-plugin">Loading the Plugin</h3>
+<p>To load the cau-repl MyCoRe plugin, place the main JAR in your MyCoRe <code>lib/</code> directory and enable it in your
+<code>.properties</code> file:</p>
+<pre><code class="language-bash">cp /path/to/cau-repl-X.Y.Z-fatjar-gpl.jar /path/to/mycore/lib
+echo &quot;CAU.REPL.Enabled=true&quot; &gt;&gt; /path/to/mycore/mycore.properties
+</code></pre>
+<p>Then (re-) start your servlet container. The REPL will listen for SSH connections on port 8512 on the localhost. You can
+log in with the username <code>administrator</code> and the corresponding MyCoRe password of the account. See the
+<a href="../configuration/">Configuration</a> section for more settings that you can customize from your <code>.properties</code>.</p>
+<p>By default, cau-repl will store its state in the <code>cau-repl</code> subdirectory, which it will create in your MyCoRe
+installation's root.</p>
+<h3 id="loading-the-plugin-earlier-with-the-agent">Loading the Plugin Earlier with the Agent</h3>
+<p>When you patch libraries or define classes, load order is important. The MyCoRe plugin generally tries to load your
+Groovy classes as early as possible, but when you interact with lower layers of the stack, it is sometimes too late to
+do anything about that from the plugin. Most users will never have these issues and can skip this step, but if you try
+to patch a very basic class and fail because it was already loaded, you can add the agent as described here. Please note: these steps are to be
+performed <em>in addition</em> to the plugin installation steps above. Do not delete ot disable the main JAR.</p>
+<p>First copy the loader agent into place:</p>
+<pre><code class="language-bash">cp path/to/cau-repl-agent-X.Y.Z.jar /path/to/mycore/lib
+</code></pre>
+<p>Then add it to your servlet container's java arguments. E.g. for Tomcat, you would add something like this to your
+<code>bin/setenv.sh</code> file:</p>
+<pre><code class="language-bash"># adjust paths as needed
+export JAVA_OPTS=&quot;$JAVA_OPTS -javaagent:/path/to/mycore/lib/cau-repl-agent-X.Y.Z.jar -DCAU.JavaAgent.ClassPath=/path/to/mycore/lib/* -DCAU.JavaAgent.SupportMode=true -DCAU.JavaAgent.Triggers=org/mycore/ -DCAU.Groovy.ClassPath=$CATALINA_HOME/lib/*:$CATALINA_HOME/webapps/ROOT/WEB-INF/lib/* -DCAU.Groovy.SourceDirs=/path/to/your/groovy-sources&quot;
+</code></pre>
+<p>From now on, your Groovy sources in the <code>/path/to/your/groovy-sources</code> directory will be compiled before other MyCoRe
+classes, so they can patch any library that MyCoRe uses and are available from the very beginning of the application's
+lifecycle. You can continue to use the plugin as usual when you add the agent like this.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="About"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../configuration/" class="btn btn-neutral float-right" title="Configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2023 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/os-cau/cau-repl" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
