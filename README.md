@@ -101,7 +101,7 @@ Now import a class of your target and start interacting
 Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
 target.<br/>
 Want to define your own classes in your target's classloader? Then you have to configure cau-repl's ClassLoader use as well.<br/>
-Consult the [installation manual](TODO) for details.
+Consult the [installation manual](https://os-cau.github.io/cau-repl/installation/) for details.
 
 ### For use in MyCoRe, built with GPL code
     mvn -P gpl clean package
@@ -134,4 +134,4 @@ Numerous helper functions are avaliable. Go retrieve a document and inspect it:
 
 ## Documentation
 
-There is [complete documentation TODO URL](https://127.0.0.1) available covering all of cau-repl's features.
+There is [complete documentation](https://os-cau.github.io/cau-repl/) available covering all of cau-repl's features.
