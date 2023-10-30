@@ -96,6 +96,11 @@ public class GroovyShellCommand implements Command {
         shell.setErrorHook(new Closure<>(this) {
             @Override
             public Object call(Object... args) {
+                if (args[0] instanceof Exception ex) {
+                    REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Shell command error: {}",
+                            ex, Arrays.stream(ex.getStackTrace()).map(s -> "  " + s.toString()).collect(Collectors.joining("\n"))),
+                            REPLLog.INTERNAL_LOG_TARGETS);
+                }
                 if (args[0] instanceof InterruptedIOException || args[0] instanceof SshException) {
                     // Stopping groovysh thread in case of broken client channel
                     shell.getRunner().setRunning(false);

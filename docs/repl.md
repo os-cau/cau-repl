@@ -566,7 +566,8 @@ groovy:000> :B 0 some string data
   to properly syntactically finish your statement. To get out of this state, simply enter a single line consisting of
   just `:c`.
 - The return value of your last command is always available in the special `_` variable. This is useful to continue
-  using it in the next line, or if you want to save it in a more persistent properly named variable. 
+  using it in the next line, or if you want to save it in a more persistent properly named variable.
+- The stacktrace of a failed REPL command is available in the REPL's log.
 - groovysh's standard `:edit / :e` command is not very useful when accessing it via SSH, because it launches the editor in
   the TTY of the server process. Use the `:editssh / :E` commands instead to edit a file directly in your
   SSH session.
