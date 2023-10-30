@@ -236,8 +236,8 @@ on, even after restarting the target application.
 **Retrieve a current job and print its progress**
 > **Shell Command**
 >
-> `:job [index]` / `:job [key]`<br/>
-> `:J [index]` / `:J [key]`
+> `:job [index|key]`<br/>
+> `:J [index|key]`
 >
 > Retrieves the ReplJob that has the given `index` number in the `:J` listing, or whose `key` matches the argument.
 > Print its JobProgress to the console and return the job object.
@@ -246,10 +246,10 @@ on, even after restarting the target application.
 **Pause or unpause a job**
 > **Shell Command**
 >
-> `:job pause [key]` / `:job unpause [key]`<br/>
-> `:J pause [key]` / `:J unpause [key]`<br/>
+> `:job pause [index|key]` / `:job unpause [index|key]`<br/>
+> `:J pause [index|key]` / `:J unpause [index|key]`<br/>
 >
-> Pauses the job with the given `key`. When paused, workers will finish their currently assigned work item, but will not
+> Pauses the job with the given `key` or `index` number in the `:J` listing. When paused, workers will finish their currently assigned work item, but will not
 > receive any new work items. While residual items are still being processed, the job's state will be given as
 > "pausing", after which it will transition to "paused".
 >
@@ -262,10 +262,10 @@ on, even after restarting the target application.
 <a name="job-cancel"></a>**Cancel a job**
 > **Shell Command**
 >
-> `:job cancel [key]` / `:job cancelforce [key]`<br/>
-> `:J cancel [key]` / `:J cancelforce [key]`<br/>
+> `:job cancel [index|key]` / `:job cancelforce [index|key]`<br/>
+> `:J cancel [index|key]` / `:J cancelforce [index|key]`<br/>
 >
-> Cancels the job with the given `key`. No further input items will be passed to the worker threads. When invoked as
+> Cancels the job with the given `key` or `index` number in the `:J` listing. No further input items will be passed to the worker threads. When invoked as
 > `cancel`, previously active threads will be allowed to continue indefinitely until they have finished their previously
 > assigned inputs. During this phase, the job state will be "cancelling" after which it will transition to "cancelled".
 > The job is then ready for archiving or resuming it.
@@ -280,10 +280,10 @@ on, even after restarting the target application.
 **Archive a job**
 > **Shell Command**
 >
-> `:job archive [key]`<br/>
-> `:J archive [key]`
+> `:job archive [index|key]`<br/>
+> `:J archive [index|key]`
 >
-> Archives the finished job with the given `key`, removing it from the job list and freeing its memory.
+> Archives the finished job with the given `key` or `index` number in the `:J` listing, removing it from the job list and freeing its memory.
 >
 > **Returns** a boolean indicating if the job was archived or not.
 
@@ -333,8 +333,8 @@ on, even after restarting the target application.
 **Kill a Thread**
 > **Shell Command**
 >
-> `:ps kill [threadid...]` / `:ps killforce [threadid...]`<br/>
-> `:P kill [threadid...]` / `:P killforce [threadid...]`
+> `:ps kill [...threadid]` / `:ps killforce [...threadid]`<br/>
+> `:P kill [...threadid]` / `:P killforce [...threadid]`
 >
 > Tries to terminate the threads with the given ids by invoking `Thread.interrupt()` on them. This does not guarantee
 > termination in all cases, but can be helpful if you launched a misbehaving command in a different SSH session. 

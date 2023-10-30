@@ -41,7 +41,7 @@ public class GroovyCmdJob extends CommandSupport {
 
     @Override
     public String getUsage() {
-        return "[] | [index] | [key] | pause [key] | unpause [key] | cancel [key] | cancelforce[key] | archive [key] | archived | prune";
+        return "[] | [index] | [key] | pause [index|key] | unpause [index|key] | cancel [index|key] | cancelforce[index|key] | archive [index|key] | archived | prune";
     }
 
     private static String jobToList(REPLJob j) {
@@ -74,14 +74,7 @@ public class GroovyCmdJob extends CommandSupport {
 
         if (list.get(0).matches("^[0-9-]+$")) {
             // progress command
-            REPLJob j;
-            try {
-                synchronized (speedDial) {
-                    j = REPLJob.get(speedDial.get(Integer.valueOf(list.get(0))));
-                }
-            } catch (NumberFormatException e) {
-                j = REPLJob.get(list.get(0));
-            }
+            REPLJob j = lookup(list.get(0));
             if (j == null) fail("no such job");
             assert j != null;
             new PrintWriter(out, true, StandardCharsets.UTF_8).println(j.getProgress());
@@ -103,7 +96,7 @@ public class GroovyCmdJob extends CommandSupport {
 
         if (list.size() == 1) fail(list.get(0) + " is not a valid argument-less command");
         if (list.size() > 2) fail("please supply at most 2 arguments");
-        REPLJob j = REPLJob.get(list.get(1));
+        REPLJob j = lookup(list.get(1));
         if (j == null) fail("no such job");
         assert j != null;
         switch(list.get(0)) {
@@ -126,6 +119,23 @@ public class GroovyCmdJob extends CommandSupport {
         }
         // NOTREACHED
         return null;
+    }
+
+    private static REPLJob lookup(String keyOrIdx) {
+        try {
+            return lookupSpeedDial(Integer.valueOf(keyOrIdx));
+        } catch (NumberFormatException e) {
+            return REPLJob.get(keyOrIdx);
+        }
+    }
+
+    private static REPLJob lookupSpeedDial(int idx) {
+        String key = null;
+        synchronized (speedDial) {
+            key = speedDial.get(idx);
+        }
+        if (key == null) return null;
+        return REPLJob.get(key);
     }
 }
 
