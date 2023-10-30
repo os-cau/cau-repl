@@ -271,6 +271,8 @@ on, even after restarting the target application.
 > The job is then ready for archiving or resuming it.
 >
 > When invoked as `cancelforce`, previously active threads will be forcefully terminated after a grace period of 10s.
+> 
+> Jobs that don't have `inputs` can only be forcefully cancelled.
 >
 > **Returns** a boolean indicating if the job transitioned to the "cancelling" or "cancelled" state (could e.g. be
 > false for jobs that finished in the meantime).

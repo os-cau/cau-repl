@@ -1156,7 +1156,8 @@ public class REPLJob implements Serializable {
      * Cancels a running job. The instance will immediately transition to {@code CANCELLING} status and wait for all
      * currently active workers to finish their current inputs. When they all have terminated, the job will transition
      * to {@code CANCELLED} status. If some workers hang around for too long, it is safe to subsequently call
-     * {@link REPLJob#cancelForce(int) cancelForce()} again on the job.
+     * {@link REPLJob#cancelForce(int) cancelForce()} again on the job. Jobs without inputs must use
+     * {@link REPLJob#cancelForce(int) cancelForce()}.
      * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
      * finished in the meantime.
      */
@@ -1179,6 +1180,7 @@ public class REPLJob implements Serializable {
 
     private boolean doCancel(Integer forceTimeoutSeconds) {
         if (doneTimestamp != null) return false;
+        if (inputs == null && forceTimeoutSeconds == null) throw new RuntimeException("Jobs without inputs can only be force-cancelled");
         log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "Job {}: cancelled{}", key, forceTimeoutSeconds == null ? "" : (", force timeout=" + forceTimeoutSeconds)), INTERNAL_LOG_TARGETS);
         final Instant cs = Instant.now();
         tryCallback(cs, JobEventType.JOB_CANCEL_REQUESTED, null);
