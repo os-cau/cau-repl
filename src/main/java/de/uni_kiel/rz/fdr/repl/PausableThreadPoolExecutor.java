@@ -20,8 +20,8 @@ class PausableThreadPoolExecutor extends ThreadPoolExecutor {
     private ReentrantLock pauseLock = new ReentrantLock();
     private Condition unpaused = pauseLock.newCondition();
 
-    public PausableThreadPoolExecutor(int poolSize, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        super(poolSize, poolSize, 0, TimeUnit.SECONDS, workQueue, threadFactory != null ? threadFactory : Executors.defaultThreadFactory());
+    public PausableThreadPoolExecutor(int poolSize, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, String prefix) {
+        super(poolSize, poolSize, 0, TimeUnit.SECONDS, workQueue, threadFactory != null ? threadFactory : new NamedThreadFactory(prefix));
     }
 
     protected void beforeExecute(Thread t, Runnable r) {
@@ -96,4 +96,22 @@ class PausableThreadPoolExecutor extends ThreadPoolExecutor {
             super();
         }
     }
+
+    private static class NamedThreadFactory implements ThreadFactory {
+        private String prefix;
+        private ThreadFactory proxy;
+
+        public NamedThreadFactory(String prefix) {
+            this.prefix = prefix != null ? prefix : "";
+            this.proxy = Executors.defaultThreadFactory();
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = proxy.newThread(r);
+            t.setName(prefix + t.getName());
+            return t;
+        }
+    }
+
 }

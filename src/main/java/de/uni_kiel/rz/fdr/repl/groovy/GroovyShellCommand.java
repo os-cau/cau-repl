@@ -5,10 +5,7 @@
 
 package de.uni_kiel.rz.fdr.repl.groovy;
 
-import de.uni_kiel.rz.fdr.repl.REPLLog;
-import de.uni_kiel.rz.fdr.repl.REPLLogEntry;
-import de.uni_kiel.rz.fdr.repl.SshTerminal;
-import de.uni_kiel.rz.fdr.repl.TtyFilterOutputStream;
+import de.uni_kiel.rz.fdr.repl.*;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import org.apache.groovy.groovysh.Groovysh;
@@ -23,11 +20,9 @@ import org.codehaus.groovy.tools.shell.IO;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static de.uni_kiel.rz.fdr.repl.groovy.GroovyShellService.SHELL_KEY;
@@ -36,6 +31,7 @@ import static org.codehaus.groovy.tools.shell.IO.Verbosity.INFO;
 public class GroovyShellCommand implements Command {
 
     public static final Map<GroovyShellCommand, Binding> activeShells = Collections.synchronizedMap(new WeakHashMap<>());
+    public static final String THREAD_PREFIX = REPL.THREAD_PREFIX + "client: ";
 
     private final SshServer sshd;
     private final Map<String, Object> bindings;
@@ -136,7 +132,7 @@ public class GroovyShellCommand implements Command {
 
     private static Thread newThread(Runnable r, ChannelSession session) {
         String address = session.getSession().getIoSession().getRemoteAddress().toString();
-        String threadName = "GroovySh Client Thread: " + address;
+        String threadName = THREAD_PREFIX + address;
         return new Thread(r, threadName);
     }
 

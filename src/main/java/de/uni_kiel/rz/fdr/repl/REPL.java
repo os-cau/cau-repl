@@ -15,9 +15,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a single REPL interface with an associated SSH service.
@@ -39,6 +38,10 @@ public class REPL {
      * The default name of the work subdirectory containing the REPL's persistent state.
      */
     public static final String DEFAULT_WORK_SUBDIR = "cau-repl";
+    /**
+     * Threads of cau-repl have a name that starts with this prefix
+     */
+    public static final String THREAD_PREFIX = "cau-repl ";
     /**
      * Does this build of cau-repl contain GPL licensed code?
      */

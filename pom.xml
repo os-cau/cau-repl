@@ -524,6 +524,7 @@
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdEditSSH.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdGrabREPL.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdJob.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdPS.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamized.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamizedExpando.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyDynamizeTransformer1.java</exclude>

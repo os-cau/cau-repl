@@ -8,6 +8,7 @@ println("${de.uni_kiel.rz.fdr.repl.REPL.versionString} initializing...")
 :register de.uni_kiel.rz.fdr.repl.groovy.GroovyCmdGrabREPL :grabrepl :G
 :register de.uni_kiel.rz.fdr.repl.groovy.GroovyCmdBreakpoint :breakpoint :B
 :register de.uni_kiel.rz.fdr.repl.groovy.GroovyCmdJob :job :J
+:register de.uni_kiel.rz.fdr.repl.groovy.GroovyCmdPS :ps :P
 
 _cauIn = null
 _cauEnv = null

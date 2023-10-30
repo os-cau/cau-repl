@@ -31,6 +31,13 @@ import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
  */
 @SuppressWarnings("unused")
 public class REPLJob implements Serializable {
+
+    /**
+     * Threads of cau-repls job workers have names that start with this prefix. Threads belonging to a single job will
+     * also be placed in a common thread group.
+     */
+    public static final String THREAD_PREFIX = REPL.THREAD_PREFIX + "job: ";
+
     /**
      * A record containing a job's results for one single input item.
      * @param key The key of the job that produced this result
@@ -982,7 +989,7 @@ public class REPLJob implements Serializable {
             startTimestamp = Instant.now();
             errors = 0;
             success = 0;
-            executor = new PausableThreadPoolExecutor(concurrency, queue, threadFactory);
+            executor = new PausableThreadPoolExecutor(concurrency, queue, threadFactory, THREAD_PREFIX + key + " - ");
         }
         Instant pauseNotified = null;
         info("Starting job...");

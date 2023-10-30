@@ -132,7 +132,7 @@ groovy:000> warn("restarting in 5min", targets:[REPLLog.LOG_TARGETS.REPL_FILE, R
 
 ------------------------------
 
-## Job Management
+## Job Management and Threads
 
 You can start long-running jobs in the REPL that will execute in the background and continue running after you end the
 SSH session. Jobs can be associated with a list of inputs to be processed. If you can list your inputs in advance,
@@ -259,7 +259,7 @@ on, even after restarting the target application.
 > paused jobs); when unpausing: the number of milliseconds that the jobs has in the paused state.
 >
 
-**Cancel a job**
+<a name="job-cancel"></a>**Cancel a job**
 > **Shell Command**
 >
 > `:job cancel [key]` / `:job cancelforce [key]`<br/>
@@ -308,6 +308,45 @@ on, even after restarting the target application.
 > from the REPL's work directory. This includes both current and archived jobs.
 >
 > **Returns** The list of pruned keys in text format.
+
+**List cau-repl's Threads**
+> **Shell Command**
+>
+> `:ps`<br/>
+> `:P`
+>
+> Generates an overview of cau-repl's threads in the JVM. This includes shell sessions and job workers. The thread of
+> your current REPL session will be marked with a `*`.
+>
+> **Returns** A textual representation of cau-repl's threads.
+
+**List all JVM Threads**
+> **Shell Command**
+>
+> `:ps all`<br/>
+> `:P all`
+>
+> Generates an overview of all threads in the JVM. The thread of your current REPL session will be marked with a `*`.
+>
+> **Returns** A textual representation of all threads in the JVM.
+
+**Kill a Thread**
+> **Shell Command**
+>
+> `:ps kill [threadid...]` / `:ps killforce [threadid...]`<br/>
+> `:P kill [threadid...]` / `:P killforce [threadid...]`
+>
+> Tries to terminate the threads with the given ids by invoking `Thread.interrupt()` on them. This does not guarantee
+> termination in all cases, but can be helpful if you launched a misbehaving command in a different SSH session. 
+> 
+> Use `killforce` instead of `kill` for a more vigorous attempt at termination, which may or may not be successful.
+> 
+> **Don't use this command to cancel a job.** Use [:job cancel](#job-cancel) instead, which can handle cau-repl's job
+> much better.
+>
+> **Returns** Nothing.
+
+
 
 **Related Classes:** [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html), [REPLJobCallbackAutoTune](apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html) provide additional functionality related to job
 control.
@@ -568,6 +607,7 @@ groovy:000> :B 0 some string data
 - The return value of your last command is always available in the special `_` variable. This is useful to continue
   using it in the next line, or if you want to save it in a more persistent properly named variable.
 - The stacktrace of a failed REPL command is available in the REPL's log.
+- If you launch a mishbehaving command that blocks your REPL, start a second SSH session and use the `:ps kill` command to terminate it.
 - groovysh's standard `:edit / :e` command is not very useful when accessing it via SSH, because it launches the editor in
   the TTY of the server process. Use the `:editssh / :E` commands instead to edit a file directly in your
   SSH session.
