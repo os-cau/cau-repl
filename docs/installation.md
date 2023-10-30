@@ -17,7 +17,7 @@ mvn clean package
 ```
 This will produce the following two JARs:
 
-- `target/cau-repl-X.Y.Z-fatjar-nogpl.jar` can be used as a standalone Java agent and contains all of cau-repls dependencies
+- `target/cau-repl-X.Y.Z-fatjar-mit.jar` can be used as a standalone Java agent and contains all of cau-repls dependencies
 - `target/cau-repl-agent-X.Y.Z.jar` is an optional lightweight loader-only agent that can be used to load the full `fatjar`
   into a specific classloader. Use this if your application places its classes in a non-default classloader (e.g.
   web applications in a servlet container). See the [Classloader Selection](#classloader-selection) section for details. 
@@ -27,21 +27,21 @@ This will produce the following two JARs:
 To simply get access to the SSH REPL, load cau-repl as a Java agent. You need to pass a special parameter to your
 Java command:
 ```bash
-java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar ...
+java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-mit.jar ...
 ```
 This also allows you to compile your own classes and use them in the REPL.
 
 If you would like to extend your own classes' availability to the entire application (and not just the REPL), they need
 to be loaded into the system-default classloader. Then you should configure cau-repl like this: 
 ```bash
-java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar -DCAU.Groovy.UseSystemClassLoader=true ...
+java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-mit.jar -DCAU.Groovy.UseSystemClassLoader=true ...
 ```
 
 If you use the system-default classloader and loading your classes fails with an exception, you might also need to
 disable the access protection provided by Java's module system (potentially impacting your target's security if it
 depends on it). Whether this step is necessary, depends on your target application:
 ```bash
-java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-nogpl.jar --add-opens 'java.base/java.lang=ALL-UNNAMED' -DCAU.Groovy.UseSystemClassLoader=true ...
+java -javaagent:/path/to/cau-repl-X.Y.Z-fatjar-mit.jar --add-opens 'java.base/java.lang=ALL-UNNAMED' -DCAU.Groovy.UseSystemClassLoader=true ...
 ```
 
 The REPL will listen for SSH connections on port 8512 on the local interface. You can use any username to log in. A

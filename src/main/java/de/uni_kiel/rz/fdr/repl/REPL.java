@@ -304,7 +304,7 @@ public class REPL {
      * @return cau-repl's version string.
      */
     public static String getVersionString() {
-        return "cau-repl " + REPL.VERSION + "-" + (HAVE_GPL ? "gpl" : "nogpl");
+        return "cau-repl " + REPL.VERSION + "-" + (HAVE_GPL ? "gpl" : "mit");
     }
 
 

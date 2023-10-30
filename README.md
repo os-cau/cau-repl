@@ -72,7 +72,7 @@ applications. Choose the quickstart instructions that apply to your use-case.
 
 ### For generic use, built without MyCoRe GPL code
     mvn clean package
-    java -javaagent:target/cau-repl-X.Y.Z-fatjar-nogpl.jar -jar /path/to/your/application.jar
+    java -javaagent:target/cau-repl-X.Y.Z-fatjar-mit.jar -jar /path/to/your/application.jar
     # a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
     # you may now login with any username and the password that was just printed
     ssh "ssh://localhost:8512"
@@ -81,7 +81,7 @@ By default, cau-repl will store its state in the `cau-repl` directory, which it 
 directory.
 
 *If you don't have a Java target application available and just want to see the REPL in action, you can also start the
-agent directly without a target:* `java -jar target/cau-repl-X.Y.Z-fatjar-nogpl.jar`
+agent directly without a target:* `java -jar target/cau-repl-X.Y.Z-fatjar-mit.jar`
 
 #### Things to try
 
