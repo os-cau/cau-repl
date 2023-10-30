@@ -274,7 +274,11 @@ public class REPLJob implements Serializable {
     public static final Consumer<JobEvent> CALLBACK_PAUSE_ON_ERROR = evt -> {
         if (evt.eventType != JobEventType.INPUT_ERROR) return;
         evt.job.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "Job {}: Pausing due to input #{} error: {}", evt.job.key, evt.inputIndex, evt.job.results[evt.inputIndex].error), Set.of(LOG_TARGETS.REPL_ALL_SHELLS));
-        if (evt.job.inputs != null) evt.job.pause();
+        if (evt.job.inputs != null) {
+            try {
+                evt.job.pause();
+            } catch (JobException ignore) {}
+        }
     };
 
     @Serial
@@ -323,6 +327,8 @@ public class REPLJob implements Serializable {
             try {
                 return load(k);
             } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            } catch (AppendableObjectStore.ObjectStoreInvalidException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -357,7 +363,7 @@ public class REPLJob implements Serializable {
      * @param job The job to archive.
      * @return Flag indicating whether this job was archived or not.
      */
-    public static boolean archive(REPLJob job) {
+    public static boolean archive(REPLJob job) throws JobException {
         return archive(job.key);
     }
 
@@ -367,9 +373,9 @@ public class REPLJob implements Serializable {
      * @param key The key of the job to archive.
      * @return Flag indicating whether this job was archived or not.
      */
-    public static boolean archive(String key) {
+    public static boolean archive(String key) throws JobException {
         REPLJob j = jobs.get(key);
-        if (j != null && j.getProgress().isActive()) throw new RuntimeException("can't archive a job that is still active");
+        if (j != null && j.getProgress().isActive()) throw new JobException("can't archive a job that is still active");
         return jobs.remove(key) != null;
     }
 
@@ -378,7 +384,7 @@ public class REPLJob implements Serializable {
      * @param supplier The job action.
      * @return The new job.
      */
-    public static REPLJob repljob(Supplier<Serializable> supplier) {
+    public static REPLJob repljob(Supplier<Serializable> supplier) throws IOException {
         return repljob((x, y) -> supplier.get(), null, 1, null);
     }
 
@@ -388,7 +394,7 @@ public class REPLJob implements Serializable {
      * @param concurrency The concurrency level to use.
      * @return The new job.
      */
-    public static REPLJob repljob(Supplier<Serializable> supplier, int concurrency) {
+    public static REPLJob repljob(Supplier<Serializable> supplier, int concurrency) throws IOException {
         return repljob((x, y) -> supplier.get(), null, concurrency, null);
     }
 
@@ -398,7 +404,7 @@ public class REPLJob implements Serializable {
      * @param name A name for the job that will be displayed in the job list.
      * @return The new job.
      */
-    public static REPLJob repljob(Supplier<Serializable> supplier, String name) {
+    public static REPLJob repljob(Supplier<Serializable> supplier, String name) throws IOException {
         return repljob((x, y) -> supplier.get(), null, 1, name);
     }
 
@@ -408,7 +414,7 @@ public class REPLJob implements Serializable {
      * @param inputs The inputs that the job action will operate on.
      * @return The new job.
      */
-    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs) {
+    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs) throws IOException {
         return repljob(function, inputs, 1, null);
     }
 
@@ -418,7 +424,7 @@ public class REPLJob implements Serializable {
      * @param inputs The inputs that the job action will operate on.
      * @return The new job.
      */
-    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs) {
+    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs) throws IOException {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, 1, null);
         closure.setDelegate(j);
         return j;
@@ -431,7 +437,7 @@ public class REPLJob implements Serializable {
      * @param concurrency The concurrency level to use.
      * @return The new job.
      */
-    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency) {
+    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency) throws IOException {
         return repljob(function, inputs, concurrency, null);
     }
 
@@ -442,7 +448,7 @@ public class REPLJob implements Serializable {
      * @param concurrency The concurrency level to use.
      * @return The new job.
      */
-    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency) {
+    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency) throws IOException {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, null);
         closure.setDelegate(j);
         return j;
@@ -455,7 +461,7 @@ public class REPLJob implements Serializable {
      * @param name A name for the job that will be displayed in the job list.
      * @return The new job.
      */
-    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, String name) {
+    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, String name) throws IOException {
         return repljob(function, inputs, 1, name);
     }
 
@@ -466,7 +472,7 @@ public class REPLJob implements Serializable {
      * @param name A name for the job that will be displayed in the job list.
      * @return The new job.
      */
-    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, String name) {
+    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, String name) throws IOException {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, name);
         closure.setDelegate(j);
         return j;
@@ -480,9 +486,9 @@ public class REPLJob implements Serializable {
      * @param name A name for the job that will be displayed in the job list.
      * @return The new job.
      */
-    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) {
+    public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) throws IOException {
         REPLJob job = new REPLJob(TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, inputs, concurrency, name);
-        if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey());
+        if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey() + ", internal error?");
         if (REPL.HAVE_MYCORE) job.setInternalCallback(new REPLJobProcessableProxy(job));
         return job;
     }
@@ -495,7 +501,7 @@ public class REPLJob implements Serializable {
      * @param name A name for the job that will be displayed in the job list.
      * @return The new job.
      */
-    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name) {
+    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name) throws IOException {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, name);
         closure.setDelegate(j);
         return j;
@@ -510,7 +516,7 @@ public class REPLJob implements Serializable {
      * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
      * @return The new job.
      */
-    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name, boolean becomeDelegate) {
+    public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name, boolean becomeDelegate) throws IOException {
         REPLJob j = repljob(inputs != null ? closure::call : (x, y) -> closure.call(), inputs, concurrency, name);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
@@ -523,7 +529,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException {
+    public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
@@ -536,7 +542,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException {
+    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(key, function, false, true);
     }
 
@@ -547,7 +553,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException {
+    public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(key, supplier, false, true);
     }
 
@@ -560,7 +566,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
@@ -576,7 +582,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException {
+    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
@@ -591,9 +597,9 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob oldJob = jobs.get(key);
-        if (oldJob != null && oldJob.getProgress().isActive()) throw new RuntimeException("Can't resume a job that is still active");
+        if (oldJob != null && oldJob.getProgress().isActive()) throw new JobException("Can't resume a job that is still active");
         return resume(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile(), function, retrySuccess, retryErrors);
     }
 
@@ -606,7 +612,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(key, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
 
@@ -617,7 +623,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException {
+    public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
@@ -630,7 +636,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException {
+    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(path, function, false, true);
     }
 
@@ -641,7 +647,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException {
+    public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(path, supplier, false, true);
     }
 
@@ -654,7 +660,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
@@ -670,7 +676,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException {
+    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
@@ -685,10 +691,10 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         REPLJob job = new REPLJob(path, TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, retrySuccess, retryErrors);
-        if (job.inputs == null || job.inputs.length == 0) throw new RuntimeException("can't resume a job that had no inputs");
-        if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey());
+        if (job.inputs == null || job.inputs.length == 0) throw new JobException("can't resume a job that had no inputs");
+        if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey() + ", internal error?");
         if (REPL.HAVE_MYCORE) job.setInternalCallback(new REPLJobProcessableProxy(job));
         return job;
     }
@@ -702,7 +708,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException {
+    public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
         return resume(path, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
 
@@ -713,7 +719,7 @@ public class REPLJob implements Serializable {
      * @return The job.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob load(String key) throws IOException {
+    public static REPLJob load(String key) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
         return load(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile());
     }
 
@@ -724,7 +730,7 @@ public class REPLJob implements Serializable {
      * @return The job.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob load(File path) throws IOException {
+    public static REPLJob load(File path) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
         return new REPLJob(path, null, null, false, false);
     }
 
@@ -797,7 +803,7 @@ public class REPLJob implements Serializable {
     private transient Integer cancelForceTimeoutSeconds = null;
     private transient CompletableFuture<JobProgress> future = null;
 
-    private REPLJob(String key, BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) {
+    private REPLJob(String key, BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) throws IOException {
         this.createdTimestamp = Instant.now();
         this.key = key;
         this.function = function;
@@ -817,14 +823,14 @@ public class REPLJob implements Serializable {
         try {
             objectStore = new AppendableObjectStore(getStateFile());
             objectStore.writeObject(this);
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException | AppendableObjectStore.ObjectStoreInvalidException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private REPLJob(File path, String newKey, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException {
+    private REPLJob(File path, String newKey, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
         this.createdTimestamp = Instant.now();
-        if (!path.isFile()) throw new RuntimeException("job state file " + path + " not found");
+        if (!path.isFile()) throw new IOException("job state file " + path + " not found");
         try (AppendableObjectStore in = new AppendableObjectStore(path)) {
             REPLJob job = (REPLJob) in.next();
             this.key = job.key;
@@ -848,7 +854,7 @@ public class REPLJob implements Serializable {
                     this.jobLog.add(logEntry);
                     if (logEntry.getLevel().compareTo(REPLLogEntry.LOG_LEVEL.DEBUG) > 0) lastLogEntry = logEntry;
                 } else {
-                    throw new RuntimeException("entry of unexpected class " + data.getClass() + " in " + path);
+                    throw new RuntimeException("entry of unexpected class " + data.getClass() + " in " + path + ", internal error?");
                 }
             }
         }
@@ -870,7 +876,7 @@ public class REPLJob implements Serializable {
                 objectStore = new AppendableObjectStore(getStateFile());
                 objectStore.writeObject(this);
                 for (REPLLogEntry logEntry : this.jobLog) objectStore.writeObject(logEntry);
-            } catch (IOException | InterruptedException e) {
+            } catch (InterruptedException | AppendableObjectStore.ObjectStoreInvalidException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -880,7 +886,7 @@ public class REPLJob implements Serializable {
      * Starts processing. Each job instance can only be started once.
      * @return A Future that will complete once the job is no longer active.
      */
-    public Future<JobProgress> start() {
+    public Future<JobProgress> start() throws JobException {
         return start(null, null);
     }
 
@@ -889,7 +895,7 @@ public class REPLJob implements Serializable {
      * @param threadFactory A custom Thread Factory that will be used for the worker threads.
      * @return A Future that will complete once the job is no longer active.
      */
-    public Future<JobProgress> start(ThreadFactory threadFactory) {
+    public Future<JobProgress> start(ThreadFactory threadFactory) throws JobException {
         return start(threadFactory, null);
     }
 
@@ -901,7 +907,7 @@ public class REPLJob implements Serializable {
      *                         by it to a different thread or risk lowering the job's throughput.
      * @return A Future that will complete once the job is no longer active.
      */
-    public Future<JobProgress> start(Consumer<JobEvent> progressCallback) {
+    public Future<JobProgress> start(Consumer<JobEvent> progressCallback) throws JobException {
         return start(null, progressCallback);
     }
 
@@ -914,12 +920,16 @@ public class REPLJob implements Serializable {
      *                         by it to a different thread or risk lowering the job's throughput.
      * @return A Future that will complete once the job is no longer active.
      */
-    public Future<JobProgress> start(ThreadFactory threadFactory, Consumer<JobEvent> progressCallback) {
-        if (future != null) throw new RuntimeException("this job has already been started");
+    public Future<JobProgress> start(ThreadFactory threadFactory, Consumer<JobEvent> progressCallback) throws JobException {
+        if (future != null) throw new JobException("this job has already been started");
         future = new CompletableFuture<>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
-                doCancel(mayInterruptIfRunning ? 10 : null);
+                try {
+                    doCancel(mayInterruptIfRunning ? 10 : null);
+                } catch (JobException e) {
+                    throw new RuntimeException(e);
+                }
                 return super.cancel(mayInterruptIfRunning);
             }
         };
@@ -982,8 +992,8 @@ public class REPLJob implements Serializable {
         }
     }
 
-    private void execute(ThreadFactory threadFactory) {
-        if (function == null) throw new RuntimeException("can't execute a job without closure");
+    private void execute(ThreadFactory threadFactory) throws JobException, InterruptedException {
+        if (function == null) throw new JobException("can't execute a job without closure");
         LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
         synchronized (this) {
             startTimestamp = Instant.now();
@@ -1007,7 +1017,7 @@ public class REPLJob implements Serializable {
                             objectStore.writeObject(results[queuedInput]);
                         } catch (InterruptedException e) {
                             log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, "Job {}: interrupted while skipping results: {}", key, e), INTERNAL_LOG_TARGETS);
-                            throw new RuntimeException("Job " + key + " interrupted while skipping results", e);
+                            throw e;
                         }
                         synchronized (this) {
                             if (results[queuedInput].error == null) skippedSuccess++;
@@ -1080,8 +1090,9 @@ public class REPLJob implements Serializable {
                     }
                 } catch (InterruptedException ex) {
                     log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, "Job {}: interrupted while waiting for results: {}", key, ex), INTERNAL_LOG_TARGETS);
+                    // do not propagate the exception, we will proceed to wind down the future in an orderly fashion
                 } catch (ExecutionException ex) {
-                    throw new RuntimeException(ex);
+                    throw new RuntimeException("internal error: exception from worker", ex);
                 }
                 if (cancelledSince != null && cancelWaitTime != null) break;
                 else if (cancelledSince != null && executor.getActiveCount() == 0) break;
@@ -1154,8 +1165,8 @@ public class REPLJob implements Serializable {
      * of its previous success. You must call this method before starting the job.
      * @param index The index of the input item to resume.
      */
-    public synchronized void retryIndex(int index) {
-        if (startTimestamp != null) throw new RuntimeException("this job has already been started");
+    public synchronized void retryIndex(int index) throws JobException {
+        if (startTimestamp != null) throw new JobException("this job has already been started");
         results[index] = null;
     }
 
@@ -1168,7 +1179,7 @@ public class REPLJob implements Serializable {
      * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
      * finished in the meantime.
      */
-    public boolean cancel() {
+    public boolean cancel() throws JobException {
         return doCancel(null);
     }
 
@@ -1181,13 +1192,13 @@ public class REPLJob implements Serializable {
      * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
      * finished in the meantime.
      */
-    public boolean cancelForce(int timeoutSeconds) {
+    public boolean cancelForce(int timeoutSeconds) throws JobException {
         return doCancel(timeoutSeconds);
     }
 
-    private boolean doCancel(Integer forceTimeoutSeconds) {
+    private boolean doCancel(Integer forceTimeoutSeconds) throws JobException {
         if (doneTimestamp != null) return false;
-        if (inputs == null && forceTimeoutSeconds == null) throw new RuntimeException("Jobs without inputs can only be force-cancelled");
+        if (inputs == null && forceTimeoutSeconds == null) throw new JobException("Jobs without inputs can only be force-cancelled");
         log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "Job {}: cancelled{}", key, forceTimeoutSeconds == null ? "" : (", force timeout=" + forceTimeoutSeconds)), INTERNAL_LOG_TARGETS);
         final Instant cs = Instant.now();
         tryCallback(cs, JobEventType.JOB_CANCEL_REQUESTED, null);
@@ -1212,8 +1223,8 @@ public class REPLJob implements Serializable {
      * had already been paused).
      */
     @SuppressWarnings("UnusedReturnValue")
-    public boolean pause() {
-        if (inputs == null) throw new RuntimeException("Jobs without inputs can't be paused");
+    public boolean pause() throws JobException {
+        if (inputs == null) throw new JobException("Jobs without inputs can't be paused");
         if (pausedSince != null || doneTimestamp != null || cancelledSince != null) return false;
         if (TRACE || TRACE_JOBS) trace("paused");
         final Instant ps = Instant.now();
@@ -1232,15 +1243,15 @@ public class REPLJob implements Serializable {
      * (e.g. because it was not actually paused before).
      */
     @SuppressWarnings("UnusedReturnValue")
-    public Long unpause() {
+    public Long unpause() throws JobException {
         return unpause(true);
     }
 
-    private Long unpause(boolean callback) {
+    private Long unpause(boolean callback) throws JobException {
         final Instant until;
         final long d;
         synchronized (this) {
-            if (inputs == null) throw new RuntimeException("Jobs without inputs can't be paused");
+            if (inputs == null) throw new JobException("Jobs without inputs can't be paused");
             if (pausedSince == null || doneTimestamp != null || cancelledSince != null) return null;
             if (TRACE || TRACE_JOBS) trace("unpaused");
             until = Instant.now();
@@ -1537,6 +1548,16 @@ public class REPLJob implements Serializable {
             if (objectStore != null) objectStore.close();
         } finally {
             super.finalize();
+        }
+    }
+
+    public static class JobException extends Exception {
+        public JobException(String message) {
+            super(message);
+        }
+
+        public JobException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 

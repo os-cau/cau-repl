@@ -18,6 +18,7 @@ import org.mycore.common.config.MCRConfiguration2;
 import org.mycore.common.events.MCRStartupHandler;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -70,7 +71,7 @@ public class REPLStartupHandler implements MCRStartupHandler.AutoExecutable {
         try {
             repl = new REPL(SSH_ADDR, SSH_PORT, SSH_TIMEOUT, GroovySourceDirsStartupHandler.getWorkDir(), classLoader);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         repl.setAuthenticator(new REPLMyCoReAuthenticator());
         repl.addSessionListener(new SessionListener() {
@@ -80,12 +81,12 @@ public class REPLStartupHandler implements MCRStartupHandler.AutoExecutable {
                     Groovysh shell = session.getAttribute(GroovyShellService.SHELL_KEY);
                     if (shell != null) {
                         String shellSessionID = (String) shell.execute("mcrsessionid");
-                        if (shellSessionID == null) throw new RuntimeException("no session ID found");
+                        if (shellSessionID == null) throw new RuntimeException("no session ID found, internal error?");
                         MCRSession mcrSession = MCRSessionMgr.getSession(shellSessionID);
-                        if (mcrSession == null) throw new RuntimeException("session is unknown");
+                        if (mcrSession == null) throw new RuntimeException("session is unknown, internal error?");
                         mcrSession.close();
                         REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.DEBUG, "REPL: MyCoRe Session {} closed", shellSessionID), INTERNAL_LOG_TARGETS);
-                    } else throw new RuntimeException("no shell found");
+                    } else throw new RuntimeException("no shell found, internal error?");
                 } catch (Exception e) {
                     REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: error while closing MyCoRe Session after disconnect: {}", e), INTERNAL_LOG_TARGETS);
                 }
@@ -123,7 +124,7 @@ public class REPLStartupHandler implements MCRStartupHandler.AutoExecutable {
         try {
             repl.start();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

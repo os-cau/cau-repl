@@ -124,7 +124,7 @@ public class REPLAgent {
          */
 
         @SuppressWarnings("UnusedReturnValue")
-        protected static Object darkInvocation(Object target, String methodName, Class<?>[] signature, Object[] arguments) throws InvocationTargetException, IllegalAccessException {
+        protected static Object darkInvocation(Object target, String methodName, Class<?>[] signature, Object[] arguments) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
             // requires --add-opens 'java.base/java.lang=ALL-UNNAMED'. maybe the agent's Instrumentation.redefineModule() can be used instead of this parameter?
             Class<?> klass = target.getClass();
             Method meth = null;
@@ -136,27 +136,25 @@ public class REPLAgent {
                 klass = klass.getSuperclass();
             }
 
-            if (meth == null) throw new RuntimeException("Could not find method " + methodName + " in class");
+            if (meth == null) throw new NoSuchMethodException("Could not find method " + methodName + " in class");
             meth.setAccessible(true);
             return meth.invoke(target, arguments);
         }
 
         // keep this protected -> uses the agent's Instrumentation
-        protected static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) {
+        protected static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) throws IOException {
             if ((classLoader == null || classLoader == ClassLoader.getSystemClassLoader()) && REPLAgent.inst != null) {
                 for (URL u : urls) {
-                    try {
-                        REPLAgent.inst.appendToSystemClassLoaderSearch(new JarFile(u.getPath()));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    REPLAgent.inst.appendToSystemClassLoaderSearch(new JarFile(u.getPath()));
                 }
                 return true;
             } else if (classLoader instanceof URLClassLoader ucl) {
                 for (URL u : urls) {
                     try {
                         darkInvocation(ucl, "addURL", new Class<?>[]{URL.class}, new Object[]{u});
-                    } catch (InvocationTargetException | IllegalAccessException e) {
+                    } catch (NoSuchMethodException | IllegalAccessException e) {
+                        throw new RuntimeException("Failed to .addURL() to extend class path, possibly an internal error?", e);
+                    } catch (InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
                 }

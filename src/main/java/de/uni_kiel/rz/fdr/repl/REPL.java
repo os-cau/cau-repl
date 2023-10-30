@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class represents a single REPL interface with an associated SSH service.
@@ -276,7 +275,7 @@ public class REPL {
             }
             boolean newDir = false;
             if (!REPL.workDir[0].isDirectory()) {
-                if (!REPL.workDir[0].mkdirs()) throw new RuntimeException("Failed to create work directory '" + REPL.workDir[0].getAbsolutePath() + "'");
+                if (!REPL.workDir[0].mkdirs()) throw new IOException("Failed to create work directory '" + REPL.workDir[0].getAbsolutePath() + "'");
                 newDir = true;
             }
             // also point groovy subsystems to our workdir

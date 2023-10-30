@@ -99,23 +99,27 @@ public class GroovyCmdJob extends CommandSupport {
         REPLJob j = lookup(list.get(1));
         if (j == null) fail("no such job");
         assert j != null;
-        switch(list.get(0)) {
-            case "pause" -> {
-                return j.pause();
+        try {
+            switch (list.get(0)) {
+                case "pause" -> {
+                    return j.pause();
+                }
+                case "unpause" -> {
+                    return j.unpause();
+                }
+                case "cancel" -> {
+                    return j.cancel();
+                }
+                case "cancelforce" -> {
+                    return j.cancelForce(10);
+                }
+                case "archive" -> {
+                    return REPLJob.archive(j);
+                }
+                default -> fail("unknown subcommand: " + list.get(0));
             }
-            case "unpause" -> {
-                return j.unpause();
-            }
-            case "cancel" -> {
-                return j.cancel();
-            }
-            case "cancelforce" -> {
-                return j.cancelForce(10);
-            }
-            case "archive" -> {
-                return REPLJob.archive(j);
-            }
-            default -> fail("unknown subcommand: " + list.get(0));
+        } catch (REPLJob.JobException e) {
+            throw new RuntimeException(e);
         }
         // NOTREACHED
         return null;

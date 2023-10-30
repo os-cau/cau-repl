@@ -3,9 +3,7 @@
 
 package de.uni_kiel.rz.fdr.repl.mycore;
 
-import de.uni_kiel.rz.fdr.repl.REPL;
-import de.uni_kiel.rz.fdr.repl.REPLLog;
-import de.uni_kiel.rz.fdr.repl.REPLLogEntry;
+import de.uni_kiel.rz.fdr.repl.*;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovyDynamized;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovyDynamizedExpando;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory;
@@ -18,6 +16,7 @@ import org.mycore.common.events.MCRStartupHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class GroovySourceDirsStartupHandler implements MCRStartupHandler.AutoExe
         try {
             REPL.setWorkDir(getWorkDir());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
 
         // retroactively add dynamized metaclasses to dynamized groovy classes that we compiled using the agent in deferred mode
@@ -80,8 +79,11 @@ public class GroovySourceDirsStartupHandler implements MCRStartupHandler.AutoExe
                 Path p = Path.of(GROOVY_SOURCE_DIRS.get(prop)).toAbsolutePath();
                 new GroovySourceDirectory(p, classLoader, classPath, false, REORDER_SOURCES);
             }
-        } catch (IOException | InvocationTargetException | IllegalAccessException e) {
+        } catch (IOException | InvocationTargetException | IllegalAccessException |
+                 InsufficientAccessRightsException | GroovySourceDirectory.CompilationException |
+                 GroovySourceDirectory.ClassLoadingException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "GroovySourceDirs: Error during compilation: {}", e), INTERNAL_LOG_TARGETS);
+            if (e instanceof IOException eio) throw new UncheckedIOException(eio);
             throw new RuntimeException(e);
         }
 

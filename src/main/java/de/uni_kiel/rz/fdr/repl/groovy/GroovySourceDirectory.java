@@ -3,6 +3,7 @@
 
 package de.uni_kiel.rz.fdr.repl.groovy;
 
+import de.uni_kiel.rz.fdr.repl.InsufficientAccessRightsException;
 import de.uni_kiel.rz.fdr.repl.REPLLog;
 import de.uni_kiel.rz.fdr.repl.REPLLogEntry;
 import groovy.lang.*;
@@ -54,10 +55,10 @@ public class GroovySourceDirectory {
      * @param root The directory or alternatively a single file to compile.
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
-     * @throws RuntimeException When your sources caused a compilation error.
+     * @throws CompilationException When your sources caused a compilation error.
      */
     @SuppressWarnings("unused")
-    public GroovySourceDirectory(Path root) throws IOException, IllegalAccessException {
+    public GroovySourceDirectory(Path root) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
         this.classLoader = new GroovyClassLoader();
         this.patcheeClassPath = System.getProperty("java.class.path", ".");
@@ -72,10 +73,10 @@ public class GroovySourceDirectory {
      * @param classLoader The ClassLoader that the compiled classes will be put in.
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
-     * @throws RuntimeException When your sources caused a compilation error.
+     * @throws CompilationException When your sources caused a compilation error.
      */
     @SuppressWarnings("unused")
-    public GroovySourceDirectory(Path root, ClassLoader classLoader) throws IOException, IllegalAccessException {
+    public GroovySourceDirectory(Path root, ClassLoader classLoader) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
         this.patcheeClassPath = System.getProperty("java.class.path", ".");
@@ -91,10 +92,10 @@ public class GroovySourceDirectory {
      * @param patcheeClassPath A custom class path that contains the target classes of the {@link de.uni_kiel.rz.fdr.repl.Patches @Patches} annotation.
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
-     * @throws RuntimeException When your sources caused a compilation error.
+     * @throws CompilationException When your sources caused a compilation error.
      */
     @SuppressWarnings("unused")
-    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath) throws IOException, IllegalAccessException {
+    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
         this.patcheeClassPath = patcheeClassPath;
@@ -114,9 +115,9 @@ public class GroovySourceDirectory {
      *                            use them safely, which is also a method to trigger the initialization.
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
-     * @throws RuntimeException When your sources caused a compilation error.
+     * @throws CompilationException When your sources caused a compilation error.
      */
-    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses) throws IOException, IllegalAccessException {
+    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
         this.patcheeClassPath = patcheeClassPath;
@@ -139,9 +140,9 @@ public class GroovySourceDirectory {
      * @throws IOException A file or directory can't be accessed.
      * @throws InvocationTargetException There was a problem loading a class.
      * @throws IllegalAccessException There was a problem loading a class.
-     * @throws RuntimeException When your sources caused a compilation error.
+     * @throws CompilationException When your sources caused a compilation error.
      */
-    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses, boolean reorderSources) throws IOException, InvocationTargetException, IllegalAccessException {
+    public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses, boolean reorderSources) throws IOException, InvocationTargetException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
         this.classLoader = classLoader;
         this.patcheeClassPath = patcheeClassPath;
@@ -190,7 +191,7 @@ public class GroovySourceDirectory {
         GroovySystem.getMetaClassRegistry().setMetaClass(theClass, demc);
     }
 
-    private void compile() throws IOException, IllegalAccessException {
+    private void compile() throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         List<File> files;
         REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Compiling Groovy classes from '{}'", root), INTERNAL_LOG_TARGETS);
         try(Stream<Path> w = Files.walk(root)) {
@@ -230,18 +231,23 @@ public class GroovySourceDirectory {
             cc.setTargetDirectory(tmpdir);
 
             for (List<URI> batch : compilationBatches) {
-                if (TRACE || TRACE_COMPILE) REPLLog.trace("Compiling {}", batch.stream().map(URI::toString).collect(Collectors.joining(", ")));
-                CompilationUnit cu = new CompilationUnit(cc);
-                cu.setClassNodeResolver(new CompilationOutputFirstClassNodeResolver(classLoader, classes.stream().map(Class::getName).toList()));
-                cu.setClassLoader(new GroovyClassLoader(classLoader));
-                for (URI u : batch) cu.addSource(u.toURL());
+                if (TRACE || TRACE_COMPILE)
+                    REPLLog.trace("Compiling {}", batch.stream().map(URI::toString).collect(Collectors.joining(", ")));
                 // collect all compiled classes, including generated inner classes (closures etc.)
                 final HashMap<String, byte[]> bytecode = new HashMap<>();
-                cu.setClassgenCallback((classVisitor, classNode) -> {
-                    ClassWriter writer = (ClassWriter) classVisitor;
-                    bytecode.put(classNode.getName(), writer.toByteArray());
-                });
-                cu.compile();
+                try {
+                    CompilationUnit cu = new CompilationUnit(cc);
+                    cu.setClassNodeResolver(new CompilationOutputFirstClassNodeResolver(classLoader, classes.stream().map(Class::getName).toList()));
+                    cu.setClassLoader(new GroovyClassLoader(classLoader));
+                    for (URI u : batch) cu.addSource(u.toURL());
+                    cu.setClassgenCallback((classVisitor, classNode) -> {
+                        ClassWriter writer = (ClassWriter) classVisitor;
+                        bytecode.put(classNode.getName(), writer.toByteArray());
+                    });
+                    cu.compile();
+                } catch (RuntimeException e) {
+                    throw new CompilationException("Compilation error", e);
+                }
 
                 LinkedHashMap<String, byte[]> newClasses = new LinkedHashMap<>();
                 // sort compiled classes in proper load order
@@ -280,7 +286,7 @@ public class GroovySourceDirectory {
         }
     }
 
-    private List<Class<?>> loadClassBatch(Map<String, byte[]> classes) throws IllegalAccessException {
+    private List<Class<?>> loadClassBatch(Map<String, byte[]> classes) throws IllegalAccessException, InsufficientAccessRightsException, ClassLoadingException {
         // Instead of injecting the bytecode directly into a classloader, it might also be possible to have groovy generate
         // .class files at runtime and add the directory to the classpath / module path
         ArrayList<Class<?>> result = new ArrayList<>();
@@ -310,11 +316,13 @@ public class GroovySourceDirectory {
                     if (idx != null) REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.WARN, "REPL: Intermediate classes between dynamized classes {} and {} are not dynamized: {}", loadedClass.getName(), topDynamized.getName(), String.join(", ", intermediate.subList(0, idx))), INTERNAL_LOG_TARGETS);
                 }
             } catch (InaccessibleObjectException e) {
-                throw new RuntimeException("To load your own Groovy classes into the system ClassLoader please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your JVM parameters or unset CAU.Groovy.UseSystemClassLoader to use a private classloader instead.", e);
+                throw new InsufficientAccessRightsException("Could not load your class '" + gc.getKey() + "'", e);
             } catch (InvocationTargetException e) {
-                throw new RuntimeException("Can't load your Groovy class '" + gc.getKey() + "'. If it already exists in the JVM, you may need to use the REPL agent to load your Groovy sources before the conflicting version gets loaded.", e);
+                throw new ClassLoadingException("Can't load your Groovy class '" + gc.getKey() + "'. If it already exists in the JVM, you may need to use the REPL agent to load your Groovy sources before the conflicting version gets loaded.", e);
             } catch (ExceptionInInitializerError e) {
-                throw new RuntimeException("Can't load your Groovy class '" + gc.getKey() + "' because its static initializer threw an exception. Maybe you need to set the 'CAU.Groovy.DeferMetaClasses' system property to true and add the MetaClasses yourself at a later time.", e);
+                throw new ClassLoadingException("Can't load your Groovy class '" + gc.getKey() + "' because its static initializer threw an exception. Maybe you need to set the 'CAU.Groovy.DeferMetaClasses' system property to true and add the MetaClasses yourself at a later time.", e);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Could not define class, possibly an internal error?", e);
             }
         }
         return result;
@@ -353,7 +361,7 @@ public class GroovySourceDirectory {
 
 
     @SuppressWarnings("UnusedReturnValue")
-    protected static Class<?> defineClass(ClassLoader cl, String name, byte[] bytecode) throws InvocationTargetException, IllegalAccessException {
+    protected static Class<?> defineClass(ClassLoader cl, String name, byte[] bytecode) throws InvocationTargetException, IllegalAccessException, InsufficientAccessRightsException, NoSuchMethodException {
         // maybe try to use the agent's Instrumentation.redefineClasses for this?
         Class<?> loadedClass;
         if (TRACE || TRACE_COMPILE) REPLLog.trace("Define Class: {}", name);
@@ -391,4 +399,35 @@ public class GroovySourceDirectory {
         }
     }
 
+    public static class ClassLoadingException extends Exception {
+        @SuppressWarnings("unused")
+        public ClassLoadingException(String message) {
+            super(message);
+        }
+
+        public ClassLoadingException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class CompilationException extends Exception {
+        @SuppressWarnings("unused")
+        public CompilationException(String message) {
+            super(message);
+        }
+
+        public CompilationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class UncheckedCompilationException extends RuntimeException {
+        public UncheckedCompilationException(String message) {
+            super(message);
+        }
+
+        public UncheckedCompilationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }

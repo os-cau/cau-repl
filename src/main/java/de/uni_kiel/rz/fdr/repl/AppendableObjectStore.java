@@ -31,11 +31,11 @@ class AppendableObjectStore implements Iterator<Serializable>, AutoCloseable {
     private Integer nextLen = null;
     
 
-    public AppendableObjectStore(File path) throws IOException {
+    public AppendableObjectStore(File path) throws IOException, ObjectStoreInvalidException {
         this.path = path;
         if (this.path.isFile()) {
             infile = new FileInputStream(this.path);
-            if (!Arrays.equals(MAGIC, infile.readNBytes(MAGIC.length))) throw new RuntimeException("bad magic");
+            if (!Arrays.equals(MAGIC, infile.readNBytes(MAGIC.length))) throw new ObjectStoreInvalidException("bad magic");
             ingz = new GZIPInputStream(infile);
             in = new DataInputStream(ingz);
             outfile = null;
@@ -165,8 +165,19 @@ class AppendableObjectStore implements Iterator<Serializable>, AutoCloseable {
     }
 
     public static class ObjectStoreNotAvailableException extends RuntimeException {
-        ObjectStoreNotAvailableException(String message) {
+        public ObjectStoreNotAvailableException(String message) {
             super(message);
+        }
+    }
+
+    public static class ObjectStoreInvalidException extends Exception {
+        public ObjectStoreInvalidException(String message) {
+            super(message);
+        }
+
+        @SuppressWarnings("unused")
+        public ObjectStoreInvalidException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

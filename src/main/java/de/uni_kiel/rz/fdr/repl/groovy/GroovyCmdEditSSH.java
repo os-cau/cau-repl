@@ -127,7 +127,7 @@ public class GroovyCmdEditSSH extends CommandSupport {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         } finally {
             if (tmp != null) tmp.delete();
         }

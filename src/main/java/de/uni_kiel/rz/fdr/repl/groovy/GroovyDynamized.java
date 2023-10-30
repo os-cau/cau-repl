@@ -46,7 +46,7 @@ public interface GroovyDynamized {
 
         if (ownStub == null || (sm.method.getDeclaringClass().getTheClass().equals(klass.getSuperclass()))) {
             if (sm.method != null) return _CAUREPL_doInvoke(sm.method, this, sm.isSuper && sm.methodType != METHOD_TYPE.EXPANDO, parameters);
-            else throw new RuntimeException("no super method " + method + " found in context " + klass.getName());
+            else throw new RuntimeException("no super method " + method + " found in context " + klass.getName() + ", internal error?");
 
             // as a final attempt, in situations where we do not even have a super stub (e.g. for final methods of non-patched superclasses)
             // we could try the non-dynamic super
@@ -69,7 +69,7 @@ public interface GroovyDynamized {
     }
 
     default Object dynamicSuper(int parents, String method, Object... parameters) {
-        if (parents < 1) throw new RuntimeException("parents parameter must be > 0");
+        if (parents < 1) throw new IllegalArgumentException("parents parameter must be > 0");
         Class<?> contextClass = getClass();
         for (int i = 1; contextClass.getSuperclass() != null && i < parents; i++) contextClass = contextClass.getSuperclass();
         return _CAUREPL_dynamicContextSuper(method, contextClass, parameters);

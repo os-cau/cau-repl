@@ -38,7 +38,7 @@ public class GroovyDynamizedExpando extends ExpandoMetaClass {
                     metaMethod = new ClosureMetaMethod(dynamizedName, cmm.getDeclaringClass().getTheClass(), cmm.getClosure(), cmm.getDoCall());
                 } else {
                     // TODO we can probably wrap other types of metaMethods in a new renamed ClosureMetaMethod and call them from there
-                    throw new RuntimeException("A non-closure MetaMethod was added to the Expando. It could not be renamed: " + metaMethod);
+                    throw new RuntimeException("Internal error: A non-closure MetaMethod was added to the Expando. It could not be renamed: " + metaMethod);
                 }
             }
         }

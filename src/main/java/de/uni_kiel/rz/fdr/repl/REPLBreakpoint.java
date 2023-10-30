@@ -270,7 +270,7 @@ public class REPLBreakpoint {
     }
 
     private synchronized Object doWait() {
-        if (triggered) throw new RuntimeException("REPLBreakpoint may only trigger once");
+        if (triggered) throw new RuntimeException("REPLBreakpoint may only trigger once, internal error?");
         triggered = true;
 
         do {

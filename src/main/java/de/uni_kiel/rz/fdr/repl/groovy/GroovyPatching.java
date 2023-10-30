@@ -21,7 +21,7 @@ public interface GroovyPatching {
      */
     default Object patcheeSuper(String method, Object... parameters) {
         Class<?> patcheeClass = getClass().getSuperclass();
-        if (!isPatchedClass(patcheeClass.getName())) throw new RuntimeException("Superclass " + patcheeClass.getName() + " is not a patchee.");
+        if (!isPatchedClass(patcheeClass.getName())) throw new RuntimeException("Superclass " + patcheeClass.getName() + " is not a patchee, internal error?");
         return InvokerHelper.invokeMethod(this, patcheeStubMethod(patcheeClass.getName(), method), parameters);
     }
 }

@@ -16,6 +16,7 @@ import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -37,7 +38,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
     public static final String PATCHEESTUB_PREFIX = "_CAUREPL_P$";
 
 
-    private record PatchesSettings (String classPath, String target, boolean makePublic, boolean preserveSuper, String[] stripAnnotations, boolean force) {}
+    public record PatchesSettings (String classPath, String target, boolean makePublic, boolean preserveSuper, String[] stripAnnotations, boolean force) {}
     private record SimulationResult(LinkedHashSet<String> dependencies) {}
 
     private final GroovySourceDirectory sourceDirectory;
@@ -70,8 +71,8 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
 
             // we can only match on the simple name in this compilation phase
             if (!an.getClassNode().getName().equals(Patches.class.getSimpleName())) continue;
-            if (!classNode.getSuperClass().getName().equals("java.lang.Object")) throw new RuntimeException("Class " + classNode.getName() + " mixes @Patches and 'extends'");
-            if (settings != null) throw new RuntimeException("Class " + classNode.getName() + " has multiple @Patches annotations");
+            if (!classNode.getSuperClass().getName().equals("java.lang.Object")) throw new GroovySourceDirectory.UncheckedCompilationException("Class " + classNode.getName() + " mixes @Patches and 'extends'");
+            if (settings != null) throw new GroovySourceDirectory.UncheckedCompilationException("Class " + classNode.getName() + " has multiple @Patches annotations");
 
             Expression ex = an.getMember("classPath");
             if (ex != null) cp = ex.getText();
@@ -105,7 +106,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
                 SimulationResult sr = doDryRun(classNode, sourceUnit, settings);
                 dependencies.put(classNode.getName(), sr.dependencies);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
             if (TRACE || TRACE_COMPILE) REPLLog.trace("Class {} dependency candidates: {}", classNode.getName(), String.join(", ", dependencies.get(classNode.getName())));
         }
@@ -117,16 +118,16 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
             patchResult = loadPatchee(sourceDirectory.getClassLoader(), settings.target, PATCHEE_SUFFIX, settings, new HashMap<>());
             Class<?> patchee = patchResult.patchedClasses().get(0);
             if (patchee.isInterface() || patchee.isAnnotation())
-                throw new RuntimeException(patchResult.mainTargetName() + " is not a plain class and can't be patched");
+                throw new GroovySourceDirectory.UncheckedCompilationException(patchResult.mainTargetName() + " is not a plain class and can't be patched");
             if (!settings.force) for (Annotation a : patchee.getAnnotations()) {
                 String an = a.annotationType().getName();
                 if (an.startsWith("javax.persistence.") || an.startsWith("org.hibernate.")) {
-                    throw new RuntimeException("Patchee " + patchResult.mainTargetName() + " has a " + an + " annotation. Patching it might have harmful side effects on your DB. Set the 'force' flag and maybe 'stripAnnotations' to continue anyway.");
+                    throw new GroovySourceDirectory.UncheckedCompilationException("Patchee " + patchResult.mainTargetName() + " has a " + an + " annotation. Patching it might have harmful side effects on your DB. Set the 'force' flag and maybe 'stripAnnotations' to continue anyway.");
                 }
             }
         } catch (Exception e) {
-            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Error Transforming Groovy class {} to patch {} from {}", classNode.getName(), settings.target, settings.classPath), REPLLog.INTERNAL_LOG_TARGETS);
-            throw new RuntimeException("Could not load class " + settings.target + " from " + settings.classPath + " for patching", e);
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Error while patching {} from {} with Groovy class {}", settings.target, settings.classPath, classNode.getName()), REPLLog.INTERNAL_LOG_TARGETS);
+            throw new GroovySourceDirectory.UncheckedCompilationException("Could not load class " + settings.target + " from " + settings.classPath + " for patching", e);
         }
         // ... and set it as the superclass of the groovy class
         classNode.setSuperClass(ClassHelper.make(patchResult.mainPatchedName()));
@@ -256,7 +257,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
         return res;
     }
 
-    public GroovyPatchResult loadPatchee(ClassLoader classLoader, String originalName, String suffix, PatchesSettings settings, Map<String, String> renameMap) throws IOException, InvocationTargetException, IllegalAccessException {
+    public GroovyPatchResult loadPatchee(ClassLoader classLoader, String originalName, String suffix, PatchesSettings settings, Map<String, String> renameMap) throws IOException, InvocationTargetException, IllegalAccessException, InsufficientAccessRightsException, NoSuchMethodException {
         // find top class loader
         ClassLoader scl = ClassLoader.getSystemClassLoader();
         while (scl.getParent() != null) scl = scl.getParent();
@@ -272,7 +273,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
         GroovyPatchResult result = new GroovyPatchResult(originalName, newName, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), renameMap);
         try (URLClassLoader patcheeClassLoader = new URLClassLoader(urls.toArray(new URL[0]), scl);
              InputStream klass = patcheeClassLoader.getResourceAsStream(originalNameRes + ".class")) {
-            if (klass == null) throw new RuntimeException("Could not find resource '" + originalNameRes + ".class' in supplied classpath: " + settings.classPath);
+            if (klass == null) throw new GroovySourceDirectory.UncheckedCompilationException("Could not find resource '" + originalNameRes + ".class' in supplied classpath: " + settings.classPath);
 
             // find inner classes (non-recursively) to construct rename map
             ClassReader classReader = new ClassReader(klass);
@@ -304,7 +305,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
                     try {
                         result.patchedClasses.add(classLoader.loadClass(newName));
                     } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Could not load original class of patchee " + newName + ", internal error?", e);
                     }
                 } else {
                     throw ex;
@@ -359,7 +360,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
                 superMethods = Arrays.stream(superKlass.getMethods()).toList();
                 this.superName = superName;
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Could not load superclass, internal error?", e);
             }
             super.visit(version, access, name, signature, superName, interfaces);
         }

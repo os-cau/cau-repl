@@ -10,6 +10,7 @@ import groovy.util.Eval;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class REPLAgentStartup {
     private static boolean started = false;
 
     @SuppressWarnings("unused")
-    protected static void start(ClassLoader forceClassLoader) throws IOException {
+    protected static void start(ClassLoader forceClassLoader) throws IOException, InsufficientAccessRightsException, GroovySourceDirectory.CompilationException, StartupException, GroovySourceDirectory.ClassLoadingException {
         started = true;
 
         // use groovy expando metaclasses globally
@@ -72,9 +73,12 @@ public class REPLAgentStartup {
                     new GroovySourceDirectory(p, classLoader, classPath, defer || supportMode, reorderSources); // in Support support mode, we defer the loading of MetaClasses. this is necessary, because setting a metaclass forces static class initializers to run, and MyCoRe needs a specific ordering
                 }
             }
-        } catch (Exception e) {
+        } catch (InvocationTargetException | IllegalAccessException | RuntimeException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Error during compilation: {}", e), INTERNAL_LOG_TARGETS);
-            throw new RuntimeException(e);
+            throw new GroovySourceDirectory.CompilationException("Error during compilation", e);
+        } catch (GroovySourceDirectory.ClassLoadingException e) {
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Class loading error during compilation: {}", e), INTERNAL_LOG_TARGETS);
+            throw e;
         }
 
         try {
@@ -110,15 +114,20 @@ public class REPLAgentStartup {
             String passCmd = System.getProperty("CAU.REPL.SSH.PasswordCommand");
             if (passCmd != null && passCmd.isBlank()) passCmd = null;
             if (pass != null && passCmd != null)
-                throw new RuntimeException("You can't set CAU.REPL.SSH.Password and CAU.REPL.SSH.PasswordCommand at the same time.");
+                throw new StartupException("You can't set CAU.REPL.SSH.Password and CAU.REPL.SSH.PasswordCommand at the same time.");
             if (passCmd != null) {
                 REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Fetching password from {}", passCmd), INTERNAL_LOG_TARGETS);
-                String output = Helpers.shellCommand(passCmd);
-                if (output.split(System.lineSeparator()).length == 0) throw new RuntimeException("Password command returned no data");
+                String output;
+                try {
+                    output = Helpers.shellCommand(passCmd);
+                } catch (ExternalCommandException e) {
+                    throw new StartupException("Password command failure", e);
+                }
+                if (output.split(System.lineSeparator()).length == 0) throw new StartupException("Password command returned no data");
                 if (output.split(System.lineSeparator()).length != 1)
-                    throw new RuntimeException("Password command returned more than one line");
+                    throw new StartupException("Password command returned more than one line");
                 pass = output.split(System.lineSeparator())[0];
-                if (pass.isBlank()) throw new RuntimeException("Password command returned empty password");
+                if (pass.isBlank()) throw new StartupException("Password command returned empty password");
             } else if (pass == null) {
                 pass = randomPassword(new SecureRandom().nextInt(30, 35));
                 REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: Session Password auto-generated: {}", pass),
@@ -137,12 +146,8 @@ public class REPLAgentStartup {
 
             // start the REPL
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: listening on {}:{}", repl.getListenAddr(), repl.getPort()), INTERNAL_LOG_TARGETS);
-            try {
-                repl.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (Exception e) {
+            repl.start();
+        } catch (StartupException | RuntimeException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Startup failure: {}", e.getMessage(), e), INTERNAL_LOG_TARGETS);
             throw e;
         }
@@ -161,7 +166,7 @@ public class REPLAgentStartup {
      * @throws IOException A file could not be accessed.
      * @throws InterruptedException The program was interrupted.
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, InsufficientAccessRightsException, GroovySourceDirectory.CompilationException, StartupException, GroovySourceDirectory.ClassLoadingException {
         if (!started) {
             System.out.println("Starting Agent...");
             REPLAgentStartup.start(null);
@@ -170,5 +175,26 @@ public class REPLAgentStartup {
         Object dummy = new Object();
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (dummy) { dummy.wait(); }
+    }
+
+    public static class ExternalCommandException extends Exception {
+        public ExternalCommandException(String message) {
+            super(message);
+        }
+
+        @SuppressWarnings("unused")
+        public ExternalCommandException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class StartupException extends Exception {
+        public StartupException(String message) {
+            super(message);
+        }
+
+        public StartupException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

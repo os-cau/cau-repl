@@ -10,6 +10,7 @@ import org.jdom2.output.XMLOutputter;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -95,7 +96,7 @@ public class XMLHelpers {
         try {
             doc = sax.build(new StringReader(nsRootStr + s + "</root>"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         return List.copyOf(doc.getRootElement().getContent()).stream().map(Content::detach).toList();
     }
@@ -110,7 +111,7 @@ public class XMLHelpers {
             } else if (x instanceof Content c) {
                 list.add(inheritNamespace(nsReference, c));
             } else {
-                throw new RuntimeException("Can't cast " + x.getClass() + " to JDOM Content.");
+                throw new IllegalArgumentException("Can't cast " + x.getClass() + " to JDOM Content.");
             }
         }
         return list;

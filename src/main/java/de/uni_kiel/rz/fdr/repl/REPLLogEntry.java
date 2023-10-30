@@ -151,15 +151,25 @@ public class REPLLogEntry implements Serializable {
     }
 
     private void validate() {
-        if (timestamp == null) throw new RuntimeException("missing timestamp");
-        if (level == null) throw new RuntimeException("missing level");
-        if (message == null) throw new RuntimeException("missing message");
+        if (timestamp == null) throw new LogEntryFormatException("missing timestamp");
+        if (level == null) throw new LogEntryFormatException("missing level");
+        if (message == null) throw new LogEntryFormatException("missing message");
     }
 
     protected static REPLLogEntry fromTSV(String tsv) {
         String[] s = tsv.split("\\t");
-        if (s.length != 3) throw new RuntimeException("invalid log line");
+        if (s.length != 3) throw new LogEntryFormatException("invalid log line");
         return new REPLLogEntry(Instant.parse(s[0]), LOG_LEVEL.valueOf(s[1].toUpperCase(Locale.ROOT).split(" ")[0]), StringEscapeUtils.unescapeJavaScript(s[2]));
+    }
+
+    public static class LogEntryFormatException extends RuntimeException {
+        public LogEntryFormatException(String message) {
+            super(message);
+        }
+
+        public LogEntryFormatException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class REPLJobIT {
     @Test
     @Order(100)
-    public void testJobFunctions() throws ExecutionException, InterruptedException {
+    public void testJobFunctions() throws ExecutionException, InterruptedException, IOException, REPLJob.JobException {
         REPLJob j1 = REPLJob.repljob(() -> "foo1");
         j1.start().get();
         assertEquals(REPLJob.JobState.COMPLETED_SUCCESSFULLY, j1.getProgress().state());

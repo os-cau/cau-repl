@@ -9,6 +9,7 @@ import groovy.lang.Binding;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.*;
@@ -201,7 +202,7 @@ public class REPLLog {
                     case INFO -> L4J_INFO.invoke(L4J_LOGGER, l4jmsg);
                     case WARN -> L4J_WARN.invoke(L4J_LOGGER, l4jmsg);
                     case ERROR -> L4J_ERROR.invoke(L4J_LOGGER, l4jmsg);
-                    default -> throw new RuntimeException("Unknown log level");
+                    default -> throw new RuntimeException("internal error: unknown log level");
                 }
                 l4jSuccess = true;
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException ignore) {}
@@ -241,7 +242,7 @@ public class REPLLog {
                 try {
                     Files.writeString(logFile(null).toPath(), entry.toTSV(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
             }
         }
