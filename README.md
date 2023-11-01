@@ -1,7 +1,7 @@
 # cau-repl
 
 Extend Java programs with Groovy at runtime. Add an interactive SSH-based REPL to any JVM and tweak it with your own custom Groovy
-classes: no sourcecode required!
+classes.
 
 The cau-repl comes bundled with an additional [MyCoRe](https://mycore.de) module for easy integration with your document repository.
 
@@ -17,9 +17,9 @@ Testing of the MyCoRe plugin was until now conducted only in a Tomcat environmen
 
 ## Features
 
-**Without access to an application's sourcecode** and without making any changes to it, cau-repl enables you to:
+cau-repl enables you to:
 
-- Connect to any Java application via SSH and run Groovy commands in its JVM. You can use all the application's classes
+- Connect to your JVMs via SSH and run Groovy commands in them. You can use all the classes
   interactively.
 - Load any Maven artifact into the REPL at runtime and use it just in your session
 - Start long-running batch jobs from the SSH console that persist after you disconnect, monitor their status and easily
