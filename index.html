@@ -179,13 +179,13 @@ the GPL 3.0. In this sense, cau-repl is dual-licensed under either the MIT or GP
 applications. Choose the quickstart instructions that apply to your use-case.</p>
 <h3 id="for-universal-use-built-without-gpl-code">For universal use, built without GPL code</h3>
 <pre><code>mvn clean package
-java -javaagent:target/cau-repl-X.Y.Z-fatjar-nogpl.jar -jar /path/to/your/application.jar
+java -javaagent:target/cau-repl-X.Y.Z-fatjar-mit.jar -jar /path/to/your/application.jar
 # a message like "REPL: Session Password auto-generated: XXXXXXXXXX" should be printed to the terminal
 # you may now login with any username and the password that was just printed
 ssh "ssh://localhost:8512"
 </code></pre>
 <p><em>If you don't have a Java target application available and just want to see the REPL in action, you can also start the agent
-directly without a target:</em> <code>java -jar target/cau-repl-X.Y.Z-fatjar-nogpl.jar</code></p>
+directly without a target:</em> <code>java -jar target/cau-repl-X.Y.Z-fatjar-mit.jar</code></p>
 <h4 id="things-to-try">Things to try</h4>
 <p>Your commands run in the target application's JVM. Try listing all threads:</p>
 <pre><code>groovy:000&gt; Thread.allStackTraces.entrySet().collect{ "${it.key} -&gt; ${it.value ? it.value[0] : ''}" }
@@ -278,5 +278,5 @@ Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2023-10-26 07:36:36.351843+00:00
+Build Date UTC : 2023-11-01 08:34:54.701690+00:00
 -->

@@ -61,7 +61,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#job-management">Job Management</a>
+    <li class="toctree-l2"><a class="reference internal" href="#job-management-and-threads">Job Management and Threads</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#loading-maven-artifacts">Loading Maven Artifacts</a>
     </li>
@@ -210,7 +210,7 @@ groovy:000&gt; warn(&quot;restarting in 5min&quot;, targets:[REPLLog.LOG_TARGETS
 ===&gt; [2023-09-28 12:37:02] WARN restarting in 5min
 </code></pre>
 <hr />
-<h2 id="job-management">Job Management</h2>
+<h2 id="job-management-and-threads">Job Management and Threads</h2>
 <p>You can start long-running jobs in the REPL that will execute in the background and continue running after you end the
 SSH session. Jobs can be associated with a list of inputs to be processed. If you can list your inputs in advance,
 cau-repl can automatically parallelize your jobs. This also makes it possible to re-run just the inputs that failed later
@@ -292,16 +292,16 @@ system default is used.</p>
 <p><strong>Retrieve a current job and print its progress</strong></p>
 <blockquote>
 <p><strong>Shell Command</strong></p>
-<p><code>:job [index]</code> / <code>:job [key]</code><br/>
-<code>:J [index]</code> / <code>:J [key]</code></p>
+<p><code>:job [index|key]</code><br/>
+<code>:J [index|key]</code></p>
 <p>Retrieves the ReplJob that has the given <code>index</code> number in the <code>:J</code> listing, or whose <code>key</code> matches the argument.
 Print its JobProgress to the console and return the job object.</p>
 <p><strong>Returns</strong> The <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a> that was requested.
 <strong>Pause or unpause a job</strong>
 <strong>Shell Command</strong></p>
-<p><code>:job pause [key]</code> / <code>:job unpause [key]</code><br/>
-<code>:J pause [key]</code> / <code>:J unpause [key]</code><br/></p>
-<p>Pauses the job with the given <code>key</code>. When paused, workers will finish their currently assigned work item, but will not
+<p><code>:job pause [index|key]</code> / <code>:job unpause [index|key]</code><br/>
+<code>:J pause [index|key]</code> / <code>:J unpause [index|key]</code><br/></p>
+<p>Pauses the job with the given <code>key</code> or <code>index</code> number in the <code>:J</code> listing. When paused, workers will finish their currently assigned work item, but will not
 receive any new work items. While residual items are still being processed, the job's state will be given as
 "pausing", after which it will transition to "paused".</p>
 <p>Unpausing a paused job will cause unprocessed work items to be submitted to the workers again.</p>
@@ -309,25 +309,26 @@ receive any new work items. While residual items are still being processed, the 
 paused jobs); when unpausing: the number of milliseconds that the jobs has in the paused state.
 </p>
 </blockquote>
-<p><strong>Cancel a job</strong></p>
+<p><a name="job-cancel"></a><strong>Cancel a job</strong></p>
 <blockquote>
 <p><strong>Shell Command</strong></p>
-<p><code>:job cancel [key]</code> / <code>:job cancelforce [key]</code><br/>
-<code>:J cancel [key]</code> / <code>:J cancelforce [key]</code><br/></p>
-<p>Cancels the job with the given <code>key</code>. No further input items will be passed to the worker threads. When invoked as
+<p><code>:job cancel [index|key]</code> / <code>:job cancelforce [index|key]</code><br/>
+<code>:J cancel [index|key]</code> / <code>:J cancelforce [index|key]</code><br/></p>
+<p>Cancels the job with the given <code>key</code> or <code>index</code> number in the <code>:J</code> listing. No further input items will be passed to the worker threads. When invoked as
 <code>cancel</code>, previously active threads will be allowed to continue indefinitely until they have finished their previously
 assigned inputs. During this phase, the job state will be "cancelling" after which it will transition to "cancelled".
 The job is then ready for archiving or resuming it.</p>
 <p>When invoked as <code>cancelforce</code>, previously active threads will be forcefully terminated after a grace period of 10s.</p>
+<p>Jobs that don't have <code>inputs</code> can only be forcefully cancelled.</p>
 <p><strong>Returns</strong> a boolean indicating if the job transitioned to the "cancelling" or "cancelled" state (could e.g. be
 false for jobs that finished in the meantime).</p>
 </blockquote>
 <p><strong>Archive a job</strong></p>
 <blockquote>
 <p><strong>Shell Command</strong></p>
-<p><code>:job archive [key]</code><br/>
-<code>:J archive [key]</code></p>
-<p>Archives the finished job with the given <code>key</code>, removing it from the job list and freeing its memory.</p>
+<p><code>:job archive [index|key]</code><br/>
+<code>:J archive [index|key]</code></p>
+<p>Archives the finished job with the given <code>key</code> or <code>index</code> number in the <code>:J</code> listing, removing it from the job list and freeing its memory.</p>
 <p><strong>Returns</strong> a boolean indicating if the job was archived or not.</p>
 </blockquote>
 <p><strong>List all job keys, including archived jobs</strong></p>
@@ -347,6 +348,35 @@ This excludes any currently loaded job.</p>
 <p>Removes the state file of all jobs that have successfully completed (i.e. all inputs were processed without error)
 from the REPL's work directory. This includes both current and archived jobs.</p>
 <p><strong>Returns</strong> The list of pruned keys in text format.</p>
+</blockquote>
+<p><strong>List cau-repl's Threads</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:ps</code><br/>
+<code>:P</code></p>
+<p>Generates an overview of cau-repl's threads in the JVM. This includes shell sessions and job workers. The thread of
+your current REPL session will be marked with a <code>*</code>.</p>
+<p><strong>Returns</strong> A textual representation of cau-repl's threads.</p>
+</blockquote>
+<p><strong>List all JVM Threads</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:ps all</code><br/>
+<code>:P all</code></p>
+<p>Generates an overview of all threads in the JVM. The thread of your current REPL session will be marked with a <code>*</code>.</p>
+<p><strong>Returns</strong> A textual representation of all threads in the JVM.</p>
+</blockquote>
+<p><strong>Kill a Thread</strong></p>
+<blockquote>
+<p><strong>Shell Command</strong></p>
+<p><code>:ps kill [...threadid]</code> / <code>:ps killforce [...threadid]</code><br/>
+<code>:P kill [...threadid]</code> / <code>:P killforce [...threadid]</code></p>
+<p>Tries to terminate the threads with the given ids by invoking <code>Thread.interrupt()</code> on them. This does not guarantee
+termination in all cases, but can be helpful if you launched a misbehaving command in a different SSH session. </p>
+<p>Use <code>killforce</code> instead of <code>kill</code> for a more vigorous attempt at termination, which may or may not be successful.</p>
+<p><strong>Don't use this command to cancel a job.</strong> Use <a href="#job-cancel">:job cancel</a> instead, which can handle cau-repl's job
+much better.</p>
+<p><strong>Returns</strong> Nothing.</p>
 </blockquote>
 <p><strong>Related Classes:</strong> <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a>, <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJobCallbackAutoTune.html">REPLJobCallbackAutoTune</a> provide additional functionality related to job
 control.</p>
@@ -566,7 +596,9 @@ groovy:000&gt; :B 0 some string data
   to properly syntactically finish your statement. To get out of this state, simply enter a single line consisting of
   just <code>:c</code>.</li>
 <li>The return value of your last command is always available in the special <code>_</code> variable. This is useful to continue
-  using it in the next line, or if you want to save it in a more persistent properly named variable. </li>
+  using it in the next line, or if you want to save it in a more persistent properly named variable.</li>
+<li>The stacktrace of a failed REPL command is available in the REPL's log.</li>
+<li>If you launch a mishbehaving command that blocks your REPL, start a second SSH session and use the <code>:ps kill</code> command to terminate it.</li>
 <li>groovysh's standard <code>:edit / :e</code> command is not very useful when accessing it via SSH, because it launches the editor in
   the TTY of the server process. Use the <code>:editssh / :E</code> commands instead to edit a file directly in your
   SSH session.</li>
