@@ -8,6 +8,9 @@ package de.uni_kiel.rz.fdr.repl.error;
  * You probably need to add {@code --add-opens 'java.base/java.lang=ALL-UNNAMED'} to your java parameters.
  */
 public class InsufficientAccessRightsException extends Exception {
+    /**
+     * Contains the instructions for fixing this error condition.
+     */
     public static final String explanation = ": please add \"--add-opens 'java.base/java.lang=ALL-UNNAMED'\" to your java parameters or unset CAU.Groovy.UseSystemClassLoader to use a private classloader.";
 
     /**

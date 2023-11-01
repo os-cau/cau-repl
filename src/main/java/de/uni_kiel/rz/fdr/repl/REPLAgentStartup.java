@@ -166,6 +166,10 @@ public class REPLAgentStartup {
      * @param args The command-line paramenters.
      * @throws IOException A file could not be accessed.
      * @throws InterruptedException The program was interrupted.
+     * @throws InsufficientAccessRightsException cau-repl does not have the required JVM permissions.
+     * @throws CompilationException Some of your Groovy code did not compile.
+     * @throws StartupException The REPL could not start, possibly due to configuration issues.
+     * @throws ClassLoadingException A class could not be loaded, e.g. due to class path issues.
      */
     public static void main(String[] args) throws IOException, InterruptedException, InsufficientAccessRightsException, CompilationException, StartupException, ClassLoadingException {
         if (!started) {

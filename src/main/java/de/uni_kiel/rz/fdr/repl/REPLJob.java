@@ -364,6 +364,7 @@ public class REPLJob implements Serializable {
      * an active job will throw an exception.
      * @param job The job to archive.
      * @return Flag indicating whether this job was archived or not.
+     * @throws JobException The action failed, e.g. because the job's state prevented it.
      */
     public static boolean archive(REPLJob job) throws JobException {
         return archive(job.key);
@@ -374,6 +375,7 @@ public class REPLJob implements Serializable {
      * an active job will throw an exception.
      * @param key The key of the job to archive.
      * @return Flag indicating whether this job was archived or not.
+     * @throws JobException The action failed, e.g. because the job's state prevented it.
      */
     public static boolean archive(String key) throws JobException {
         REPLJob j = jobs.get(key);
@@ -385,6 +387,7 @@ public class REPLJob implements Serializable {
      * Creates a new job without inputs or concurrency that is ready to be started.
      * @param supplier The job action.
      * @return The new job.
+     * @throws IOException The job's state file could not be created.
      */
     public static REPLJob repljob(Supplier<Serializable> supplier) throws IOException {
         return repljob((x, y) -> supplier.get(), null, 1, null);
@@ -395,6 +398,7 @@ public class REPLJob implements Serializable {
      * @param supplier The job action.
      * @param concurrency The concurrency level to use.
      * @return The new job.
+     * @throws IOException The job's state file could not be created.
      */
     public static REPLJob repljob(Supplier<Serializable> supplier, int concurrency) throws IOException {
         return repljob((x, y) -> supplier.get(), null, concurrency, null);
@@ -404,6 +408,7 @@ public class REPLJob implements Serializable {
      * Creates a new job without inputs or concurrency that is ready to be started.
      * @param supplier The job action.
      * @param name A name for the job that will be displayed in the job list.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Supplier<Serializable> supplier, String name) throws IOException {
@@ -414,6 +419,7 @@ public class REPLJob implements Serializable {
      * Creates a new job with inputs or concurrency that is ready to be started.
      * @param function The job action.
      * @param inputs The inputs that the job action will operate on.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs) throws IOException {
@@ -424,6 +430,7 @@ public class REPLJob implements Serializable {
      * Creates a new job with inputs and no concurrency that is ready to be started.
      * @param closure The job action.
      * @param inputs The inputs that the job action will operate on.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs) throws IOException {
@@ -437,6 +444,7 @@ public class REPLJob implements Serializable {
      * @param function The job action.
      * @param inputs The inputs that the job action will operate on.
      * @param concurrency The concurrency level to use.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency) throws IOException {
@@ -448,6 +456,7 @@ public class REPLJob implements Serializable {
      * @param closure The job action.
      * @param inputs The inputs that the job action will operate on.
      * @param concurrency The concurrency level to use.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency) throws IOException {
@@ -461,6 +470,7 @@ public class REPLJob implements Serializable {
      * @param function The job action.
      * @param inputs The inputs that the job action will operate on.
      * @param name A name for the job that will be displayed in the job list.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, String name) throws IOException {
@@ -472,6 +482,7 @@ public class REPLJob implements Serializable {
      * @param closure The job action.
      * @param inputs The inputs that the job action will operate on.
      * @param name A name for the job that will be displayed in the job list.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, String name) throws IOException {
@@ -486,6 +497,7 @@ public class REPLJob implements Serializable {
      * @param inputs The inputs that the job action will operate on.
      * @param concurrency The concurrency level to use.
      * @param name A name for the job that will be displayed in the job list.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(BiFunction<Serializable, REPLJob, Serializable> function, List<Serializable> inputs, int concurrency, String name) throws IOException {
@@ -501,6 +513,7 @@ public class REPLJob implements Serializable {
      * @param inputs The inputs that the job action will operate on.
      * @param concurrency The concurrency level to use.
      * @param name A name for the job that will be displayed in the job list.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name) throws IOException {
@@ -516,6 +529,7 @@ public class REPLJob implements Serializable {
      * @param concurrency The concurrency level to use.
      * @param name A name for the job that will be displayed in the job list.
      * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
+     * @throws IOException The job's state file could not be created.
      * @return The new job.
      */
     public static REPLJob repljob(Closure<Serializable> closure, List<Serializable> inputs, int concurrency, String name, boolean becomeDelegate) throws IOException {
@@ -530,6 +544,8 @@ public class REPLJob implements Serializable {
      * @param closure The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), false, true);
@@ -543,6 +559,8 @@ public class REPLJob implements Serializable {
      * @param function The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, function, false, true);
@@ -554,6 +572,8 @@ public class REPLJob implements Serializable {
      * @param supplier The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, supplier, false, true);
@@ -567,6 +587,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
@@ -583,6 +605,8 @@ public class REPLJob implements Serializable {
      * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
@@ -598,6 +622,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob oldJob = jobs.get(key);
@@ -613,6 +639,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, (x, y) -> supplier.get(), retrySuccess, retryErrors);
@@ -624,6 +652,8 @@ public class REPLJob implements Serializable {
      * @param closure The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), false, true);
@@ -637,6 +667,8 @@ public class REPLJob implements Serializable {
      * @param function The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, function, false, true);
@@ -648,6 +680,8 @@ public class REPLJob implements Serializable {
      * @param supplier The job action.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, supplier, false, true);
@@ -661,6 +695,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
@@ -677,6 +713,8 @@ public class REPLJob implements Serializable {
      * @param becomeDelegate Controls whether the job instance should be set as <a href="https://groovy-lang.org/closures.html#_delegate_of_a_closure">the Closure's delegate</a>.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
@@ -692,6 +730,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob job = new REPLJob(path, TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, retrySuccess, retryErrors);
@@ -709,6 +749,8 @@ public class REPLJob implements Serializable {
      * @param retryErrors Controls whether previously unsuccessful inputs should be resubmitted.
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's state file is corrupted.
+     * @throws JobException The job could not be resumed.
      */
     public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, (x, y) -> supplier.get(), retrySuccess, retryErrors);
@@ -720,6 +762,7 @@ public class REPLJob implements Serializable {
      * @param key The key of the job to load.
      * @return The job.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's object store is corrupted.
      */
     public static REPLJob load(String key) throws IOException, ObjectStoreInvalidException {
         return load(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile());
@@ -731,6 +774,7 @@ public class REPLJob implements Serializable {
      * @param path The location of the archived job's state file.
      * @return The job.
      * @throws IOException A file could not be accessed.
+     * @throws ObjectStoreInvalidException The old job's object store is corrupted.
      */
     public static REPLJob load(File path) throws IOException, ObjectStoreInvalidException {
         return new REPLJob(path, null, null, false, false);
@@ -887,6 +931,7 @@ public class REPLJob implements Serializable {
     /**
      * Starts processing. Each job instance can only be started once.
      * @return A Future that will complete once the job is no longer active.
+     * @throws JobException The job could not be started, e.g. because it is in the wrong state.
      */
     public Future<JobProgress> start() throws JobException {
         return start(null, null);
@@ -896,6 +941,7 @@ public class REPLJob implements Serializable {
      * Starts processing. Each job instance can only be started once.
      * @param threadFactory A custom Thread Factory that will be used for the worker threads.
      * @return A Future that will complete once the job is no longer active.
+     * @throws JobException The job could not be started, e.g. because it is in the wrong state.
      */
     public Future<JobProgress> start(ThreadFactory threadFactory) throws JobException {
         return start(threadFactory, null);
@@ -908,6 +954,7 @@ public class REPLJob implements Serializable {
      *                         from the job's main control thread, so you should offload long-running activities triggered
      *                         by it to a different thread or risk lowering the job's throughput.
      * @return A Future that will complete once the job is no longer active.
+     * @throws JobException The job could not be started, e.g. because it is in the wrong state.
      */
     public Future<JobProgress> start(Consumer<JobEvent> progressCallback) throws JobException {
         return start(null, progressCallback);
@@ -921,6 +968,7 @@ public class REPLJob implements Serializable {
      *                         from the job's main control thread, so you should offload long-running activities triggered
      *                         by it to a different thread or risk lowering the job's throughput.
      * @return A Future that will complete once the job is no longer active.
+     * @throws JobException The job could not be started, e.g. because it is in the wrong state.
      */
     public Future<JobProgress> start(ThreadFactory threadFactory, Consumer<JobEvent> progressCallback) throws JobException {
         if (future != null) throw new JobException("this job has already been started");
@@ -1166,6 +1214,7 @@ public class REPLJob implements Serializable {
      * Flag the input item with the specified index for resuming. This makes sure that it will be reprocessed regardless
      * of its previous success. You must call this method before starting the job.
      * @param index The index of the input item to resume.
+     * @throws JobException The job's state does not permit changing this value.
      */
     public synchronized void retryIndex(int index) throws JobException {
         if (startTimestamp != null) throw new JobException("this job has already been started");
@@ -1180,6 +1229,7 @@ public class REPLJob implements Serializable {
      * {@link REPLJob#cancelForce(int) cancelForce()}.
      * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
      * finished in the meantime.
+     * @throws JobException The job's state does not permit this action.
      */
     public boolean cancel() throws JobException {
         return doCancel(null);
@@ -1193,6 +1243,7 @@ public class REPLJob implements Serializable {
      * @param timeoutSeconds The number of seconds to wait before forcefully terminating a worker's thread.
      * @return A flag indicating whether a concel was actually requested, or unneccesary because the job had already
      * finished in the meantime.
+     * @throws JobException The job's state does not permit this action.
      */
     public boolean cancelForce(int timeoutSeconds) throws JobException {
         return doCancel(timeoutSeconds);
@@ -1223,6 +1274,7 @@ public class REPLJob implements Serializable {
      * case.
      * @return A flag indicating whether the job was newly paused, or whether no actual change was made (e.g. because it
      * had already been paused).
+     * @throws JobException The job's state does not permit this action.
      */
     @SuppressWarnings("UnusedReturnValue")
     public boolean pause() throws JobException {
@@ -1243,6 +1295,7 @@ public class REPLJob implements Serializable {
      * will raise an exception in this case.
      * @return The length of this pause period in milliseconds, or {@code null} if the job was not actually unpaused
      * (e.g. because it was not actually paused before).
+     * @throws JobException The job's state does not permit this action.
      */
     @SuppressWarnings("UnusedReturnValue")
     public Long unpause() throws JobException {

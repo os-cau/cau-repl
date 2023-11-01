@@ -58,6 +58,8 @@ public class GroovySourceDirectory {
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
      * @throws CompilationException When your sources caused a compilation error.
+     * @throws InsufficientAccessRightsException When cau-repl does not have the required JVM permissions.
+     * @throws ClassLoadingException When a class could not be loaded.
      */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
@@ -76,6 +78,8 @@ public class GroovySourceDirectory {
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
      * @throws CompilationException When your sources caused a compilation error.
+     * @throws InsufficientAccessRightsException When cau-repl does not have the required JVM permissions.
+     * @throws ClassLoadingException When a class could not be loaded.
      */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root, ClassLoader classLoader) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
@@ -95,6 +99,8 @@ public class GroovySourceDirectory {
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
      * @throws CompilationException When your sources caused a compilation error.
+     * @throws InsufficientAccessRightsException When cau-repl does not have the required JVM permissions.
+     * @throws ClassLoadingException When a class could not be loaded.
      */
     @SuppressWarnings("unused")
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
@@ -118,6 +124,8 @@ public class GroovySourceDirectory {
      * @throws IOException A file or directory can't be accessed.
      * @throws IllegalAccessException There was a problem loading a class.
      * @throws CompilationException When your sources caused a compilation error.
+     * @throws InsufficientAccessRightsException When cau-repl does not have the required JVM permissions.
+     * @throws ClassLoadingException When a class could not be loaded.
      */
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses) throws IOException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
@@ -143,6 +151,8 @@ public class GroovySourceDirectory {
      * @throws InvocationTargetException There was a problem loading a class.
      * @throws IllegalAccessException There was a problem loading a class.
      * @throws CompilationException When your sources caused a compilation error.
+     * @throws InsufficientAccessRightsException When cau-repl does not have the required JVM permissions.
+     * @throws ClassLoadingException When a class could not be loaded.
      */
     public GroovySourceDirectory(Path root, ClassLoader classLoader, String patcheeClassPath, boolean deferredMetaClasses, boolean reorderSources) throws IOException, InvocationTargetException, IllegalAccessException, InsufficientAccessRightsException, CompilationException, ClassLoadingException {
         this.root = root.toAbsolutePath();
