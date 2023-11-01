@@ -5,6 +5,7 @@ package de.uni_kiel.rz.fdr.repl.groovy;
 
 import de.uni_kiel.rz.fdr.repl.REPLLog;
 import de.uni_kiel.rz.fdr.repl.REPLLogEntry;
+import de.uni_kiel.rz.fdr.repl.error.UncheckedCompilationException;
 import groovy.lang.GroovyObject;
 import groovyjarjarasm.asm.Opcodes;
 import org.apache.groovy.ast.tools.MethodNodeUtils;
@@ -73,7 +74,7 @@ public class GroovyDynamizeTransformer2 extends CompilationCustomizer {
 
         if (classNode.isInterface() || classNode.isAnnotationDefinition()) {
             if (classNode.getName().contains("$")) return;
-            throw new GroovySourceDirectory.UncheckedCompilationException(classNode.getName() + " is not a plain class and can't by dynamized.");
+            throw new UncheckedCompilationException(classNode.getName() + " is not a plain class and can't by dynamized.");
         }
 
         if (TRACE || TRACE_COMPILE) REPLLog.trace("{}: {} < {} ({})", classNode.isInterface() ? "INTERFACE" : "CLASS", classNode.getName(), String.join(", ", getAllSuperclasses(classNode).stream().map(ClassNode::getName).toList()), getNumberOfSuperclasses(classNode));
@@ -133,7 +134,7 @@ public class GroovyDynamizeTransformer2 extends CompilationCustomizer {
                         code = new BlockStatement(patched, bs.getVariableScope());
                     } else {
                         REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: {}: constructor {} has a super-constructor call, but does not start with a constructor call statement", classNode.getName(), constructorNode), INTERNAL_LOG_TARGETS);
-                        throw new GroovySourceDirectory.UncheckedCompilationException("Class " + classNode.getName() + ": constructor " + constructorNode + " has a super-constructor call, but does not start with a constructor call statement");
+                        throw new UncheckedCompilationException("Class " + classNode.getName() + ": constructor " + constructorNode + " has a super-constructor call, but does not start with a constructor call statement");
                     }
                 }
                 MethodNode renamed = new MethodNode(constructorMethod(classNode.getName()), mod, constructorNode.getReturnType(), constructorNode.getParameters(), constructorNode.getExceptions(), code);

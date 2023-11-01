@@ -4,6 +4,9 @@
 package de.uni_kiel.rz.fdr.repl.mycore;
 
 import de.uni_kiel.rz.fdr.repl.*;
+import de.uni_kiel.rz.fdr.repl.error.ClassLoadingException;
+import de.uni_kiel.rz.fdr.repl.error.CompilationException;
+import de.uni_kiel.rz.fdr.repl.error.InsufficientAccessRightsException;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovyDynamized;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovyDynamizedExpando;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory;
@@ -80,8 +83,8 @@ public class GroovySourceDirsStartupHandler implements MCRStartupHandler.AutoExe
                 new GroovySourceDirectory(p, classLoader, classPath, false, REORDER_SOURCES);
             }
         } catch (IOException | InvocationTargetException | IllegalAccessException |
-                 InsufficientAccessRightsException | GroovySourceDirectory.CompilationException |
-                 GroovySourceDirectory.ClassLoadingException e) {
+                 InsufficientAccessRightsException | CompilationException |
+                 ClassLoadingException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "GroovySourceDirs: Error during compilation: {}", e), INTERNAL_LOG_TARGETS);
             if (e instanceof IOException eio) throw new UncheckedIOException(eio);
             throw new RuntimeException(e);

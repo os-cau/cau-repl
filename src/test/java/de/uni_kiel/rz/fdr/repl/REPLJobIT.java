@@ -3,6 +3,7 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.JobException;
 import groovy.util.Eval;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class REPLJobIT {
     @Test
     @Order(100)
-    public void testJobFunctions() throws ExecutionException, InterruptedException, IOException, REPLJob.JobException {
+    public void testJobFunctions() throws ExecutionException, InterruptedException, IOException, JobException {
         REPLJob j1 = REPLJob.repljob(() -> "foo1");
         j1.start().get();
         assertEquals(REPLJob.JobState.COMPLETED_SUCCESSFULLY, j1.getProgress().state());

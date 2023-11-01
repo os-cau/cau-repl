@@ -3,7 +3,9 @@
 
 package de.uni_kiel.rz.fdr.repl.groovy;
 
-import de.uni_kiel.rz.fdr.repl.InsufficientAccessRightsException;
+import de.uni_kiel.rz.fdr.repl.error.ClassLoadingException;
+import de.uni_kiel.rz.fdr.repl.error.CompilationException;
+import de.uni_kiel.rz.fdr.repl.error.InsufficientAccessRightsException;
 import de.uni_kiel.rz.fdr.repl.REPLLog;
 import de.uni_kiel.rz.fdr.repl.REPLLogEntry;
 import groovy.lang.*;
@@ -396,38 +398,6 @@ public class GroovySourceDirectory {
                 } catch (ClassNotFoundException ignore) {}
             }
             return super.findClassNode(name, compilationUnit);
-        }
-    }
-
-    public static class ClassLoadingException extends Exception {
-        @SuppressWarnings("unused")
-        public ClassLoadingException(String message) {
-            super(message);
-        }
-
-        public ClassLoadingException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class CompilationException extends Exception {
-        @SuppressWarnings("unused")
-        public CompilationException(String message) {
-            super(message);
-        }
-
-        public CompilationException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class UncheckedCompilationException extends RuntimeException {
-        public UncheckedCompilationException(String message) {
-            super(message);
-        }
-
-        public UncheckedCompilationException(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 }

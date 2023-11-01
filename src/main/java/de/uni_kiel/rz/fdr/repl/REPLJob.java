@@ -3,6 +3,8 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.JobException;
+import de.uni_kiel.rz.fdr.repl.error.ObjectStoreInvalidException;
 import de.uni_kiel.rz.fdr.repl.mycore.REPLJobProcessableProxy;
 import groovy.lang.Closure;
 
@@ -328,7 +330,7 @@ public class REPLJob implements Serializable {
                 return load(k);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
-            } catch (AppendableObjectStore.ObjectStoreInvalidException e) {
+            } catch (ObjectStoreInvalidException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -529,7 +531,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, Closure<Serializable> closure) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
@@ -542,7 +544,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, function, false, true);
     }
 
@@ -553,7 +555,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, Supplier<Serializable> supplier) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, supplier, false, true);
     }
 
@@ -566,7 +568,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
@@ -582,7 +584,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(key, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
@@ -597,7 +599,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob oldJob = jobs.get(key);
         if (oldJob != null && oldJob.getProgress().isActive()) throw new JobException("Can't resume a job that is still active");
         return resume(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile(), function, retrySuccess, retryErrors);
@@ -612,7 +614,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(String key, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(key, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
 
@@ -623,7 +625,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, Closure<Serializable> closure) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), false, true);
         closure.setDelegate(j);
         return j;
@@ -636,7 +638,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, function, false, true);
     }
 
@@ -647,7 +649,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, Supplier<Serializable> supplier) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, supplier, false, true);
     }
 
@@ -660,7 +662,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         closure.setDelegate(j);
         return j;
@@ -676,7 +678,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, Closure<Serializable> closure, boolean retrySuccess, boolean retryErrors, boolean becomeDelegate) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob j = resume(path, (x, y) -> closure.call(x, y), retrySuccess, retryErrors);
         if (becomeDelegate) closure.setDelegate(j);
         return j;
@@ -691,7 +693,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         REPLJob job = new REPLJob(path, TIMESTAMP_FORMAT.format(LocalDateTime.now()), function, retrySuccess, retryErrors);
         if (job.inputs == null || job.inputs.length == 0) throw new JobException("can't resume a job that had no inputs");
         if (jobs.putIfAbsent(job.getKey(), job) != null) throw new RuntimeException("key collision: " + job.getKey() + ", internal error?");
@@ -708,7 +710,7 @@ public class REPLJob implements Serializable {
      * @return A new instance of the archived job that can be resumed.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException, JobException {
+    public static REPLJob resume(File path, Supplier<Serializable> supplier, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException, JobException {
         return resume(path, (x, y) -> supplier.get(), retrySuccess, retryErrors);
     }
 
@@ -719,7 +721,7 @@ public class REPLJob implements Serializable {
      * @return The job.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob load(String key) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
+    public static REPLJob load(String key) throws IOException, ObjectStoreInvalidException {
         return load(Path.of(REPL.getWorkDir().getAbsolutePath(), STATE_FILE_PREFIX + "-" + key + "." + STATE_FILE_SUFFIX).toFile());
     }
 
@@ -730,7 +732,7 @@ public class REPLJob implements Serializable {
      * @return The job.
      * @throws IOException A file could not be accessed.
      */
-    public static REPLJob load(File path) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
+    public static REPLJob load(File path) throws IOException, ObjectStoreInvalidException {
         return new REPLJob(path, null, null, false, false);
     }
 
@@ -823,12 +825,12 @@ public class REPLJob implements Serializable {
         try {
             objectStore = new AppendableObjectStore(getStateFile());
             objectStore.writeObject(this);
-        } catch (InterruptedException | AppendableObjectStore.ObjectStoreInvalidException e) {
+        } catch (InterruptedException | ObjectStoreInvalidException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private REPLJob(File path, String newKey, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, AppendableObjectStore.ObjectStoreInvalidException {
+    private REPLJob(File path, String newKey, BiFunction<Serializable, REPLJob, Serializable> function, boolean retrySuccess, boolean retryErrors) throws IOException, ObjectStoreInvalidException {
         this.createdTimestamp = Instant.now();
         if (!path.isFile()) throw new IOException("job state file " + path + " not found");
         try (AppendableObjectStore in = new AppendableObjectStore(path)) {
@@ -876,7 +878,7 @@ public class REPLJob implements Serializable {
                 objectStore = new AppendableObjectStore(getStateFile());
                 objectStore.writeObject(this);
                 for (REPLLogEntry logEntry : this.jobLog) objectStore.writeObject(logEntry);
-            } catch (InterruptedException | AppendableObjectStore.ObjectStoreInvalidException e) {
+            } catch (InterruptedException | ObjectStoreInvalidException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -1548,16 +1550,6 @@ public class REPLJob implements Serializable {
             if (objectStore != null) objectStore.close();
         } finally {
             super.finalize();
-        }
-    }
-
-    public static class JobException extends Exception {
-        public JobException(String message) {
-            super(message);
-        }
-
-        public JobException(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 

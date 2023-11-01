@@ -4,6 +4,7 @@
 package de.uni_kiel.rz.fdr.repl.groovy;
 
 import de.uni_kiel.rz.fdr.repl.REPLJob;
+import de.uni_kiel.rz.fdr.repl.error.JobException;
 import org.apache.groovy.groovysh.CommandSupport;
 import org.apache.groovy.groovysh.Groovysh;
 
@@ -118,7 +119,7 @@ public class GroovyCmdJob extends CommandSupport {
                 }
                 default -> fail("unknown subcommand: " + list.get(0));
             }
-        } catch (REPLJob.JobException e) {
+        } catch (JobException e) {
             throw new RuntimeException(e);
         }
         // NOTREACHED
@@ -127,14 +128,14 @@ public class GroovyCmdJob extends CommandSupport {
 
     private static REPLJob lookup(String keyOrIdx) {
         try {
-            return lookupSpeedDial(Integer.valueOf(keyOrIdx));
+            return lookupSpeedDial(Integer.parseInt(keyOrIdx));
         } catch (NumberFormatException e) {
             return REPLJob.get(keyOrIdx);
         }
     }
 
     private static REPLJob lookupSpeedDial(int idx) {
-        String key = null;
+        String key;
         synchronized (speedDial) {
             key = speedDial.get(idx);
         }

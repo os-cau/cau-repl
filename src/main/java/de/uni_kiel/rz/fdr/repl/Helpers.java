@@ -3,6 +3,9 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.ExternalCommandException;
+import de.uni_kiel.rz.fdr.repl.error.InsufficientAccessRightsException;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InaccessibleObjectException;
@@ -50,6 +53,7 @@ public class Helpers {
         }
 
         // keep this protected -> uses the agent's Instrumentation
+        @SuppressWarnings("unused")
         protected static boolean forbiddenExtendClassPath(ClassLoader classLoader, List<URL> urls) throws InsufficientAccessRightsException, IOException {
             if ((classLoader == null || classLoader == ClassLoader.getSystemClassLoader()) && REPLAgent.inst != null) {
                 for (URL u : urls) {
@@ -121,7 +125,7 @@ public class Helpers {
         return TimeUnit.SECONDS.toMicros(i.getEpochSecond()) + TimeUnit.NANOSECONDS.toMicros(i.getNano());
     }
 
-    public static String shellCommand(String command) throws IOException, REPLAgentStartup.ExternalCommandException {
+    public static String shellCommand(String command) throws IOException, ExternalCommandException {
         boolean windows = System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("windows");
         ProcessBuilder builder = new ProcessBuilder();
         if (windows) builder.command("cmd.exe", "/c", command);
@@ -130,7 +134,7 @@ public class Helpers {
         try {
             String stdout = new String(proc.getInputStream().readAllBytes());
             int status = proc.waitFor();
-            if (status != 0) throw new REPLAgentStartup.ExternalCommandException("Command " + command + " failed, status " + status);
+            if (status != 0) throw new ExternalCommandException("Command " + command + " failed, status " + status);
             return stdout;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

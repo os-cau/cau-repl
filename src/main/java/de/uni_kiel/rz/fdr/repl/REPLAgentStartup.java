@@ -3,6 +3,7 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.*;
 import de.uni_kiel.rz.fdr.repl.groovy.GroovySourceDirectory;
 import groovy.lang.ExpandoMetaClass;
 import groovy.lang.GroovyClassLoader;
@@ -33,7 +34,7 @@ public class REPLAgentStartup {
     private static boolean started = false;
 
     @SuppressWarnings("unused")
-    protected static void start(ClassLoader forceClassLoader) throws IOException, InsufficientAccessRightsException, GroovySourceDirectory.CompilationException, StartupException, GroovySourceDirectory.ClassLoadingException {
+    protected static void start(ClassLoader forceClassLoader) throws IOException, InsufficientAccessRightsException, CompilationException, StartupException, ClassLoadingException {
         started = true;
 
         // use groovy expando metaclasses globally
@@ -75,8 +76,8 @@ public class REPLAgentStartup {
             }
         } catch (InvocationTargetException | IllegalAccessException | RuntimeException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Error during compilation: {}", e), INTERNAL_LOG_TARGETS);
-            throw new GroovySourceDirectory.CompilationException("Error during compilation", e);
-        } catch (GroovySourceDirectory.ClassLoadingException e) {
+            throw new CompilationException("Error during compilation", e);
+        } catch (ClassLoadingException e) {
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Class loading error during compilation: {}", e), INTERNAL_LOG_TARGETS);
             throw e;
         }
@@ -166,7 +167,7 @@ public class REPLAgentStartup {
      * @throws IOException A file could not be accessed.
      * @throws InterruptedException The program was interrupted.
      */
-    public static void main(String[] args) throws IOException, InterruptedException, InsufficientAccessRightsException, GroovySourceDirectory.CompilationException, StartupException, GroovySourceDirectory.ClassLoadingException {
+    public static void main(String[] args) throws IOException, InterruptedException, InsufficientAccessRightsException, CompilationException, StartupException, ClassLoadingException {
         if (!started) {
             System.out.println("Starting Agent...");
             REPLAgentStartup.start(null);
@@ -175,26 +176,5 @@ public class REPLAgentStartup {
         Object dummy = new Object();
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (dummy) { dummy.wait(); }
-    }
-
-    public static class ExternalCommandException extends Exception {
-        public ExternalCommandException(String message) {
-            super(message);
-        }
-
-        @SuppressWarnings("unused")
-        public ExternalCommandException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class StartupException extends Exception {
-        public StartupException(String message) {
-            super(message);
-        }
-
-        public StartupException(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

@@ -3,6 +3,7 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.LogEntryFormatException;
 import groovy.json.StringEscapeUtils;
 
 import java.io.Serializable;
@@ -161,15 +162,4 @@ public class REPLLogEntry implements Serializable {
         if (s.length != 3) throw new LogEntryFormatException("invalid log line");
         return new REPLLogEntry(Instant.parse(s[0]), LOG_LEVEL.valueOf(s[1].toUpperCase(Locale.ROOT).split(" ")[0]), StringEscapeUtils.unescapeJavaScript(s[2]));
     }
-
-    public static class LogEntryFormatException extends RuntimeException {
-        public LogEntryFormatException(String message) {
-            super(message);
-        }
-
-        public LogEntryFormatException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
 }

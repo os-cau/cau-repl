@@ -3,6 +3,8 @@
 
 package de.uni_kiel.rz.fdr.repl;
 
+import de.uni_kiel.rz.fdr.repl.error.ObjectStoreInvalidException;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -164,20 +166,9 @@ class AppendableObjectStore implements Iterator<Serializable>, AutoCloseable {
         }
     }
 
-    public static class ObjectStoreNotAvailableException extends RuntimeException {
+    protected static class ObjectStoreNotAvailableException extends RuntimeException {
         public ObjectStoreNotAvailableException(String message) {
             super(message);
-        }
-    }
-
-    public static class ObjectStoreInvalidException extends Exception {
-        public ObjectStoreInvalidException(String message) {
-            super(message);
-        }
-
-        @SuppressWarnings("unused")
-        public ObjectStoreInvalidException(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 }
