@@ -651,6 +651,7 @@ def mcrcli(Map params=[:], String... commands) {
 def mcrxslt(Map params=[:], source, String... stylesheet) {
     params = new HashMap(params)
     def xsltParams = params.containsKey("params") ? params["params"] as Map<String, String> : new HashMap<String, String>()
+    def mime = params["mime"]
     if (!params.keySet().intersect(["session", "sessionid", "user", "userid", "join"]) && MCRSessionMgr.hasCurrentSession()) params["join"] = true
     def content
     if (source instanceof org.mycore.datamodel.metadata.MCRBase) content = source.createXML()
@@ -671,7 +672,11 @@ def mcrxslt(Map params=[:], source, String... stylesheet) {
     return mcrdo(params, {
         def pc = new org.mycore.common.xsl.MCRParameterCollector()
         pc.setParameters(xsltParams)
-        return transformer.transform(xml, pc).asXML()
+        def data = transformer.transform(xml, pc)
+        mime = mime?: data.mimeType
+        if (mime =~ /[\/+]xml$/) return data.asXML()
+        else if (mime =~ /^text\//) return data.asString()
+        else return data.asByteArray()
     })
 }
 

@@ -296,12 +296,18 @@ to change the XML directly on the element-level and write your changes back to t
 > passed in a variety of formats. When you call this function with a `String`, there is a special logic in place: if the
 > string is a syntactically valid MyCoRe Object ID, the Document referenced by it will be used as the source. If it is
 > not a valid ID, the string's content itself will be parsed as an XML document.
+> 
+> The Class of the returned output depends on the MimeType that your stylesheets generate.
 >
 > `String stylesheet` *optional, repeatable* - The names of the XSLT stylesheets to be applied. This function will
 > resolve the names with MyCoRe's `MCRXSLTransformer.getInstance()` method, so the same naming conventions used there
 > apply here. If you pass multiple instances of this parameter, the stylesheets will be applied in the same order.
 > 
 > **Optional Named Parameters**
+> 
+> `String mime = <auto detected MimeType>` - You can override the stylesheet's output MimeType, thus making sure that the
+> data is returned as a specific class. For example, when you set this to `text/plain` you ensure that the return value
+> is always a `String`, even when the styelesheet returns XML data. 
 > 
 > `Map<String, String> params = null` - You can add some extra parameters that will be set during the XSLT
 > transformation. The values from your MyCoRe configuration will always be set by default, as usual, and you don't have
@@ -312,7 +318,8 @@ to change the XML directly on the element-level and write your changes back to t
 > default admin session will be used. If this function is called from a session-context, the pre-existing session will
 > be reused instead.
 >
-> **Returns** the transformed XML as a JDOM `Document` object.
+> **Returns** the transformed XML, as a class depending on your stylesheets output MimeType: a JDOM `Document` for
+> MimeTypes `*/xml` or `*+xml`, a `String` for MimeTypes `text/*` and `byte[]` for all other MimeTypes.
 
 **Interacting with XML Objects**
 > **XML Mixins for org.jdom2.Document**
