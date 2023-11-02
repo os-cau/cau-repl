@@ -278,7 +278,8 @@ resume - input values will automatically be read from the old job's state file.<
 <p><code>Boolean retryerror = true</code> - When resuming a job, disable to not retry inputs that threw an exception.</p>
 <p><code>Boolean retrysuccess = false</code> - When resuming a job, enable to also retry inputs that were successful.</p>
 <p><code>ThreadFactory threadfactory</code> - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
-system default is used.</p>
+system default is used. Note that cau-repl will always prepend its own prefix to the name of the threads that your
+factory supplies.</p>
 <p><strong>Returns</strong> the <a href="../apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html">ReplJob</a> that was created.</p>
 </blockquote>
 <p><strong>List current jobs</strong></p>

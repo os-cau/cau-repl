@@ -330,10 +330,14 @@ handle MyCoRe stylesheets that need a more complex setup.</p>
 passed in a variety of formats. When you call this function with a <code>String</code>, there is a special logic in place: if the
 string is a syntactically valid MyCoRe Object ID, the Document referenced by it will be used as the source. If it is
 not a valid ID, the string's content itself will be parsed as an XML document.</p>
+<p>The Class of the returned output depends on the MimeType that your stylesheets generate.</p>
 <p><code>String stylesheet</code> <em>optional, repeatable</em> - The names of the XSLT stylesheets to be applied. This function will
 resolve the names with MyCoRe's <code>MCRXSLTransformer.getInstance()</code> method, so the same naming conventions used there
 apply here. If you pass multiple instances of this parameter, the stylesheets will be applied in the same order.</p>
 <p><strong>Optional Named Parameters</strong></p>
+<p><code>String mime = &lt;auto detected MimeType&gt;</code> - You can override the stylesheet's output MimeType, thus making sure that the
+data is returned as a specific class. For example, when you set this to <code>text/plain</code> you ensure that the return value
+is always a <code>String</code>, even when the styelesheet returns XML data. </p>
 <p><code>Map&lt;String, String&gt; params = null</code> - You can add some extra parameters that will be set during the XSLT
 transformation. The values from your MyCoRe configuration will always be set by default, as usual, and you don't have
 to specify them here explicitly.</p>
@@ -341,7 +345,8 @@ to specify them here explicitly.</p>
 for the XSLT transformation. Without any further parameters and in absence of a pre-existing session, the REPL's
 default admin session will be used. If this function is called from a session-context, the pre-existing session will
 be reused instead.</p>
-<p><strong>Returns</strong> the transformed XML as a JDOM <code>Document</code> object.</p>
+<p><strong>Returns</strong> the transformed XML, as a class depending on your stylesheets output MimeType: a JDOM <code>Document</code> for
+MimeTypes <code>*/xml</code> or <code>*+xml</code>, a <code>String</code> for MimeTypes <code>text/*</code> and <code>byte[]</code> for all other MimeTypes.</p>
 </blockquote>
 <p><strong>Interacting with XML Objects</strong></p>
 <blockquote>
