@@ -13,10 +13,11 @@ nav:
   - Java API Docs: apidocs/index.html
 extra_css:
   - custom.css
-remote_branch: gh-pages
-remote_name: github
+edit_uri: ''
 theme:
   name: readthedocs
   locale: en
 # strict: true
+remote_branch: gh-pages
+remote_name: github
 dev_addr: '127.0.0.1:8088'
