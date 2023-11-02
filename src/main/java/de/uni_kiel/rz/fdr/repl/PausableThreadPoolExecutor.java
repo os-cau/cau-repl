@@ -21,7 +21,8 @@ class PausableThreadPoolExecutor extends ThreadPoolExecutor {
     private Condition unpaused = pauseLock.newCondition();
 
     public PausableThreadPoolExecutor(int poolSize, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, String prefix) {
-        super(poolSize, poolSize, 0, TimeUnit.SECONDS, workQueue, threadFactory != null ? threadFactory : new NamedThreadFactory(prefix));
+        super(poolSize, poolSize, 0, TimeUnit.SECONDS, workQueue,
+                threadFactory != null ? new NamedThreadFactory(prefix, threadFactory) : new NamedThreadFactory(prefix));
     }
 
     protected void beforeExecute(Thread t, Runnable r) {
@@ -100,6 +101,11 @@ class PausableThreadPoolExecutor extends ThreadPoolExecutor {
     private static class NamedThreadFactory implements ThreadFactory {
         private String prefix;
         private ThreadFactory proxy;
+
+        public NamedThreadFactory(String prefix, ThreadFactory proxy) {
+            this.prefix = prefix != null ? prefix : "";
+            this.proxy = proxy;
+        }
 
         public NamedThreadFactory(String prefix) {
             this.prefix = prefix != null ? prefix : "";

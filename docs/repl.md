@@ -219,7 +219,8 @@ on, even after restarting the target application.
 > `Boolean retrysuccess = false` - When resuming a job, enable to also retry inputs that were successful.
 > 
 > `ThreadFactory threadfactory` - Use a custom ThreadFactory to spawn the worker threads. If unspecified, the
-> system default is used.
+> system default is used. Note that cau-repl will always prepend its own prefix to the name of the threads that your
+> factory supplies.
 > 
 > **Returns** the [ReplJob](apidocs/de/uni_kiel/rz/fdr/repl/REPLJob.html) that was created.
 
