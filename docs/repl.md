@@ -601,12 +601,15 @@ groovy:000> :B 0 some string data
 
 
 ## Hints
-- Tab-completion and line history is available.
+- Tab-completion and line history is available. The REPL can't tab-complete your input, if it contains a function call.
+  You can use tab-complete in those situations, if you assing the function's output to a variable first. 
 - When you mismatch parentheses or similar syntactic structures, the REPL may enter a state where it's waiting for you
   to properly syntactically finish your statement. To get out of this state, simply enter a single line consisting of
   just `:c`.
 - The return value of your last command is always available in the special `_` variable. This is useful to continue
   using it in the next line, or if you want to save it in a more persistent properly named variable.
+- Java getter-methods without parameters can be accessed like properties in Groovy, e.g. instead of `foo.getText()`, you
+  may just write `foo.text`.
 - The stacktrace of a failed REPL command is available in the REPL's log.
 - If you launch a mishbehaving command that blocks your REPL, start a second SSH session and use the `:ps kill` command to terminate it.
 - groovysh's standard `:edit / :e` command is not very useful when accessing it via SSH, because it launches the editor in
