@@ -293,6 +293,8 @@
               <includes>
                 <include>de/uni_kiel/rz/fdr/repl/REPLAgent.class</include>
                 <include>de/uni_kiel/rz/fdr/repl/REPLAgent$*.class</include>
+                <include>de/uni_kiel/rz/fdr/repl/REPLChainloader.class</include>
+                <include>de/uni_kiel/rz/fdr/repl/REPLChainloaderInstaller.class</include>
               </includes>
               <archive>
                 <manifest>
@@ -303,6 +305,7 @@
                   <MCR-Artifact-Id>${project.artifactId}-agent</MCR-Artifact-Id>
                   <MCR-Application-Module>${project.name} Agent</MCR-Application-Module>
                   <MCR-Auto-Deploy>false</MCR-Auto-Deploy>
+                  <Main-Class>de.uni_kiel.rz.fdr.repl.REPLChainloaderInstaller</Main-Class>
                   <Agent-Class>de.uni_kiel.rz.fdr.repl.REPLAgent</Agent-Class>
                   <Premain-Class>de.uni_kiel.rz.fdr.repl.REPLAgent</Premain-Class>
                   <Can-Redefine-Classes>false</Can-Redefine-Classes>

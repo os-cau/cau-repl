@@ -43,21 +43,7 @@ public class REPLAgent {
             inst.addTransformer(new REPLAgentTransformer(t.replaceAll("\\.", "/").split(",")), false);
         } else {
             // immediate start
-            try {
-                String cp = System.getProperty("CAU.JavaAgent.ClassPath");
-                if (cp != null && !REPLAgentTransformer.forbiddenExtendClassPath(REPLAgent.class.getClassLoader(), REPLAgentTransformer.deglobClassPath(cp))) {
-                    System.err.println("REPL: ERROR: could not extend classpath");
-                }
-                if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
-                Class<?> klass = Class.forName("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
-                REPLAgentTransformer.darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{null});
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("REPL: Could not locate class de.uni_kiel.rz.fdr.repl.REPLAgentStartup. Please make sure that cau-repl-*.jar is in your classpath");
-            } catch (Exception e) {
-                throw new RuntimeException("REPL: Could not initiate Agent Startup", e);
-            } finally {
-                if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
-            }
+            immediateStart();
         }
     }
 
@@ -66,8 +52,26 @@ public class REPLAgent {
         premain(agentArgs, inst);
     }
 
+    protected static void immediateStart() {
+        try {
+            String cp = System.getProperty("CAU.JavaAgent.ClassPath");
+            if (cp != null && !REPLAgentTransformer.forbiddenExtendClassPath(REPLAgent.class.getClassLoader(), REPLAgentTransformer.deglobClassPath(cp))) {
+                System.err.println("REPL: ERROR: could not extend classpath");
+            }
+            if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
+            Class<?> klass = Class.forName("de.uni_kiel.rz.fdr.repl.REPLAgentStartup");
+            REPLAgentTransformer.darkInvocation(klass.getDeclaredConstructor().newInstance(), "start", new Class<?>[]{ClassLoader.class}, new Object[]{null});
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("REPL: Could not locate class de.uni_kiel.rz.fdr.repl.REPLAgentStartup. Please make sure that cau-repl-*.jar is in your classpath");
+        } catch (Exception e) {
+            throw new RuntimeException("REPL: Could not initiate Agent Startup", e);
+        } finally {
+            if (!KEEP_INSTRUMENTATION) REPLAgent.inst = null;
+        }
+    }
 
-    private static class REPLAgentTransformer implements ClassFileTransformer {
+
+    protected static class REPLAgentTransformer implements ClassFileTransformer {
 
         private final String[] triggers;
         private boolean triggered = false;
