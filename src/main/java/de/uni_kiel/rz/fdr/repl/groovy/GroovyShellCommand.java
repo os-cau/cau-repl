@@ -89,6 +89,7 @@ public class GroovyShellCommand implements Command {
         io.setVerbosity(INFO);
         Binding binding = createBinding(bindings, in, out, err, env);
         Groovysh shell = new Groovysh(this.classLoader, binding, io);
+        binding.setVariable("_cauShell", shell);
         shell.setErrorHook(new Closure<>(this) {
             @Override
             public Object call(Object... args) {
