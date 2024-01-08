@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import static de.uni_kiel.rz.fdr.repl.REPLChainloader.MF_CHAINLOAD;
+import static de.uni_kiel.rz.fdr.repl.REPLChainloader.*;
 
 public class REPLChainloaderInstaller {
 
@@ -24,6 +24,7 @@ public class REPLChainloaderInstaller {
     private static final String OPT_UNINSTALL = "uninstall";
     private static final String MANIFEST_PATH = "META-INF" + File.separator + "MANIFEST.MF";
     private static final String MF_MAIN_CLASS = "Main-Class";
+    private static final String MF_ORIGINAL_MAIN_CLASS = "CAU-ChainLoader-OriginalMainClass";
     private static final String MF_CLASS_PATH = "Class-Path";
     private static final String CP_RE = "(^| )[^ ]*cau-repl-[^ ]* *";
     private static final Set<Class<?>> CLASSES_TO_INSTALL = Set.of(REPLChainloader.class, REPLAgent.class, REPLAgent.REPLAgentTransformer.class);
@@ -35,11 +36,23 @@ public class REPLChainloaderInstaller {
 
     public static void main(String[] args) throws MalformedURLException {
         System.err.println("cau-repl chainloader installer");
-        if (args.length != 3 || !(args[0].equals(OPT_INSTALL) || args[0].equals(OPT_ABSINSTALL) || args[0].equals(OPT_UNINSTALL))) printHelp();
+        if (args.length < 1) printHelp();
 
         String action = args[0];
-        String caurepl = args[1];
-        String target = args[2];
+        String caurepl = null;
+        String target = null;
+
+        if (!(action.equals(OPT_INSTALL) || action.equals(OPT_ABSINSTALL) || action.equals(OPT_UNINSTALL))) printHelp();
+
+        if (action.equals(OPT_UNINSTALL)) {
+          if (args.length != 2) printHelp();
+          target = args[1];
+        }
+        else {
+            if (args.length != 3) printHelp();
+            caurepl = args[1];
+            target = args[2];
+        }
 
         System.err.println(action + "ing the REPL chainloader in " + target);
 
@@ -82,14 +95,24 @@ public class REPLChainloaderInstaller {
                 // adjust the manifest...
                 if (!update) {
                     manifest.getMainAttributes().putValue(MF_MAIN_CLASS, REPLChainloader.class.getName());
-                    manifest.getMainAttributes().putValue(MF_CHAINLOAD, mainClass);
+                    manifest.getMainAttributes().putValue(MF_ORIGINAL_MAIN_CLASS, mainClass);
+                }
+                for (Map.Entry<String, String> e : MANIFEST_PROPERTIES.entrySet()) {
+                    String sysProp = System.getProperty(e.getValue());
+                    if (sysProp != null) {
+                        System.err.println("persisting system property: " + e.getValue() + "=" + sysProp);
+                        manifest.getMainAttributes().putValue(e.getKey(), sysProp);
+                    } else if (e.getValue().equals(PROP_CHAINLOAD) && !update) {
+                        // no special chainload class set as a system property: use the jar's original main class by default
+                        manifest.getMainAttributes().putValue(MF_CHAINLOAD, mainClass);
+                    }
                 }
                 // ...especially the class-path
                 String newcp = cp != null ? cp.replaceAll(CP_RE, " ").trim() : "";
                 if (absolute) {
-                    newcp = Path.of(caurepl).toAbsolutePath().toUri() + " " + newcp;
+                    newcp = Path.of(caurepl).toAbsolutePath().normalize().toUri() + " " + newcp;
                 } else {
-                    newcp = URLEncoder.encode(Path.of(target).getParent().relativize(Path.of(caurepl)).toString(), StandardCharsets.UTF_8) + " " + newcp;
+                    newcp = URLEncoder.encode(Path.of(target).toAbsolutePath().normalize().getParent().relativize(Path.of(caurepl).toAbsolutePath().normalize()).toString(), StandardCharsets.UTF_8) + " " + newcp;
                 }
                 newcp = newcp.trim();
                 if (cp == null || !cp.equals(newcp)) System.err.println("class path: " + (cp == null ? "" : cp) + "  ->  " + newcp);
@@ -110,7 +133,7 @@ public class REPLChainloaderInstaller {
             if (manifest == null || manifest.getMainAttributes() == null) errorOut("target has no manifest", 2);
             String mainClass = manifest.getMainAttributes().getValue(MF_MAIN_CLASS);
             if (mainClass == null) errorOut("target manifest has no main class", 2);
-            String chainLoader = manifest.getMainAttributes().getValue(MF_CHAINLOAD);
+            String originalMain = manifest.getMainAttributes().getValue(MF_ORIGINAL_MAIN_CLASS);
             String cp = manifest.getMainAttributes().getValue(MF_CLASS_PATH);
             try (FileSystem zip = FileSystems.newFileSystem(Path.of(target), Map.of())) {
                 // remove the classes
@@ -125,9 +148,10 @@ public class REPLChainloaderInstaller {
                 }
 
                 // adjust the manifest...
-                if (chainLoader != null) {
-                    manifest.getMainAttributes().putValue(MF_MAIN_CLASS, chainLoader);
-                    manifest.getMainAttributes().remove(new Attributes.Name(MF_CHAINLOAD));
+                if (originalMain != null) {
+                    manifest.getMainAttributes().putValue(MF_MAIN_CLASS, originalMain);
+                    manifest.getMainAttributes().remove(new Attributes.Name(MF_ORIGINAL_MAIN_CLASS));
+                    for (String k : MANIFEST_PROPERTIES.keySet()) manifest.getMainAttributes().remove(new Attributes.Name(k));
                 }
                 // ...especially the class-path
                 if (cp != null) {
@@ -157,7 +181,8 @@ public class REPLChainloaderInstaller {
     }
 
     private static void printHelp() {
-        System.err.println("Usage: java -jar cau-repl-agent-X.Y.Z.jar [" + OPT_INSTALL + "|" + OPT_ABSINSTALL + "|" + OPT_UNINSTALL + "] /path/to/cau-repl.jar /path/to/target.jar");
+        System.err.println("Usage: java -jar cau-repl-agent-X.Y.Z.jar [" + OPT_INSTALL + "|" + OPT_ABSINSTALL + "] /path/to/cau-repl.jar /path/to/target.jar");
+        System.err.println("       java -jar cau-repl-agent-X.Y.Z.jar " + OPT_UNINSTALL + " /path/to/target.jar");
         System.exit(1);
     }
 }
