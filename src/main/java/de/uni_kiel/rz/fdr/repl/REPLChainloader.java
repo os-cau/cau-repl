@@ -1,4 +1,4 @@
-// (C) Copyright 2023 Ove Sörensen
+// (C) Copyright 2023, 2024 Ove Sörensen
 // SPDX-License-Identifier: MIT
 
 package de.uni_kiel.rz.fdr.repl;
