@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.jar.Manifest;
