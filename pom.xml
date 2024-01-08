@@ -522,6 +522,8 @@
             <exclude>de/uni_kiel/rz/fdr/repl/SshTerminal.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/StreamRedirector.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/TtyFilterOutputStream.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/REPLChainloader.java</exclude>
+            <exclude>de/uni_kiel/rz/fdr/repl/REPLChainloaderInstaller.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdBreakpoint.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdEditFileSSH.java</exclude>
             <exclude>de/uni_kiel/rz/fdr/repl/groovy/GroovyCmdEditSSH.java</exclude>
