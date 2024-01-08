@@ -76,6 +76,74 @@ _Remark_: it is currently not possible to patch the class that the agent trigger
 on (by the time it is seen, it is too late to block it). So make sure to select a trigger that triggers in the correct
 classloader, but before the first class you would like to patch.
 
+### An Alternative Method for Loading: the Chainloader
+
+If you'd rather not add a `-javaagent` to your JVM, there is an alternative way of loading `cau-repl`: the chainloader.
+The general idea is to replace the main class of your target application with the chainloader class of `cau-repl`. The
+chainloader can then take care of initializing the REPL and start your target application after it's done. You may
+optionally make this apply permanently to your target application's `.jar`, but you don't have to.
+
+If at all possible, you should prefer the [Java Agent](#loading-the-agent) instead of the chainloader, because only the
+agent has the ability to select a specific classloader. The chainloader can only target the system default classloader.
+
+To start your application with the chainloader, you simply need to arrange for the main `.jar` of `cau-repl` to be in your
+class path. Then start your target application the way you usually would, with two important differences:
+
+1. Set the main class to be executed to `de.uni_kiel.rz.fdr.repl.REPLChainloader` instead. This class is contained in
+the `.jar` file of `cau-repl`. This is typically achieved by changing your Java command line appropriately.
+2. Set the system property `CAU.ChainLoader.Class` to your target application's original main class. The `REPLChainloader`
+will start this class' `main` method after it has set up the REPL. The usual way to set this property is to add an argument to
+the JVM's command line, e.g. `-DCAU.ChainLoader.Class=org.example.SomeClass`
+
+You may also [add further property definitions](configuration.md#system-properties-for-the-universal-java-agent) to the command line to configure the REPL, as you would with the normal
+agent.
+
+```bash
+# start an application whose main class is org.example.SomeClass with the chainloader
+java -cp /path/to/cau-repl.jar;/other/paths -DCAU.ChainLoader.Class=org.example.SomeClass -DCAU.REPL.SSH.ListenPort=5554 de.uni_kiel.rz.fdr.repl.REPLChainloader
+```
+
+If your target application comes packaged in a `.jar`, you have two options for starting it with the chainloader:
+
+To use the chainloader without making any changes to your target's `.jar`, proceed as in the example above and
+**do not use Java's `-jar` parameter to start your target**, because this would hardwire Java to use the target application's
+main class. Instead, add your target's `.jar` file to the classpath (`-cp`) and start the `REPLChainloader` class instead.
+You may determine the main class of your target's `.jar` file by looking at its `META-INF/MANIFEST.MF` file after
+unpacking the `.jar`.
+
+```bash
+# start example.jar with its main class org.example.SomeClass with the chainloader
+java -cp /path/to/cau-repl.jar;/path/to/example.jar -DCAU.ChainLoader.Class=org.example.SomeClass -DCAU.REPL.SSH.ListenPort=5554 de.uni_kiel.rz.fdr.repl.REPLChainloader
+```
+To install the agent's chainloader (semi-)permanently to you target's jar instead, so the REPL is automatically started when you
+launch the target's `.jar`, use the chainloader installer of `cau-repl`:
+
+You start the chainloader installer by running
+`cau-repl-agent-X.Y.Z.jar` (i.e. the **-agent** `.jar` file, not the **-fatjar**). The installer will add some required
+classes for chainloading to your target's `.jar` and change its manifest so the chainloader gets started when the target's
+`.jar` is run. After this, you can start your target's `.jar` without any extra parameters and the REPL will always start
+automatically. You just need to make sure that `cau-repl-X.Y.Z-fatjar.jar` is available at the location you passed to the installer.
+All of [the usual configuration properties](configuration.md#system-properties-for-the-universal-java-agent) that you have set
+before invoking the installer will also be persisted inside the target's `.jar`. You do not need to pass them
+again when launching it. The only property that will not be saved is `CAU.REPL.SSH.Password`. Use
+`CAU.REPL.SSH.PasswordCommand` instead, or pass the property every time when launching the target `.jar`.
+
+```bash
+# install the chainloader into target.jar to automatically start on port 44443
+java -DCAU.REPL.SSH.ListenPort=44443 -jar /path/to/cau-repl-agent-X.Y.Z.jar install /path/to/cau-repl-X.Y.Z-fatjar.jar /path/to/target.jar
+# you may now start the target as usual and the REPL will be available.
+# make sure that the -fatjar.jar file remains at the same relative location to target.jar as during the installation 
+java -jar /path/to/target.jar
+# update the installation with an additional setting (not clearing previous settings).
+# also repeat this every time you install a new version of cau-repl to update the chainloader in the target
+java -DCAU.Groovy.SourceDirs=/my/sources -jar /path/to/cau-repl-agent-X.Y.Z.jar install /path/to/cau-repl-X.Y.Z-fatjar.jar /path/to/target.jar
+# install the chainloader into target.jar with an absolute reference to the -fatjar.jar file, allowing you to move target.jar
+# without moving -fatjar.jar
+java -DCAU.REPL.SSH.ListenPort=44443 -jar /path/to/cau-repl-agent-X.Y.Z.jar absinstall /path/to/cau-repl-X.Y.Z-fatjar.jar /path/to/target.jar
+# uninstall the chainloader
+java -jar /path/to/cau-repl-agent-X.Y.Z.jar uninstall /path/to/target.jar
+```
+
 ## MyCoRe plugin
 
 ### Compiling

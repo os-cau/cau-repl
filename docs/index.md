@@ -98,7 +98,7 @@ Now import a class of your target and start interacting
 Can't find the classes you are looking for? Then you should configure cau-repl to use the same ClassLoader as your
 target.<br/>
 Want to define your own classes? Then you might have to configure cau-repl's ClassLoader use as well.<br/>
-Consult the [installation manual](installation.md) for details.
+Consult the [installation manual](installation.md) for details, including ways to start the REPL if you can't use a Java agent.
 
 ### For use in MyCoRe, built with GPL code
     mvn -P gpl clean package
