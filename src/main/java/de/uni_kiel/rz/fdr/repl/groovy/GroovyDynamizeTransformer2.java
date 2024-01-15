@@ -77,7 +77,7 @@ public class GroovyDynamizeTransformer2 extends CompilationCustomizer {
             throw new UncheckedCompilationException(classNode.getName() + " is not a plain class and can't by dynamized.");
         }
 
-        if (TRACE || TRACE_COMPILE) REPLLog.trace("{}: {} < {} ({})", classNode.isInterface() ? "INTERFACE" : "CLASS", classNode.getName(), String.join(", ", getAllSuperclasses(classNode).stream().map(ClassNode::getName).toList()), getNumberOfSuperclasses(classNode));
+        if (TRACE || TRACE_COMPILE_METHODS) REPLLog.trace("{}: {} < {} ({})", classNode.isInterface() ? "INTERFACE" : "CLASS", classNode.getName(), String.join(", ", getAllSuperclasses(classNode).stream().map(ClassNode::getName).toList()), getNumberOfSuperclasses(classNode));
 
         for (MethodNode mn : selectDynamizableMethods(classNode)) {
             ClassNode staticClass = mn.isStatic() ? classNode : null;
@@ -87,7 +87,7 @@ public class GroovyDynamizeTransformer2 extends CompilationCustomizer {
             boolean isSuper = !mn.getDeclaringClass().equals(classNode);
             int mod = mn.getModifiers();
 
-            if (TRACE || TRACE_COMPILE) REPLLog.trace("    {}{}{}: {}<{}::{} ({})", mn.isStatic() ? "STATIC " : "", mn.getDeclaringClass().isInterface() ? "INTERFACE ": "", constructorNode != null ? "CONSTRUCTOR" : isTopDynamized(classNode) ? "SUPERSTUB" : "METHOD", classNode.getName(), mn.getDeclaringClass().getName(), mn.getTypeDescriptor(), mn.getModifiers());
+            if (TRACE || TRACE_COMPILE_METHODS) REPLLog.trace("    {}{}{}: {}<{}::{} ({})", mn.isStatic() ? "STATIC " : "", mn.getDeclaringClass().isInterface() ? "INTERFACE ": "", constructorNode != null ? "CONSTRUCTOR" : isTopDynamized(classNode) ? "SUPERSTUB" : "METHOD", classNode.getName(), mn.getDeclaringClass().getName(), mn.getTypeDescriptor(), mn.getModifiers());
 
             // groovy complains if finalize is not public
             if (mn.getName().equals("finalize") && mn.getDeclaringClass().getName().equals("java.lang.Object")) mod = (mod & ~ACC_PRIVATE & ~ACC_PROTECTED) | ACC_PUBLIC;

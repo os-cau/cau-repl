@@ -276,6 +276,7 @@ public class GroovySourceDirectory {
                 // load the compiled classes, making sure to do it one class at a time. this ensures that,
                 // in the case of a compilation error, the subset of classes that were actually loaded are in the list.
                 for (Map.Entry<String, byte[]> toLoad : newClasses.entrySet()) {
+                    if (TRACE || TRACE_COMPILE) REPLLog.trace("Loading compiled class: {}", toLoad.getKey());
                     classes.addAll(loadClassBatch(Map.of(toLoad.getKey(), toLoad.getValue())));
                 }
             }

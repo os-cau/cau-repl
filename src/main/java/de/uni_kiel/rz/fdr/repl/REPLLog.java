@@ -33,9 +33,14 @@ public class REPLLog {
     public static boolean TRACE = false;
     /**
      * Controls whether very fine-grained internal trace messages from cau-repl related to compilation are logged.
-     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting. Do not enable in production.
+     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting.
      */
     public static boolean TRACE_COMPILE = false;
+    /**
+     * Controls whether very fine-grained internal trace messages from cau-repl related to methods during compilation are logged.
+     * Enabling {@link REPLLog#TRACE TRACE} overrides this setting.
+     */
+    public static boolean TRACE_COMPILE_METHODS = false;
     /**
      * Controls whether very fine-grained internal trace messages from cau-repl related to dynamization are logged.
      * Enabling {@link REPLLog#TRACE TRACE} overrides this setting. Do not enable in production.
