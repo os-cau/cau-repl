@@ -379,7 +379,7 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
                         || name.contains("$") || name.contains("<") || name.contains(">")
                         || isGeneratedMethod(name)
                         || GroovyDynamizeTransformer2.DYNAMIZE_BLACKLIST.contains(name)) continue;
-                if (TRACE || TRACE_COMPILE_METHODS) REPLLog.trace("PatcheeStub: {} < {} -- {}{}", newName, superName, name, descriptor);
+                if (TRACE_COMPILE_METHODS) REPLLog.trace("PatcheeStub: {} < {} -- {}{}", newName, superName, name, descriptor);
 
                 Method stub = new Method(stubName, descriptor);
                 MethodVisitor mv = classVisitor.visitMethod(ACC_PUBLIC, stubName, descriptor, null, null);
