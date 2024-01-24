@@ -1,4 +1,4 @@
-// (C) Copyright 2023 Ove Sörensen
+// (C) Copyright 2023, 2024 Ove Sörensen
 // SPDX-License-Identifier: MIT
 
 package de.uni_kiel.rz.fdr.repl;
@@ -144,5 +144,15 @@ public class Helpers {
             proc.getErrorStream().close();
             proc.getOutputStream().close();
         }
+    }
+
+    public static String packageOfClass(String klass) {
+            int i = klass.lastIndexOf(".");
+            if (i < 0) return "";
+            return klass.substring(0, i);
+    }
+
+    public static boolean isInnerClassOf(String outer, String inner) {
+            return (inner.startsWith(outer + "$"));
     }
 }

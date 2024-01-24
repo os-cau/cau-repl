@@ -1,4 +1,4 @@
-// (C) Copyright 2023 Ove Sörensen
+// (C) Copyright 2023, 2024 Ove Sörensen
 // SPDX-License-Identifier: MIT
 
 package de.uni_kiel.rz.fdr.repl.groovy;
@@ -15,6 +15,12 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.connectivity.KosarajuStrongConnectivityInspector;
+import org.jgrapht.alg.cycle.TarjanSimpleCycles;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphTypeBuilder;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +33,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.uni_kiel.rz.fdr.repl.Helpers.isGeneratedMethod;
-import static de.uni_kiel.rz.fdr.repl.Helpers.patcheeStubMethod;
+import static de.uni_kiel.rz.fdr.repl.Helpers.*;
 import static de.uni_kiel.rz.fdr.repl.REPLLog.*;
 import static groovyjarjarasm.asm.Opcodes.*;
 
@@ -213,29 +218,78 @@ public class GroovyPatchesTransformer extends CompilationCustomizer {
         }
     }
 
-    public List<URI> getCompileOrder() {
-        boolean[][] edges = new boolean[dependencies.size()][dependencies.size()];
-        boolean[] visited = new boolean[dependencies.size()];
-        List<Integer> order = new ArrayList<>();
-        final List<String> sortedClasses = new ArrayList<>(dependencies.keySet());
-
-        // construct dependency graph
-        sortedClasses.sort(Comparator.naturalOrder());
-        for (int i = 0; i < sortedClasses.size(); i++) {
-            visited[i] = false;
-            LinkedHashSet<String> sc = dependencies.get(sortedClasses.get(i));
-            for (int j = 0; j < sortedClasses.size(); j++) {
-                if (i == j) continue;
-                // superclasses before their subclasses
-                if (sc.contains(sortedClasses.get(j))) edges[i][j] = true;
+    public List<Set<URI>> getCompileOrder() {
+        // collect dependencies in a directed graph
+        Graph<String, DefaultEdge> graph = GraphTypeBuilder
+                .<String, DefaultEdge> directed()
+                .allowingMultipleEdges(false)
+                .allowingSelfLoops(false)
+                .edgeClass(DefaultEdge.class)
+                .buildGraph();
+        for (Map.Entry<String, LinkedHashSet<String>> e : dependencies.entrySet()) {
+            graph.addVertex(e.getKey());
+            for (String s : e.getValue()) {
+                if (s.equals(e.getKey())) continue;
+                if (!dependencies.containsKey(s)) continue;
+                graph.addVertex(s);
+                graph.addEdge(e.getKey(), s);
+            }
+        }
+        for (String x : graph.vertexSet()) {
+            for (String y : graph.vertexSet()) {
+                if (y.equals(x)) continue;
+                // inner and outer classes depend on one another
+                if (isInnerClassOf(x, y)) {
+                    graph.addEdge(x, y);
+                    graph.addEdge(y, x);
+                }
+                // outer classes in the same package can use one another without imports, but make sure not to disturb the @Patches induced order
+                if (packageOfClass(y).equals(packageOfClass(x)) && !patchesSettings.containsKey(y) && !patchesSettings.containsKey(x) && !x.contains("$") && !y.contains("$")) {
+                    graph.addEdge(x, y);
+                    graph.addEdge(y, x);
+                }
             }
         }
 
-        // topological sort
-        for (int i = 0; i < sortedClasses.size(); i++) {
-            if (!visited[i]) GroovyLoadOrderTransformer.visitLoadOrder(i, edges, visited, order);
+        // detect unresolvable cycles
+        TarjanSimpleCycles<String, DefaultEdge> cycleDetector = new TarjanSimpleCycles<>(graph);
+        List<List<String>> cycles = new ArrayList<>();
+        cycleDetector.findSimpleCycles(c -> {
+            List<String> pc = c.stream().filter(patchesSettings::containsKey).toList();
+            for (String x : pc) {
+                if (pc.stream().anyMatch(y -> !x.equals(y) && !isInnerClassOf(x, y) && !isInnerClassOf(y, x))) {
+                    c.add(c.get(0));
+                    cycles.add(c);
+                    break;
+                }
+            }
+        });
+        if (!cycles.isEmpty()) {
+            cycles.sort(Comparator.comparingInt(List::size));
+            String msg = cycles.stream().map(x -> String.join(" -> ", x)).collect(Collectors.joining(", "));
+            REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.ERROR, "REPL: Cyclic @Patches classes detected: {}", msg), REPLLog.INTERNAL_LOG_TARGETS);
+            throw new UncheckedCompilationException("Cyclic @Patches classes detected: " + msg);
         }
-        return new ArrayList<>(order.stream().map(sortedClasses::get).map(sources::get).distinct().toList());
+
+        // group strongly connected clusters in a single node each
+        Graph<Graph<String, DefaultEdge>, DefaultEdge> cgraph = new KosarajuStrongConnectivityInspector<>(graph).getCondensation();
+        for (Graph<String, DefaultEdge> x : cgraph.vertexSet()) {
+            if (TRACE || TRACE_COMPILE) REPLLog.trace("Batch {}", x.vertexSet());
+            for (DefaultEdge e : cgraph.edgesOf(x)) {
+                Graph<String, DefaultEdge> y = cgraph.getEdgeTarget(e);
+                if (y.vertexSet().equals(x.vertexSet())) continue;
+                if (TRACE || TRACE_COMPILE) REPLLog.trace("      -> {}", y.vertexSet());
+            }
+        }
+
+        // sort topologically
+        List<Set<URI>> batches = new ArrayList<>();
+        for (TopologicalOrderIterator<Graph<String, DefaultEdge>, DefaultEdge> it = new TopologicalOrderIterator<>(cgraph); it.hasNext(); ) {
+            Graph<String, DefaultEdge> x = it.next();
+            batches.add(new HashSet<>(x.vertexSet().stream().map(sources::get).distinct().toList()));
+        }
+        Collections.reverse(batches);
+        return batches;
     }
 
 

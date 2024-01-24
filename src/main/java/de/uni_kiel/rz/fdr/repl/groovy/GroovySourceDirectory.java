@@ -1,4 +1,4 @@
-// (C) Copyright 2023 Ove Sörensen
+// (C) Copyright 2023, 2024 Ove Sörensen
 // SPDX-License-Identifier: MIT
 
 package de.uni_kiel.rz.fdr.repl.groovy;
@@ -213,19 +213,19 @@ public class GroovySourceDirectory {
                      .toList();
         }
         List<URI> uris = files.stream().map(File::toURI).toList();
-        List<List<URI>> compilationBatches = new ArrayList<>();
+        List<Set<URI>> compilationBatches = new ArrayList<>();
         if (reorderSources) {
             GroovyPatchesTransformer simulationRun = determineCompileOrder(files);
-            List<URI> compileOrdered = simulationRun.getCompileOrder();
-            for (URI x : compileOrdered) compilationBatches.add(List.of(x));
+            compilationBatches.addAll(simulationRun.getCompileOrder());
             // now add all the rest that were not important during the simulation run
-            compilationBatches.add(new ArrayList<>(uris));
-            compilationBatches.get(compilationBatches.size() - 1).removeAll(compileOrdered);
-            compilationBatches.removeIf(List::isEmpty);
-            if (TRACE || TRACE_COMPILE) REPLLog.trace("Patch order: {}", compileOrdered.stream().map(URI::toString).collect(Collectors.joining(", ")));
+            Set<URI> theRest = new HashSet<>(uris);
+            for (Set<URI> x : compilationBatches) theRest.removeAll(x);
+            compilationBatches.add(theRest);
+            compilationBatches.removeIf(Set::isEmpty);
         } else {
-            compilationBatches.add(uris);
+            compilationBatches.add(new HashSet<>(uris));
         }
+        if (TRACE || TRACE_COMPILE) REPLLog.trace("Compilation order: {}", compilationBatches.stream().map(x -> x.stream().map(URI::toString).sorted().collect(Collectors.joining(", ", "[", "]"))).collect(Collectors.joining("; ")));
 
         CompilerConfiguration cc = new CompilerConfiguration();
         GroovyDynamizeTransformer1 dynamize1 = new GroovyDynamizeTransformer1();
@@ -242,7 +242,7 @@ public class GroovySourceDirectory {
             if (!KEEP_TEMPFILES) tmpdir.deleteOnExit();
             cc.setTargetDirectory(tmpdir);
 
-            for (List<URI> batch : compilationBatches) {
+            for (Set<URI> batch : compilationBatches) {
                 if (TRACE || TRACE_COMPILE)
                     REPLLog.trace("Compiling {}", batch.stream().map(URI::toString).collect(Collectors.joining(", ")));
                 // collect all compiled classes, including generated inner classes (closures etc.)

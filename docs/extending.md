@@ -127,6 +127,9 @@ with a special annotation:
 > You only have to override the methods that you would like to alter and can inherit the rest.
 > One may invoke its methods via `super()`, including access to all its private methods and fields, which cau-repl will
 > transparently patch to `public` access.<br/>
+> Two classes that make use of the `@Patches` annotation cannot have a mutual dependency on each other (a cycle).
+> Your compilation will fail if this is the case.
+> <br/>
 > You do not have to import this annotation manually. It is always available.
 > 
 > > **Warning**

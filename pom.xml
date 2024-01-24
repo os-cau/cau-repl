@@ -231,6 +231,12 @@
       <artifactId>java-diff-utils</artifactId>
       <version>4.12</version>
     </dependency>
+    <dependency>
+      <!-- License: LGPL 2.1 OR EPL 2.0, bundled -->
+      <groupId>org.jgrapht</groupId>
+      <artifactId>jgrapht-core</artifactId>
+      <version>1.5.2</version>
+    </dependency>
 
     <dependency>
       <!-- License: EPL-2.0, not bundled, integration tests only -->
@@ -366,6 +372,7 @@
                   <include>jline:jline</include>
                   <include>org.slf4j:slf4j-api</include>
                   <include>io.github.java-diff-utils:java-diff-utils</include>
+                  <include>org.jgrapht:jgrapht-core</include>
                 </includes>
               </artifactSet>
               <filters>
@@ -427,6 +434,15 @@
                 </filter>
                 <filter>
                   <artifact>io.github.java-diff-utils:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/**</exclude>
+                    <exclude>.cache/**</exclude>
+                    <exclude>module-info.class</exclude>
+                    <exclude>LICENSE.txt</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jgrapht:*</artifact>
                   <excludes>
                     <exclude>META-INF/**</exclude>
                     <exclude>.cache/**</exclude>
