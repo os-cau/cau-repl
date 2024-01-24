@@ -5,6 +5,6 @@ pom.xml.versionsBackup
 .cache/
 .m2/
 *.iml
-tools/
+work/
 site/
 docs/apidocs/
