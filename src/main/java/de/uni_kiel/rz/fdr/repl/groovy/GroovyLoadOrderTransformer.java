@@ -3,12 +3,17 @@
 
 package de.uni_kiel.rz.fdr.repl.groovy;
 
+import de.uni_kiel.rz.fdr.repl.Helpers;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.classgen.GeneratorContext;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphTypeBuilder;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.net.URI;
 import java.util.*;
@@ -44,38 +49,39 @@ public class GroovyLoadOrderTransformer extends CompilationCustomizer {
     }
 
     private static List<ClassNode> sortLoadOrder(List<ClassNode> classes) {
-        boolean[][] edges = new boolean[classes.size()][classes.size()];
-        boolean[] visited = new boolean[classes.size()];
-        List<Integer> order = new ArrayList<>();
-        final List<ClassNode> sortedClasses = new ArrayList<>(classes);
-
-        // construct dependency graph
-        sortedClasses.sort(Comparator.comparing(ClassNode::getName));
-        for (int i = 0; i < sortedClasses.size(); i++) {
-            visited[i] = false;
-            List<String> sc = getAllSuperclasses(sortedClasses.get(i)).stream().map(ClassNode::getName).toList();
-            for (int j = 0; j < sortedClasses.size(); j++) {
-                if (i == j) continue;
-                // superclasses before their subclasses
-                if (sc.contains(sortedClasses.get(j).getName())) edges[i][j] = true;
-                // outer classes before their inner classes
-                else if (sortedClasses.get(i).getName().startsWith(sortedClasses.get(j).getName() + "$")) edges[i][j] = true;
+        Graph<ClassNode, DefaultEdge> graph = GraphTypeBuilder
+                .<ClassNode, DefaultEdge> directed()
+                .allowingMultipleEdges(false)
+                .allowingSelfLoops(false)
+                .edgeClass(DefaultEdge.class)
+                .buildGraph();
+        for (ClassNode c : classes) {
+            graph.addVertex(c);
+            // superclasses before their subclasses
+            for (ClassNode s : getAllSuperclasses(c)) {
+                if (s.equals(c)) continue;
+                if (!classes.contains(s)) continue;
+                graph.addVertex(s);
+                graph.addEdge(c, s);
+            }
+            // outer classes before their inner classes
+            for (ClassNode x : classes) {
+                if (x.equals(c)) continue;
+                if (!classes.contains(x)) continue;
+                graph.addVertex(x);
+                if (Helpers.isInnerClassOf(c.getName(), x.getName())) {
+                    graph.addEdge(x, c);
+                }
             }
         }
 
         // topological sort
-        for (int i = 0; i < sortedClasses.size(); i++) {
-            if (!visited[i]) visitLoadOrder(i, edges, visited, order);
+        List<ClassNode> loadOrder = new ArrayList<>();
+        for (TopologicalOrderIterator<ClassNode, DefaultEdge> it = new TopologicalOrderIterator<>(graph); it.hasNext(); ) {
+            ClassNode x = it.next();
+            loadOrder.add(x);
         }
-        return new ArrayList<>(order.stream().map(sortedClasses::get).toList());
-    }
-
-    protected static void visitLoadOrder(int i, boolean[][] edges, boolean[] visited, List<Integer> order) {
-        visited[i] = true;
-        for (int j = 0; j < visited.length; j++) {
-            if (i == j) continue;
-            if (!visited[j] && edges[i][j]) visitLoadOrder(j, edges, visited, order);
-        }
-        order.add(i);
+        Collections.reverse(loadOrder);
+        return loadOrder;
     }
 }
