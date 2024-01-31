@@ -173,6 +173,16 @@ enabled the early-loading mechanism.</p>
 <td>If set, the REPL will listen for SSH connections.</td>
 </tr>
 <tr>
+<td>CAU.REPL.Groovy.Startup.Commands</td>
+<td></td>
+<td>A semicolon-separated list of Groovy commands. Each command you list here will be executed in the REPL whenever you connect to it as if you had typed it there.</td>
+</tr>
+<tr>
+<td>CAU.REPL.Groovy.Startup.Scripts</td>
+<td></td>
+<td>A comma-separated list of Groovy script files. Each file you list here will be executed in the REPL whenever you connect to it as if you had typed its contents there.</td>
+</tr>
+<tr>
 <td>CAU.REPL.Log.Internal</td>
 <td></td>
 <td>If set to <code>file</code>, redirects cau-repl's internal log messages from STDERR (or Log4J if installed) to the <code>repl.log</code> file in its work dir. If set to <code>stderr</code>, messages are always redirected to STDERR (never to Log4J).</td>
