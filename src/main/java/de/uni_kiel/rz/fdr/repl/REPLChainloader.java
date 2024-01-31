@@ -25,7 +25,8 @@ public class REPLChainloader {
             "CAU.Groovy.ReorderSources", "CAU.Groovy.SourceDirs", "CAU.Groovy.UseSystemClassLoader", "CAU.JavaAgent.AutoExec",
             "CAU.JavaAgent.ClassPath", "CAU.JavaAgent.SupportMode", "CAU.JavaAgent.Triggers", "CAU.REPL.EditorSSH", "CAU.REPL.Enabled",
             "CAU.REPL.Log.Internal", "CAU.REPL.Log.Trace", "CAU.REPL.MaxBreakpoints", "CAU.REPL.SSH.ListenAddr", "CAU.REPL.SSH.ListenPort",
-            "CAU.REPL.SSH.PasswordCommand", "CAU.REPL.SSH.Timeout", "CAU.REPL.WorkDir", PROP_CHAINLOAD
+            "CAU.REPL.SSH.PasswordCommand", "CAU.REPL.SSH.Timeout", "CAU.REPL.WorkDir", "CAU.REPL.Groovy.Startup.Commands",
+            "CAU.REPL.Groovy.Startup.Scripts", PROP_CHAINLOAD
     ).collect(Collectors.toMap(x -> x.replaceAll("\\.", "-"), Function.identity()));
 
 

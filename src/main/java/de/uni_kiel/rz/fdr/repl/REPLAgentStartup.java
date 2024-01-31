@@ -144,6 +144,17 @@ public class REPLAgentStartup {
             if (editorssh == null)
                 editorssh = "vim --not-a-term -c \"set mouse=\" -c \"set ttymouse=\" -c \"set filetype=groovy\"";
             repl.addStartupCommand(":set editorssh '" + editorssh + "'");
+            // startup commands
+            String startupScripts = System.getProperty("CAU.REPL.Groovy.Startup.Scripts", "");
+            for (String script : startupScripts.split(",")) {
+                if (script.isEmpty()) continue;
+                repl.addStartupScript(script);
+            }
+            String startupCommands = System.getProperty("CAU.REPL.Groovy.Startup.Commands", "");
+            for (String command : startupCommands.split(";")) {
+                if (command.isEmpty()) continue;
+                repl.addStartupCommand(command);
+            }
 
             // start the REPL
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: listening on {}:{}", repl.getListenAddr(), repl.getPort()), INTERNAL_LOG_TARGETS);
