@@ -150,11 +150,8 @@ public class REPLAgentStartup {
                 if (script.isEmpty()) continue;
                 repl.addStartupScript(script);
             }
-            String startupCommands = System.getProperty("CAU.REPL.Groovy.Startup.Commands", "");
-            for (String command : startupCommands.split(";")) {
-                if (command.isEmpty()) continue;
-                repl.addStartupCommand(command);
-            }
+            String startupCommands = System.getProperty("CAU.REPL.Groovy.Startup.Commands");
+            if (startupCommands != null) repl.addStartupCommand(startupCommands);
 
             // start the REPL
             REPLLog.log(new REPLLogEntry(REPLLogEntry.LOG_LEVEL.INFO, "REPL: listening on {}:{}", repl.getListenAddr(), repl.getPort()), INTERNAL_LOG_TARGETS);
