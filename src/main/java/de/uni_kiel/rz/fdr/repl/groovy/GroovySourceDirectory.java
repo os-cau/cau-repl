@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,7 +44,7 @@ public class GroovySourceDirectory {
      */
     public static Set<Class<?>> groovyClasses = new ConcurrentHashMap<Class<?>, Boolean>().keySet(true);
     private static boolean KEEP_TEMPFILES = false;
-
+    private static Pattern RE_VERIFY_ERROR_LOCATION = Pattern.compile("^\\s*Location:$\\s*(.*)", Pattern.MULTILINE);
 
     private final Path root;
     private List<File> sources;
@@ -257,6 +259,17 @@ public class GroovySourceDirectory {
                         bytecode.put(classNode.getName(), writer.toByteArray());
                     });
                     cu.compile();
+                } catch (VerifyError e) {
+                    String location = null;
+                    if (e.getMessage() != null) {
+                        try {
+                            Matcher m = RE_VERIFY_ERROR_LOCATION.matcher(e.getMessage());
+                            m.find();
+                            location = m.group(1);
+                        } catch (IllegalStateException ignore) {}
+                    }
+                    if (location == null) location = "<unknown location>";
+                    throw new CompilationException("Compilation error: there are cyclic dependencies between an @Patches (target-)class and another class: " + location);
                 } catch (RuntimeException e) {
                     throw new CompilationException("Compilation error", e);
                 }
@@ -331,7 +344,7 @@ public class GroovySourceDirectory {
             } catch (InaccessibleObjectException e) {
                 throw new InsufficientAccessRightsException("Could not load your class '" + gc.getKey() + "'", e);
             } catch (InvocationTargetException e) {
-                throw new ClassLoadingException("Can't load your Groovy class '" + gc.getKey() + "'. If it already exists in the JVM, you may need to use the REPL agent to load your Groovy sources before the conflicting version gets loaded.", e);
+                throw new ClassLoadingException("Can't load your Groovy class '" + gc.getKey() + "'. If it already exists in the JVM, you may need to use the REPL agent to load your Groovy sources before the conflicting version gets loaded or get rid of cyclic dependencies between your @Patches annotations.", e);
             } catch (ExceptionInInitializerError e) {
                 throw new ClassLoadingException("Can't load your Groovy class '" + gc.getKey() + "' because its static initializer threw an exception. Maybe you need to set the 'CAU.Groovy.DeferMetaClasses' system property to true and add the MetaClasses yourself at a later time.", e);
             } catch (NoSuchMethodException e) {
