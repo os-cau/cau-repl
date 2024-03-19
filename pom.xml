@@ -69,7 +69,7 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <versions.groovy>4.0.18</versions.groovy>
+    <versions.groovy>4.0.20</versions.groovy>
     <versions.mycore>2022.06.2</versions.mycore> <!-- remember to adjust the version in the <version> and <parent> elements above accordingly by hand -->
     <conditional.jar.exclude>de/uni_kiel/rz/fdr/repl/mycore/</conditional.jar.exclude>
     <conditional.resources.exclude>**/*-mycore-*</conditional.resources.exclude>
