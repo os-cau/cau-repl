@@ -8,3 +8,4 @@ pom.xml.versionsBackup
 work/
 site/
 docs/apidocs/
+.theia/
