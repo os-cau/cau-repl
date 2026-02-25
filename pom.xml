@@ -69,7 +69,8 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <versions.groovy>4.0.22</versions.groovy>
+    <!-- updating to groovy 5.x would be a bigger project, requiring some refactoring-->
+    <versions.groovy>4.0.30</versions.groovy>
     <versions.mycore>2025.06.1</versions.mycore> <!-- remember to adjust the version in the <version> and <parent> elements above accordingly by hand -->
     <conditional.jar.exclude>de/uni_kiel/rz/fdr/repl/mycore/</conditional.jar.exclude>
     <conditional.resources.exclude>**/*-mycore-*</conditional.resources.exclude>
@@ -211,7 +212,7 @@
       <!-- License: BSD-2-Clause, bundled -->
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
-      <!-- updating to 3.x would probably be a big effort -->
+      <!-- updating to 3.x would require us to also update to groovy 5.x, a bigger project -->
       <version>2.14.6</version>
     </dependency>
     <dependency>
