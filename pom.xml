@@ -529,8 +529,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.12.0</version>
         <configuration>
-          <outputDirectory>${project.basedir}/docs/apidocs</outputDirectory>
-          <reportOutputDirectory>${project.basedir}/docs/apidocs</reportOutputDirectory>
+          <outputDirectory>${project.basedir}/docs</outputDirectory>
           <show>public</show>
           <author>false</author>
           <nohelp>true</nohelp>
