@@ -57,7 +57,7 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">MyCoRe Integration</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">MyCoRe Integration</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#retrieving-documents">Retrieving Documents</a>
     </li>
@@ -577,7 +577,7 @@ groovy:000&gt; x[&quot;//servdate[@type='modifydate']/text()&quot;]()
 <p><strong>Positional Parameters</strong></p>
 <p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
 <p><strong>Optional Named Parameters</strong></p>
-<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
 <p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
 <p><code>Integer rows = Integer.MAX_VALUE</code> - The number of matches to return. If omitted, this number is practically
 unlimited, so all matches will be returned.</p>
@@ -594,7 +594,7 @@ beginning. </p>
 <p><strong>Positional Parameters</strong></p>
 <p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
 <p><strong>Optional Named Parameters</strong></p>
-<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
 <p><code>Integer rows = Integer.MAX_VALUE</code> - The number of matches to return. If omitted, this number is practically
 unlimited, so all matches will be returned.</p>
 <p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
@@ -610,7 +610,7 @@ beginning.</p>
 <p><strong>Positional Parameters</strong></p>
 <p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
 <p><strong>Optional Named Parameters</strong></p>
-<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
 <p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
 <p><code>String sort</code> - Sorting conditions in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#sort-parameter">standard Solr syntax</a>.</p>
 <p><code>Integer start = 0</code> - Return the result at this position in the result set. If omitted, we will return the first result.</p>
@@ -626,7 +626,7 @@ query is still active. You can cancel streaming queries before all results were 
 <p><code>String query</code> - The Solr query in <a href="https://solr.apache.org/guide/solr/latest/query-guide/query-syntax-and-parsers.html">standard Solr syntax</a>.</p>
 <p><strong>Optional Named Parameters</strong></p>
 <p><code>Integer chunksize = 1000</code> - Size of each chunk that will be transferred vom server to client.</p>
-<p><code>HttpSolrClient client = MCRSolrClientFactory.mainSolrClient</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
+<p><code>HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()</code> - The Solr client to use. If omitted, use MyCoRe's main client.</p>
 <p><code>String fl</code> - Fields to return in <a href="https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter">standard Solr syntax</a></p>
 <p><code>Boolean parallel = false</code> - If enabled, this function will return a parallel stream, which may allows for faster
 processing at the price of losing ordering information. Defaults to <code>false</code>, returning a sequential, ordered stream.</p>
@@ -852,7 +852,7 @@ Defaults to the MyCoRe's classpath.</p>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-      <p>Copyright &copy; 2023, 2024 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+      <p>Copyright &copy; 2023, 2024, 2026 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
   </div>
 
   Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.

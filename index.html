@@ -41,7 +41,7 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href=".">About</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">About</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a>
     </li>
@@ -165,7 +165,7 @@ issues if you run it on Windows (it might run fine on the WSL, though). Pull req
 <li>Java 17 or 21 (other versions &gt; 17 may or may not work)</li>
 <li>Maven</li>
 <li>vim or any other console text editor that can run without a tty (optional: only if you want to edit files within the SSH session)</li>
-<li>MyCoRe 2022.06 or 2023.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)</li>
+<li>MyCoRe 2025.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)</li>
 </ul>
 <h2 id="license">License</h2>
 <p>cau-repl is MIT licensed. Designated portions of it were imported from other projects and are Apache 2.0 licensed.</p>
@@ -212,7 +212,7 @@ ssh "ssh://administrator@localhost:8512"
 </code></pre>
 <h4 id="things-to-try_1">Things to try</h4>
 <p>Your commands run directly in MyCoRe's JVM. Try pinging a Solr core:</p>
-<pre><code>groovy:000&gt; MCRSolrClientFactory.mainSolrClient.ping()
+<pre><code>groovy:000&gt; MCRSolrCoreManager.getMainSolrClient().ping()
 ===&gt; {responseHeader={zkConnected=null,status=0,QTime=13,params={q={!lucene}*:*,distrib=false,df=allMeta,facet.field=mods.genre,echoParams=all,fl=*,score,sort=score desc, mods.dateIssued desc,facet.mincount=1,rows=20,wt=javabin,version=2,facet=true,rid=-26}},status=OK}
 </code></pre>
 <p>Numerous helper functions are available. Go retrieve a document and inspect it:</p>
@@ -235,7 +235,7 @@ Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-      <p>Copyright &copy; 2023, 2024 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
+      <p>Copyright &copy; 2023, 2024, 2026 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.</p>
   </div>
 
   Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -276,6 +276,6 @@ Location="datamodel-mods.xsd" ID="fdr_mods_00000299" version="2022.06.3-SNAPSHOT
 </html>
 
 <!--
-MkDocs version : 1.5.3
-Build Date UTC : 2024-03-19 08:23:59.582780+00:00
+MkDocs version : 1.6.1
+Build Date UTC : 2026-02-25 10:29:04.635115+00:00
 -->
