@@ -1,7 +1,7 @@
 The cau-repl is licensed under the MIT license (with the exception of
 designated portions, see below):
 
-Copyright (c) 2023, 2024 Ove Sörensen
+Copyright (c) 2023, 2024, 2026 Ove Sörensen
 Portions Copyright (c) 2015-2022 Denis Bazhenov
 
 

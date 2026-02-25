@@ -13,7 +13,7 @@ import org.mycore.datamodel.common.MCRXMLMetadataManager
 import org.mycore.datamodel.metadata.MCRObjectID
 import org.mycore.datamodel.metadata.MCRObject
 import org.mycore.datamodel.metadata.MCRDerivate
-import org.mycore.solr.MCRSolrClientFactory
+import org.mycore.solr.MCRSolrCoreManager
 import org.mycore.solr.search.MCRSolrSearchUtils
 import org.jdom2.xpath.XPathFactory
 import org.jdom2.Document
@@ -550,7 +550,7 @@ def mcrdiff(old=null, updated) {
 }
 
 def mcrsolr(Map params=[:], String query) {
-    def client = params["client"] ?: MCRSolrClientFactory.mainSolrClient
+    def client = params["client"] ?: MCRSolrCoreManager.getMainSolrClient()
     def sp = new org.apache.solr.common.params.ModifiableSolrParams()
     sp.set("q", query)
     sp.set("rows", Integer.MAX_VALUE)
@@ -571,7 +571,7 @@ def mcrsolrfirst(Map params=[:], String query) {
 def mcrsolrstream(Map params=[:], String query) {
     if (params.containsKey("start")) throw new RuntimeException("'start' parameter is not supported")
     if (params.containsKey("rows")) throw new RuntimeException("'rows' parameter is not supported")
-    def client = params["client"] ?: MCRSolrClientFactory.mainSolrClient
+    def client = params["client"] ?: MCRSolrCoreManager.getMainSolrClient()
     def parallel = params["parallel"] as boolean
     def chunksize = params["chunksize"] ?: 1000
     def sp = new org.apache.solr.common.params.ModifiableSolrParams()

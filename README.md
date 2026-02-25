@@ -51,7 +51,7 @@ cau-repl can be built as a MyCoRe plugin that enables better integration:
 - Java 17 or 21 (other versions > 17 may or may not work)
 - Maven
 - vim or any other console text editor that can run without a tty (optional: only if you want to edit files within the SSH session)
-- MyCoRe 2022.06 or 2023.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)
+- MyCoRe 2025.06 (optional: only if you would like to use the MyCoRe plugin; other versions may or may not work)
 
 
 ## License
@@ -119,7 +119,7 @@ installation's root.
 
 Your commands run directly in MyCoRe's JVM. Try pinging a Solr core:
 
-    groovy:000> MCRSolrClientFactory.mainSolrClient.ping()
+    groovy:000> MCRSolrCoreManager.getMainSolrClient().ping()
     ===> {responseHeader={zkConnected=null,status=0,QTime=13,params={q={!lucene}*:*,distrib=false,df=allMeta,facet.field=mods.genre,echoParams=all,fl=*,score,sort=score desc, mods.dateIssued desc,facet.mincount=1,rows=20,wt=javabin,version=2,facet=true,rid=-26}},status=OK}
 
 Numerous helper functions are avaliable. Go retrieve a document and inspect it:

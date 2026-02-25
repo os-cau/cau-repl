@@ -2,7 +2,7 @@ site_name: cau-repl
 # TODO site_url: ''
 repo_url: 'https://github.com/os-cau/cau-repl'
 site_description: 'Documentation for the cau-repl software'
-copyright: Copyright &copy; 2023, 2024 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.
+copyright: Copyright &copy; 2023, 2024, 2026 Ove Sörensen. This documentation is licensed under the CC0 1.0 license.
 nav:
   - About: index.md
   - Installation: installation.md

@@ -27,7 +27,7 @@ public class REPL {
      * cau-repl's version
      */
     // remember to also adjust the version in pom.xml
-    public static final String VERSION = "0.1.0-SNAPSHOT";
+    public static final String VERSION = "0.1.1-SNAPSHOT";
 
     /**
      * The user name used for login will be accessible from each SSH Session using this key.

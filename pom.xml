@@ -5,14 +5,14 @@
   <parent>
     <groupId>org.mycore.mir</groupId>
     <artifactId>mir-parent</artifactId>
-    <version>2022.06.2</version>
+    <version>2025.06.1</version>
   </parent>
 
   <groupId>de.uni-kiel.rz.fdr.repl</groupId>
   <name>CAU REPL Module</name>
   <artifactId>cau-repl</artifactId>
   <!-- remember to also adjust java class REPL::VERSION, as well as copyright years in mkdocs.yml -->
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/os-cau/cau-repl</url>
   <organization>
@@ -70,7 +70,7 @@
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <versions.groovy>4.0.22</versions.groovy>
-    <versions.mycore>2022.06.2</versions.mycore> <!-- remember to adjust the version in the <version> and <parent> elements above accordingly by hand -->
+    <versions.mycore>2025.06.1</versions.mycore> <!-- remember to adjust the version in the <version> and <parent> elements above accordingly by hand -->
     <conditional.jar.exclude>de/uni_kiel/rz/fdr/repl/mycore/</conditional.jar.exclude>
     <conditional.resources.exclude>**/*-mycore-*</conditional.resources.exclude>
     <conditional.jarclassifier>fatjar-mit</conditional.jarclassifier>

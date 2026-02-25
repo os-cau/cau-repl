@@ -603,7 +603,7 @@ groovy:000> x["//servdate[@type='modifydate']/text()"]()
 >
 > **Optional Named Parameters**
 > 
-> `HttpSolrClient client = MCRSolrClientFactory.mainSolrClient` - The Solr client to use. If omitted, use MyCoRe's main client.
+> `HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()` - The Solr client to use. If omitted, use MyCoRe's main client.
 >
 > `String fl` - Fields to return in [standard Solr syntax](https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter)
 > 
@@ -630,7 +630,7 @@ groovy:000> x["//servdate[@type='modifydate']/text()"]()
 >
 > **Optional Named Parameters**
 > 
-> `HttpSolrClient client = MCRSolrClientFactory.mainSolrClient` - The Solr client to use. If omitted, use MyCoRe's main client.
+> `HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()` - The Solr client to use. If omitted, use MyCoRe's main client.
 >
 > `Integer rows = Integer.MAX_VALUE` - The number of matches to return. If omitted, this number is practically
 > unlimited, so all matches will be returned.
@@ -655,7 +655,7 @@ groovy:000> x["//servdate[@type='modifydate']/text()"]()
 >
 > **Optional Named Parameters**
 >
-> `HttpSolrClient client = MCRSolrClientFactory.mainSolrClient` - The Solr client to use. If omitted, use MyCoRe's main client.
+> `HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()` - The Solr client to use. If omitted, use MyCoRe's main client.
 >
 > `String fl` - Fields to return in [standard Solr syntax](https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter)
 >
@@ -681,7 +681,7 @@ groovy:000> x["//servdate[@type='modifydate']/text()"]()
 >
 > `Integer chunksize = 1000` - Size of each chunk that will be transferred vom server to client.
 > 
-> `HttpSolrClient client = MCRSolrClientFactory.mainSolrClient` - The Solr client to use. If omitted, use MyCoRe's main client.
+> `HttpSolrClient client = MCRSolrCoreManager.getMainSolrClient()` - The Solr client to use. If omitted, use MyCoRe's main client.
 >
 > `String fl` - Fields to return in [standard Solr syntax](https://solr.apache.org/guide/solr/latest/query-guide/common-query-parameters.html#fl-field-list-parameter)
 > 

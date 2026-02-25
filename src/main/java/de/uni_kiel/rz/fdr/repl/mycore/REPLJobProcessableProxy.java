@@ -23,7 +23,7 @@ public class REPLJobProcessableProxy implements MCRProcessable, Consumer<REPLJob
     private Exception error = null;
     private Integer progress = null;
     private String progressText = null;
-    private MCRProcessableStatus processableStatus = MCRProcessableStatus.created;
+    private MCRProcessableStatus processableStatus = MCRProcessableStatus.CREATED;
     private final LinkedHashSet<MCRProcessableStatusListener> statusListeners = new LinkedHashSet<>();
     private final LinkedHashSet<MCRProgressableListener> progressListeners = new LinkedHashSet<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
@@ -170,11 +170,11 @@ public class REPLJobProcessableProxy implements MCRProcessable, Consumer<REPLJob
         // status
         MCRProcessableStatus oldStatus = getStatus();
         switch (p.state()) {
-            case RUNNING, PAUSING, PAUSED, CANCELLING -> processableStatus = MCRProcessableStatus.processing;
-            case INTERNAL_ERROR, COMPLETED_WITH_ERRORS -> processableStatus = MCRProcessableStatus.failed;
-            case CANCELLED -> processableStatus = MCRProcessableStatus.canceled;
-            case COMPLETED_SUCCESSFULLY -> processableStatus = MCRProcessableStatus.successful;
-            case NOT_YET_STARTED -> processableStatus = MCRProcessableStatus.created;
+            case RUNNING, PAUSING, PAUSED, CANCELLING -> processableStatus = MCRProcessableStatus.PROCESSING;
+            case INTERNAL_ERROR, COMPLETED_WITH_ERRORS -> processableStatus = MCRProcessableStatus.FAILED;
+            case CANCELLED -> processableStatus = MCRProcessableStatus.CANCELED;
+            case COMPLETED_SUCCESSFULLY -> processableStatus = MCRProcessableStatus.SUCCESSFUL;
+            case NOT_YET_STARTED -> processableStatus = MCRProcessableStatus.CREATED;
         }
 
         // send updates
